@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f2f2f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="站務助手">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/icon-180.png">
+<title>站務工作助手</title>
+<script src="./vendor/pdf.min.js"></script>
+<style>
+  :root{
+    --bg:#f2f2f7; --card:#ffffff; --border:#e5e5ea; --border-strong:#c7c7cc;
+    --text:#1c1c1e; --text-2:#636366; --text-muted:#8e8e93;
+    --accent:#007aff; --accent-bg:#eaf4ff; --accent-text:#005bb5;
+    --danger:#a32d2d; --danger-bg:#fcebeb;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#d1d1d6;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--text);display:flex;justify-content:center;padding:24px 0;min-height:100vh;}
+  #phone{
+    width:390px; height:820px; background:var(--bg); border-radius:38px; border:7px solid #1c1c1e;
+    box-shadow:0 12px 40px rgba(0,0,0,0.25); overflow:hidden; display:flex; flex-direction:column; position:relative;
+  }
+  #topbar{
+    height:56px; flex-shrink:0; background:rgba(249,249,249,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:0.5px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between; padding:0 16px;
+  }
+  #topbar h1{font-size:17px;font-weight:650;margin:0;}
+  #topbar button{background:none;border:none;font-size:20px;color:var(--text-2);cursor:pointer;padding:4px;}
+  #content{flex:1; overflow-y:auto; padding:14px;}
+  #tabbar{
+    height:68px;flex-shrink:0;background:rgba(249,249,249,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:0.5px solid var(--border);
+    display:flex; align-items:stretch;
+  }
+  @media (max-width:600px){
+    body{padding:0;background:var(--bg);}
+    #phone{width:100%;height:100dvh;border:0;border-radius:0;box-shadow:none;}
+    #topbar{padding-top:env(safe-area-inset-top);height:calc(56px + env(safe-area-inset-top));}
+    #tabbar{padding-bottom:env(safe-area-inset-bottom);height:calc(68px + env(safe-area-inset-bottom));}
+  }
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;}
+  .tab-btn.active{color:var(--accent);}
+  .tab-btn .icon{font-size:20px;}
+
+  .card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.035);}
+  .row{display:flex;align-items:center;gap:8px;}
+  .between{justify-content:space-between;}
+  .muted{color:var(--text-2);font-size:12px;}
+  .tiny-muted{color:var(--text-muted);font-size:11px;}
+  input, select, textarea{
+    width:100%;border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;min-height:44px;
+    font-size:16px;background:#fff;color:var(--text);font-family:inherit;outline:none;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,122,255,.13);}
+  textarea{resize:vertical;min-height:70px;}
+  label{font-size:12px;color:var(--text-2);display:block;margin-bottom:4px;}
+  .field{margin-bottom:10px;}
+  button.primary{
+    background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:10px 14px;min-height:44px;
+    font-size:15px;font-weight:600;cursor:pointer;
+  }
+  button.secondary{
+    background:#fff; color:var(--text); border:0.5px solid var(--border-strong); border-radius:var(--radius);
+    padding:9px 14px;min-height:44px;font-size:14px;cursor:pointer;
+  }
+  button.danger-text{background:none;border:none;color:var(--danger);font-size:13px;cursor:pointer;padding:4px;}
+  .chip{font-size:12px;padding:4px 10px;border-radius:999px;border:0.5px solid var(--border-strong);color:var(--text-2);cursor:pointer;white-space:nowrap;}
+  .chip.active{background:var(--accent-bg);color:var(--accent-text);border-color:var(--accent-bg);}
+  .chips-row{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;}
+  .empty{text-align:center;padding:60px 20px;color:var(--text-muted);}
+  .empty .icon{font-size:36px;margin-bottom:10px;}
+  .highlight{color:var(--accent-text);font-weight:500;}
+  .search-summary{margin:2px 0 10px;color:var(--text-2);font-size:12px;}
+  .search-doc-title{font-size:13px;font-weight:600;line-height:1.45;flex:1;}
+  .search-page-badge{font-size:11px;color:var(--accent-text);background:var(--accent-bg);border-radius:999px;padding:3px 8px;white-space:nowrap;}
+  .search-snippet{font-size:13px;line-height:1.7;color:var(--text-2);margin:8px 0 0;padding:8px 10px;background:#f7f6f2;border-radius:8px;border-left:3px solid #b5d4ef;}
+  .search-keywords{display:flex;gap:5px;flex-wrap:wrap;margin:0 0 10px;}
+  .search-keyword{font-size:11px;color:var(--accent-text);background:var(--accent-bg);border-radius:999px;padding:3px 8px;}
+  .search-field{position:relative;margin-bottom:10px;}
+  .search-field input{padding-left:38px;padding-right:42px;background:#e9e9ee;border:none;}
+  .search-field .search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:15px;pointer-events:none;}
+  .search-clear{position:absolute;right:9px;top:50%;transform:translateY(-50%);width:27px;height:27px;min-height:0;padding:0;border:0;border-radius:50%;background:#8e8e93;color:white;font-size:16px;line-height:27px;cursor:pointer;}
+  .reader-page{background:#fff;border:0.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;}
+  .reader-page.current{border:1.5px solid var(--accent);background:#f6fbff;}
+  .reader-page-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;color:var(--text-2);}
+  .reader-text{font-size:14px;line-height:1.85;white-space:pre-wrap;word-break:break-word;margin:0;color:var(--text);user-select:text;-webkit-user-select:text;}
+  .reader-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+  .sop-block{font-size:14px;line-height:1.8;margin:0 0 10px;padding:0 2px;}
+  .sop-block.level-2{font-weight:700;font-size:15px;color:var(--accent-text);padding:9px 10px;background:var(--accent-bg);border-radius:10px;}
+  .sop-block.level-3{font-weight:650;padding:9px 10px;background:#f2f2f7;border-radius:10px;border-left:3px solid var(--accent);}
+  .sop-block.letter{padding:9px 10px;background:#f7f7f9;border-radius:10px;border-left:3px solid #aeaeb2;}
+  .sop-block.subitem{margin-left:12px;padding:7px 9px;background:#fafafa;border-radius:8px;}
+  .scenario-tag{display:inline-block;font-size:11px;font-weight:600;color:#854f0b;background:#faeeda;padding:2px 7px;border-radius:999px;margin-right:5px;}
+  .reference-chip{display:inline-block;color:#005bb5;background:#eaf4ff;border:0;border-radius:999px;padding:1px 6px;margin:0 2px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;}
+  .shortcut-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+  .shortcut-card{background:#fff;border:0.5px solid var(--border);border-radius:13px;padding:11px;min-height:72px;cursor:pointer;position:relative;}
+  .shortcut-title{font-size:13px;font-weight:600;line-height:1.35;margin:0 24px 5px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .shortcut-meta{font-size:11px;color:var(--text-muted);margin:0;}
+  .favorite-btn{border:0;background:none;color:var(--accent);font-size:21px;line-height:1;padding:4px;min-height:0;cursor:pointer;flex-shrink:0;}
+  .ios-entry{background:#fff;border:.5px solid var(--border);border-radius:14px;min-height:58px;padding:10px 12px;display:flex;align-items:center;gap:11px;cursor:pointer;margin-bottom:12px;}
+  .ios-entry-icon{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .ios-entry-main{flex:1;min-width:0;}
+  .ios-entry-title{font-size:15px;font-weight:600;margin:0 0 2px;}
+  .ios-entry-subtitle{font-size:12px;color:var(--text-muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ios-chevron{font-size:21px;color:#c7c7cc;}
+  .procedure-row{background:#fff;border-bottom:.5px solid var(--border);padding:11px 12px;display:flex;align-items:center;gap:10px;min-height:62px;}
+  .procedure-row:first-child{border-radius:13px 13px 0 0;}
+  .procedure-row:last-child{border-bottom:0;border-radius:0 0 13px 13px;}
+  .procedure-list{border:.5px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:14px;}
+  .procedure-actions{display:flex;gap:4px;flex-shrink:0;}
+  .mini-action{border:0;background:#f2f2f7;color:var(--accent);border-radius:8px;padding:6px 8px;min-height:32px;font-size:12px;cursor:pointer;}
+  .badge{font-size:11px;padding:2px 8px;border-radius:6px;background:#f1efe8;color:var(--text-2);}
+  .badge.cover{background:var(--accent-bg);color:var(--accent-text);}
+  .badge.revision{background:#faeeda;color:#854f0b;}
+  .modal-overlay{
+    position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;z-index:20;
+  }
+  .modal-sheet{
+    background:var(--bg);width:100%;max-height:92%;border-radius:16px 16px 0 0;display:flex;flex-direction:column;overflow:hidden;
+  }
+  .modal-header{padding:12px 16px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--card);}
+  .modal-body{padding:14px;overflow-y:auto;flex:1;}
+  .doc-review-item{border:0.5px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;background:#fff;}
+  #pdf-canvas-wrap{display:flex;justify-content:center;padding:8px;background:#3a3a38;}
+  canvas{max-width:100%;height:auto;background:#fff;}
+</style>
+</head>
+<body>
+<div id="phone">
+  <div id="topbar">
+    <h1 id="page-title">作業查詢</h1>
+    <button id="data-mgmt-btn" title="資料管理">⋯</button>
+  </div>
+  <div id="content"></div>
+  <div id="tabbar">
+    <button class="tab-btn" data-tab="sop"><span class="icon">🔎</span>作業查詢</button>
+    <button class="tab-btn" data-tab="library"><span class="icon">🗂️</span>文件庫</button>
+    <button class="tab-btn" data-tab="personnel"><span class="icon">👤</span>事件/人員</button>
+    <button class="tab-btn" data-tab="ridership"><span class="icon">📊</span>車站運量</button>
+  </div>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js';
+
+/* ---------- IndexedDB layer ---------- */
+const DB_NAME = 'stationAssistantDB';
+const STORES = ['pdfFiles','sopDocs','announcements','personnel','ridership','favorites','recentViews','synonymGroups','unmatchedQueries'];
+let db;
+function openDB(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open(DB_NAME, 3);
+    req.onupgradeneeded = (e)=>{
+      const d = e.target.result;
+      STORES.forEach(name=>{
+        if(!d.objectStoreNames.contains(name)){
+          d.createObjectStore(name,{keyPath:'id',autoIncrement:true});
+        }
+      });
+    };
+    req.onsuccess = ()=>{db=req.result; resolve(db);};
+    req.onerror = ()=>reject(req.error);
+  });
+}
+function txStore(name, mode){
+  return db.transaction(name, mode).objectStore(name);
+}
+function dbGetAll(name){
+  return new Promise((res,rej)=>{
+    const r = txStore(name,'readonly').getAll();
+    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
+  });
+}
+function dbAdd(name, obj){
+  return new Promise((res,rej)=>{
+    const r = txStore(name,'readwrite').add(obj);
+    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
+  });
+}
+function dbPut(name, obj){
+  return new Promise((res,rej)=>{
+    const r = txStore(name,'readwrite').put(obj);
+    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
+  });
+}
+function dbDelete(name, id){
+  return new Promise((res,rej)=>{
+    const r = txStore(name,'readwrite').delete(id);
+    r.onsuccess=()=>res(); r.onerror=()=>rej(r.error);
+  });
+}
+
+/* ---------- In-memory cache ---------- */
+const cache = { pdfFiles:[], sopDocs:[], announcements:[], personnel:[], ridership:[], favorites:[], recentViews:[], synonymGroups:[], unmatchedQueries:[] };
+async function reloadCache(){
+  for(const name of STORES){ cache[name] = await dbGetAll(name); }
+}
+
+/* ---------- App state ---------- */
+let currentTab = 'sop';
+let sopFilter = 'content'; // 'content' | 'all'
+let searchSource = 'all'; // 'all' | 'sop' | 'notice'
+let sopKeyword = '';
+let noticeKeyword = '';
+let personnelKeyword = '';
+let ridershipKeyword = '';
+let procedureKeyword = '';
+let procedureEditMode = false;
+
+const titleMap = {sop:'作業查詢', library:'文件庫', personnel:'特殊事件/人員', ridership:'車站運量查詢'};
+
+/* ---------- PDF parsing helpers ---------- */
+function isRevisionPage(text){
+  const compact = text.replace(/\s+/g,'');
+  if(compact.includes('文件異動狀況表')) return true;
+  const set1 = compact.includes('修訂緣由') && compact.includes('修訂內容概述');
+  const set2 = compact.includes('版別') && compact.includes('編訂') && compact.includes('審查') && compact.includes('核定');
+  return set1 || set2;
+}
+function isRevisionStartPage(text){
+  const compact = text.replace(/\s+/g,'');
+  // 每份文件封面後的第一張異動表，會有表名或完整的異動表主要欄位。
+  return compact.includes('文件異動狀況表') ||
+    (compact.includes('發行日期') &&
+     compact.includes('修訂緣由') &&
+     compact.includes('修訂內容概述'));
+}
+function isCoverPage(text){
+  const compact = text.replace(/\s+/g,'');
+  const hasCode = compact.includes('文件編號');
+  const hasFirstIssue = compact.includes('首次發行日期') || compact.includes('初次發行日期');
+  const hasOwner = compact.includes('編訂單位') || compact.includes('保管單位');
+  // 公司封面固定會同時出現文件編號及首次發行日期；第三欄作為掃描／抽字不完整時的備援。
+  return (hasCode && hasFirstIssue) || (hasCode && hasOwner && !compact.includes('文件異動狀況表'));
+}
+function extractHeaderInfo(text){
+  const compact = text.replace(/\s+/g,'');
+  const nameM = compact.match(/文件名稱[:：]?([\s\S]*?)(?=文件編號|最新版別|版別|章節|首次發行日期|初次發行日期|編訂單位|保管單位|$)/);
+  const codeM = compact.match(/文件編號[:：]?([\s\S]*?)(?=首次發行日期|初次發行日期|最新版別|編訂單位|保管單位|$)/);
+  return {
+    name: nameM ? nameM[1].trim() : null,
+    code: codeM ? codeM[1].trim() : null
+  };
+}
+function resolvedDocName(doc){
+  for(const page of doc.pages||[]){
+    const compact=String(page.formattedText||page.text||'').replace(/\s+/g,'');
+    const m=compact.match(/文件名稱[:：]?(.{2,100}?)(?=文件編號|最新版別|版別|章節|首次發行日期|初次發行日期|編訂單位|保管單位)/);
+    if(m){
+      const candidate=m[1].replace(/[，,。；;：:]+$/,'').trim();
+      if(candidate.length>=2&&candidate.length<=80&&!/(?:修訂第|編訂|審查|核定|工程師|中心主任)/.test(candidate)) return candidate;
+    }
+  }
+  const original=String(doc.name||'').trim();
+  if(original.length<=80&&!/(?:修訂第|編訂|審查|核定|工程師|中心主任)/.test(original)) return original;
+  return '站務工作說明書';
+}
+function guessTitle(coverText){
+  let cleaned = coverText.replace(/\s+/g,'').trim();
+  // 常見前綴：把公司抬頭類的詞先去掉再取一段當標題
+  const stopWords = ['股份有限公司','有限公司'];
+  stopWords.forEach(w=>{
+    const idx = cleaned.indexOf(w);
+    if(idx>=0) cleaned = cleaned.slice(idx+w.length);
+  });
+  return cleaned.slice(0,24) || '未命名文件';
+}
+function extractFormattedText(textContent,pageHeight){
+  const layoutLines=[];
+  let currentLine=[],lastY=null;
+  const flushLine=()=>{
+    if(currentLine.length) layoutLines.push(currentLine.join(' ').replace(/\s+/g,' ').trim());
+    currentLine=[];
+  };
+  textContent.items.forEach(it=>{
+    const str=(it.str||'').trim();
+    if(!str) return;
+    const y=it.transform ? it.transform[5] : lastY;
+    // 排除頁面最下方獨立的文件內部頁碼；APP另以PDF總檔頁碼顯示。
+    if(pageHeight && y<pageHeight*.075 && /^\d{1,4}$/.test(str)) return;
+    if(currentLine.length && lastY!==null && y!==null && Math.abs(y-lastY)>3) flushLine();
+    currentLine.push(str);
+    lastY=y;
+    if(it.hasEOL) flushLine();
+  });
+  flushLine();
+  return layoutLines.filter(Boolean).join('\n');
+}
+async function parsePdfArrayBuffer(buf){
+  const pdf = await pdfjsLib.getDocument({data:buf.slice(0)}).promise;
+  const pages = [];
+  for(let i=1;i<=pdf.numPages;i++){
+    const page = await pdf.getPage(i);
+    const tc = await page.getTextContent();
+    const text = tc.items.map(it=>it.str).join(' ');
+    const viewport = page.getViewport({scale:1});
+    const formattedText=extractFormattedText(tc,viewport.height);
+    const positionedText = tc.items.map(it=>({
+      text:(it.str || '').trim(),
+      x:it.transform ? it.transform[4] : 0,
+      y:it.transform ? it.transform[5] : 0
+    })).filter(it=>it.text);
+    pages.push({absolutePage:i, text, formattedText, positionedText, pageWidth:viewport.width, pageHeight:viewport.height});
+  }
+  return pages;
+}
+function romanToInt(s){
+  const vals={i:1,v:5,x:10,l:50,c:100,d:500,m:1000};
+  s=s.toLowerCase();
+  if(!/^[ivxlcdm]+$/.test(s)) return null;
+  let total=0;
+  for(let i=0;i<s.length;i++){
+    const cur=vals[s[i]], next=vals[s[i+1]];
+    if(next && cur<next) total-=cur; else total+=cur;
+  }
+  return total;
+}
+function parsePageLabelToken(token){
+  const cleaned = String(token || '').trim().replace(/[－—–\-_.頁第]/g,'');
+  if(/^\d{1,4}$/.test(cleaned)) return {type:'arabic', value:parseInt(cleaned,10)};
+  if(/^[ivxlcdm]{1,6}$/i.test(cleaned)){
+    const v = romanToInt(cleaned);
+    if(v) return {type:'roman', value:v};
+  }
+  return null;
+}
+function extractPageLabel(page){
+  // PDF 文字陣列的先後順序不代表版面位置，優先從頁面底部 18% 尋找置中的頁碼。
+  const footer = (page.positionedText || [])
+    .filter(it=>it.y <= page.pageHeight * .18)
+    .map(it=>({it, label:parsePageLabelToken(it.text)}))
+    .filter(x=>x.label)
+    .sort((a,b)=>Math.abs(a.it.x-page.pageWidth/2)-Math.abs(b.it.x-page.pageWidth/2));
+  if(footer.length) return footer[0].label;
+  // 舊式或座標缺失 PDF 的備援。
+  const tokens = page.text.trim().split(/\s+/);
+  const last = tokens[tokens.length-1] || '';
+  return parsePageLabelToken(last) || {type:'none', value:null};
+}
+function segmentDocuments(pages){
+  const labels = pages.map(p=>extractPageLabel(p));
+  const boundaries = new Set();
+  const explicitCovers = new Set();
+  pages.forEach((page,i)=>{
+    // 單靠「文件編號／首次發行日期」會把正文中的表單誤認成封面。
+    // 依公司文件固定結構，只有「封面之後緊接異動表」才視為新文件。
+    const nextIsRevisionStart = i+1 < pages.length && isRevisionStartPage(pages[i+1].text);
+    if(isCoverPage(page.text) && nextIsRevisionStart) explicitCovers.add(i);
+  });
+  if(explicitCovers.size){
+    // 找到真正封面時，以第一個封面為起點；封面之前的總目錄／對照表不建立成SOP。
+    explicitCovers.forEach(i=>boundaries.add(i));
+  } else {
+    // 若整份 PDF 都抽不到封面固定欄位，保留第1頁並退回以 i／正文 1 的重置位置推測分界。
+    boundaries.add(0);
+    for(let i=0;i<pages.length;i++){
+      const lab = labels[i];
+      if(lab.type==='roman' && lab.value===1){
+        boundaries.add(i);
+      } else if(lab.type==='arabic' && lab.value===1){
+        const prev = i>0 ? labels[i-1] : null;
+        if(!prev || prev.type!=='roman') boundaries.add(i);
+      }
+    }
+  }
+  // 把緊接在邊界前、沒有頁碼的封面頁往前納入這份新文件，並記錄哪些索引才是真正的封面頁
+  const coverIdxSet = new Set();
+  const finalSet = new Set();
+  boundaries.forEach(idx=>{
+    let start = idx;
+    while(!explicitCovers.size && start>0 && labels[start-1].type==='none' && !boundaries.has(start-1)){
+      coverIdxSet.add(start-1);
+      start--;
+    }
+    if(explicitCovers.has(idx)) coverIdxSet.add(idx);
+    finalSet.add(start);
+  });
+  const sorted = Array.from(finalSet).sort((a,b)=>a-b);
+
+  const docs = [];
+  for(let i=0;i<sorted.length;i++){
+    const start = sorted[i];
+    const end = (i+1<sorted.length) ? sorted[i+1]-1 : pages.length-1;
+    const slice = pages.slice(start, end+1);
+    let info = extractHeaderInfo(slice[0].text);
+    if(!info.name){
+      for(const pg of slice){ const alt = extractHeaderInfo(pg.text); if(alt.name){ info = alt; break; } }
+    }
+    const name = info.name || guessTitle(slice[0].text);
+    const docPages = slice.map((p,rel)=>{
+      const absIdx = start+rel;
+      // 型態判斷改為只依內容特徵（修訂紀錄關鍵字），封面只認定為明確被歸類的封面索引，不再受頁碼抓取失敗影響
+      const type = coverIdxSet.has(absIdx) ? 'cover' : (isRevisionPage(p.text) ? 'revision' : 'content');
+      return { pageNum: rel+1, absolutePage: p.absolutePage, text: p.text, formattedText:p.formattedText, type, _label: labels[absIdx] };
+    });
+    docs.push({name, pages:docPages});
+  }
+  return docs;
+}
+
+/* ---------- Rendering ---------- */
+const contentEl = document.getElementById('content');
+const titleEl = document.getElementById('page-title');
+
+// 中文注音／拼音輸入時，compositionend 前不可重建輸入框，否則組字會被中斷。
+function bindImeSafeSearch(input, setValue, rerender){
+  if(!input) return;
+  let composing = false;
+  input.addEventListener('compositionstart', ()=>{ composing = true; });
+  input.addEventListener('input', e=>{
+    setValue(e.target.value);
+    if(!composing && !e.isComposing) rerender();
+  });
+  input.addEventListener('compositionend', e=>{
+    composing = false;
+    setValue(e.target.value);
+    rerender();
+  });
+}
+function focusAtEnd(id){
+  const input = document.getElementById(id);
+  if(!input) return;
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+}
+
+function render(){
+  titleEl.textContent = titleMap[currentTab];
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===currentTab));
+  if(currentTab==='sop') renderSop();
+  if(currentTab==='library') renderLibrary();
+  if(currentTab==='personnel') renderPersonnel();
+  if(currentTab==='ridership') renderRidership();
+}
+
+/* --- SOP tab --- */
+function countTypes(doc){
+  let c=0,r=0,ct=0;
+  doc.pages.forEach(p=>{ if(p.type==='cover')c++; else if(p.type==='revision')r++; else ct++; });
+  return {c,r,ct};
+}
+function renderSop(){
+  const results = sopKeyword.trim() ? searchUnified(sopKeyword.trim()) : null;
+  let html = `
+    <div class="search-field">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="sop-search-input" placeholder="輸入關鍵字，例如：車站 鑰匙" value="${escapeHtml(sopKeyword)}">
+      ${sopKeyword?`<button class="search-clear" id="sop-search-clear" aria-label="清除全部關鍵字">×</button>`:''}
+    </div>
+    <p class="tiny-muted" style="margin:-4px 0 10px;">可輸入關鍵字或直接描述狀況，例如「電梯困人如何處理」。</p>
+    <div class="chips-row">
+      <span class="chip ${searchSource==='all'?'active':''}" data-source="all">全部</span>
+      <span class="chip ${searchSource==='sop'?'active':''}" data-source="sop">SOP</span>
+      <span class="chip ${searchSource==='notice'?'active':''}" data-source="notice">通告</span>
+      <span class="chip ${sopFilter==='all'?'active':''}" data-revision-toggle="1">含修訂紀錄</span>
+    </div>`;
+
+  if(results){
+    const terms = lastSearchPlan?.expanded||parseSearchTerms(sopKeyword);
+    const docCount = new Set(results.map(r=>`${r.source}-${r.docName}`)).size;
+    html += `${lastSearchPlan?.isSmart?'<p class="tiny-muted" style="margin:0 0 5px;">智慧擴充搜尋：</p>':''}
+      <div class="search-keywords">${terms.slice(0,12).map(t=>`<span class="search-keyword">${escapeHtml(t)}</span>`).join('')}</div>
+      <p class="search-summary">找到 ${docCount} 份資料、${results.length} 條相關內容</p>`;
+    results.forEach(r=>{
+      const savedItem=r.source==='sop'
+        ? {type:'sop',docId:r.docId,absolutePage:r.absolutePage,title:r.docName}
+        : {type:'notice',noticeId:r.noticeId,title:r.docName};
+      const isFav=!!favoriteFor(savedItem);
+      const openAttr=r.source==='sop'
+        ? `data-open-text="${r.docId}" data-page="${r.absolutePage}" data-clause-target="${escapeHtml(r.clauseMarker||'')}"`
+        : `data-open-notice="${r.noticeId}"`;
+      html += `<div class="card" ${openAttr}>
+        <div class="row between" style="margin-bottom:4px;">
+          <span class="search-doc-title">${r.source==='sop'?'📄':'📣'} ${escapeHtml(r.docName)}</span>
+          <span class="search-page-badge">${r.source==='sop'?`SOP${r.clauseMarker?`・${r.clauseMarker}`:''}・第${r.absolutePage}頁`:'通告'}</span>
+          <button class="favorite-btn" data-fav-type="${savedItem.type}" data-fav-id="${r.source==='sop'?r.docId:r.noticeId}" data-fav-page="${r.absolutePage||''}" data-fav-title="${escapeHtml(r.docName)}">${isFav?'★':'☆'}</button>
+        </div>
+        ${r.titleMatched?`<p class="tiny-muted" style="margin:6px 0 0;">✓ 文件名稱符合</p>`:''}
+        ${r.snippetsHtml.map(s=>`<p class="search-snippet">${s}</p>`).join('')}
+        <button class="mini-action" data-teach-query="${escapeHtml(sopKeyword)}" style="margin-top:8px;">＋新增口語說法</button>
+      </div>`;
+    });
+    if(results.length===0){
+      html += `<div class="empty" style="padding:38px 20px;"><p>沒有符合的結果</p>
+        <button class="primary" id="teach-no-result">新增同義詞</button></div>`;
+    }
+  } else {
+    html += renderShortcutSection()+`<div class="card" style="text-align:center;padding:24px 16px;">
+      <div style="font-size:32px;margin-bottom:8px;">🔎</div>
+      <p style="margin:0 0 6px;font-weight:600;">查詢SOP與通告</p>
+      <p class="muted" style="margin:0;">目前有 ${cache.sopDocs.length} 份SOP、${cache.announcements.length} 則通告可供查詢</p>
+    </div>`;
+  }
+  contentEl.innerHTML = html;
+
+  const searchInput = document.getElementById('sop-search-input');
+  if(searchInput){
+    bindImeSafeSearch(searchInput, value=>{ sopKeyword=value; }, render);
+    searchInput.addEventListener('keydown',e=>{
+      if(e.key==='Escape'){ sopKeyword=''; render(); }
+    });
+    focusAtEnd('sop-search-input');
+  }
+  document.getElementById('sop-search-clear')?.addEventListener('click',()=>{
+    sopKeyword='';
+    render();
+    focusAtEnd('sop-search-input');
+  });
+  contentEl.querySelectorAll('[data-source]').forEach(c=>{
+    c.addEventListener('click', ()=>{ searchSource=c.dataset.source; render(); });
+  });
+  contentEl.querySelectorAll('[data-revision-toggle]').forEach(c=>{
+    c.addEventListener('click', ()=>{ sopFilter=sopFilter==='all'?'content':'all'; render(); });
+  });
+  contentEl.querySelectorAll('[data-open-text]').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      openTextReader(Number(card.dataset.openText),Number(card.dataset.page),card.dataset.clauseTarget||null);
+    });
+  });
+  contentEl.querySelectorAll('[data-open-notice]').forEach(card=>{
+    card.addEventListener('click', ()=>openNoticeReader(Number(card.dataset.openNotice)));
+  });
+  contentEl.querySelectorAll('[data-fav-type]').forEach(btn=>{
+    btn.addEventListener('click',async e=>{
+      e.stopPropagation();
+      const item=btn.dataset.favType==='notice'
+        ? {type:'notice',noticeId:Number(btn.dataset.favId),title:btn.dataset.favTitle}
+        : {type:'sop',docId:Number(btn.dataset.favId),absolutePage:Number(btn.dataset.favPage),title:btn.dataset.favTitle};
+      await toggleFavorite(item); render();
+    });
+  });
+  contentEl.querySelectorAll('[data-teach-query]').forEach(btn=>{
+    btn.addEventListener('click',async e=>{
+      e.stopPropagation();
+      await openSynonymDialog(btn.dataset.teachQuery,'');
+    });
+  });
+  document.getElementById('teach-no-result')?.addEventListener('click',async()=>{
+    await recordUnmatchedQuery(sopKeyword);
+    if(await openSynonymDialog(sopKeyword,'')) render();
+  });
+  contentEl.querySelectorAll('[data-open-saved]').forEach(card=>{
+    card.addEventListener('click',()=>{
+      const rows=card.dataset.savedSource==='favorite'?cache.favorites:cache.recentViews;
+      const item=rows.find(x=>x.id===Number(card.dataset.openSaved));
+      if(item) openSavedItem(item);
+    });
+  });
+  document.getElementById('open-procedures')?.addEventListener('click',openCommonProcedures);
+  contentEl.querySelectorAll('[data-remove-favorite]').forEach(btn=>{
+    btn.addEventListener('click',async e=>{
+      e.stopPropagation();
+      await dbDelete('favorites',Number(btn.dataset.removeFavorite));
+      await reloadCache(); render();
+    });
+  });
+}
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function parseSearchTerms(keyword){
+  return [...new Set(keyword.trim().split(/\s+/).map(s=>s.trim()).filter(Boolean))];
+}
+function readablePdfText(text){
+  let out = String(text || '').replace(/\s+/g,' ').trim();
+  // 移除PDF抽字時夾在中文字之間的假空格，但保留一般詞組及英文空格。
+  for(let i=0;i<6;i++){
+    const next = out.replace(/([\u3400-\u9fff])\s+([\u3400-\u9fff])/g,'$1$2');
+    if(next===out) break;
+    out=next;
+  }
+  return out;
+}
+function searchComparable(text){
+  return readablePdfText(text).toLocaleLowerCase().replace(/\s+/g,'');
+}
+function makeSearchSnippet(text, term){
+  const readable = readablePdfText(text);
+  const compactTerm = term.replace(/\s+/g,'');
+  const comparable = readable.toLocaleLowerCase();
+  let idx = comparable.indexOf(compactTerm.toLocaleLowerCase());
+  if(idx<0){
+    // 搜尋時忽略空格；若原文仍有特殊空白，退回顯示頁面開頭。
+    return `…${escapeHtml(readable.slice(0,70))}${readable.length>70?'…':''}`;
+  }
+  const start = Math.max(0,idx-32);
+  const end = Math.min(readable.length,idx+compactTerm.length+48);
+  return `${start>0?'…':''}${escapeHtml(readable.slice(start,idx))}<span class="highlight">${escapeHtml(readable.slice(idx,idx+compactTerm.length))}</span>${escapeHtml(readable.slice(idx+compactTerm.length,end))}${end<readable.length?'…':''}`;
+}
+const SMART_CONCEPTS=[
+  ['電梯','升降機'],
+  ['電扶梯','扶梯'],
+  ['困人','受困','受困旅客','電梯受困'],
+  ['非真實火警','火警誤報','誤報','假火警'],
+  ['真實火警','火災','起火'],
+  ['旅客受傷','跌傷','跌倒','滑倒'],
+  ['行動電源','鋰電池','自燃','冒煙'],
+  ['淹水','積水','進水','防洪'],
+  ['大量旅客','人潮','旅客壅塞'],
+  ['遺失物','拾得物'],
+  ['無錢購票','沒有錢買車票','沒錢買票','無錢買票','票款不足','無法購票'],
+  ['列車異常','列車故障'],
+  ['廣播','廣播詞'],
+  ['停機','停止運轉'],
+  ['通報','回報','通知'],
+  ['管制','警戒','隔離']
+];
+const QUESTION_WORDS=/如何|怎麼辦|怎麼|怎樣|遭遇|遇到|發生|應如何|要如何|請問|規定為何|處理方式/g;
+const ACTION_ALIASES=['處理','處置','應變','排除','救援','通報','停機','管制','確認'];
+let lastSearchPlan=null;
+function buildSmartSearchPlan(keyword){
+  const normalized=searchComparable(keyword);
+  const groups=[];
+  const customGroups=cache.synonymGroups.map(g=>[g.canonical,...(g.aliases||[])].filter(Boolean));
+  [...SMART_CONCEPTS,...customGroups].forEach(aliases=>{
+    if(aliases[0]==='真實火警'&&/(?:非真實火警|火警誤報|誤報|假火警)/.test(normalized)) return;
+    if(aliases.some(alias=>normalized.includes(searchComparable(alias)))) groups.push(aliases);
+  });
+  const rawTerms=parseSearchTerms(keyword.replace(QUESTION_WORDS,' ').replace(/[，。？！、；：]/g,' '));
+  rawTerms.forEach(term=>{
+    if(term.length<2||ACTION_ALIASES.includes(term)) return;
+    if(!groups.some(group=>group.some(alias=>searchComparable(alias).includes(searchComparable(term))||searchComparable(term).includes(searchComparable(alias))))) groups.push([term]);
+  });
+  if(!groups.length){
+    parseSearchTerms(keyword).forEach(term=>groups.push([term]));
+  }
+  const expanded=[...new Set(groups.flat())];
+  const intent=ACTION_ALIASES.filter(word=>normalized.includes(searchComparable(word)));
+  if(/如何|怎麼|處理方式|怎麼辦/.test(keyword)&&!intent.length) intent.push('處理','處置','應變');
+  return {groups,expanded,intent,isSmart:expanded.some(t=>!normalized.includes(searchComparable(t)))||/如何|怎麼|怎樣|請問/.test(keyword)};
+}
+function groupMatches(text,group){
+  const comparable=searchComparable(text);
+  return group.some(alias=>comparable.includes(searchComparable(alias)));
+}
+function highlightedClause(text,terms){
+  const readable=readablePdfText(text);
+  const display=readable.length>320?`${readable.slice(0,320)}…`:readable;
+  return highlightReaderText(display,terms);
+}
+function searchSop(keyword,plan){
+  const out = [];
+  cache.sopDocs.forEach(doc=>{
+    const displayName=resolvedDocName(doc);
+    const titleMatches=plan.groups.map(group=>groupMatches(displayName,group));
+    const pages = doc.pages.filter(p=>p.type!=='cover' && !(sopFilter==='content' && p.type==='revision'));
+    if(titleMatches.every(Boolean) && pages.length){
+      const p=pages[0];
+      out.push({source:'sop',docId:doc.id,docName:displayName,pdfFileId:doc.pdfFileId,pageNum:p.pageNum,absolutePage:p.absolutePage,titleMatched:true,snippetsHtml:[],score:50});
+      return;
+    }
+    pages.forEach(p=>{
+      const paragraphs=parseSopParagraphs(p.formattedText||p.text);
+      paragraphs.forEach(paragraph=>{
+        const clauseMatches=plan.groups.map(group=>groupMatches(paragraph.text,group));
+        if(!plan.groups.every((group,i)=>titleMatches[i]||clauseMatches[i])) return;
+        const matchedAliases=plan.expanded.filter(alias=>groupMatches(paragraph.text,[alias]));
+        let score=clauseMatches.filter(Boolean).length*10+titleMatches.filter(Boolean).length*4;
+        score+=plan.intent.filter(word=>groupMatches(paragraph.text,[word])).length*2;
+        if(paragraph.marker) score+=2;
+        out.push({
+          source:'sop',docId:doc.id,docName:displayName,pdfFileId:doc.pdfFileId,pageNum:p.pageNum,absolutePage:p.absolutePage,
+          titleMatched:titleMatches.some(Boolean),clauseMarker:paragraph.marker,score,
+          snippetsHtml:[highlightedClause(paragraph.text,matchedAliases.length?matchedAliases:plan.expanded)]
+        });
+      });
+    });
+  });
+  return out.sort((a,b)=>b.score-a.score||a.docName.localeCompare(b.docName,'zh-Hant')||a.pageNum-b.pageNum).slice(0,100);
+}
+function searchNotices(keyword,plan){
+  return cache.announcements.map(n=>{
+    const combined=searchComparable(`${n.title} ${n.category||''} ${n.content||''}`);
+    const matches=plan.groups.map(group=>group.some(alias=>combined.includes(searchComparable(alias))));
+    if(!matches.every(Boolean)) return null;
+    const matched=plan.expanded.filter(alias=>combined.includes(searchComparable(alias)));
+    return {
+    source:'notice',noticeId:n.id,docName:n.title,pageNum:null,absolutePage:null,
+    titleMatched:plan.groups.some(group=>groupMatches(n.title,group)),score:matches.filter(Boolean).length*10,
+    snippetsHtml:[highlightedClause(n.content||n.title,matched)]
+  };}).filter(Boolean).sort((a,b)=>b.score-a.score);
+}
+function searchUnified(keyword){
+  const plan=buildSmartSearchPlan(keyword);
+  lastSearchPlan=plan;
+  let out=[];
+  if(searchSource!=='notice') out=out.concat(searchSop(keyword,plan));
+  if(searchSource!=='sop') out=out.concat(searchNotices(keyword,plan));
+  return out.sort((a,b)=>(b.score||0)-(a.score||0));
+}
+async function recordUnmatchedQuery(query){
+  const cleaned=String(query||'').trim();
+  if(!cleaned) return;
+  const existing=cache.unmatchedQueries.find(q=>q.query===cleaned);
+  if(existing){
+    existing.count=(existing.count||1)+1;
+    existing.lastUsedAt=new Date().toISOString();
+    await dbPut('unmatchedQueries',existing);
+  }else{
+    await dbAdd('unmatchedQueries',{query:cleaned,count:1,lastUsedAt:new Date().toISOString()});
+  }
+  cache.unmatchedQueries=await dbGetAll('unmatchedQueries');
+}
+function openSynonymDialog(alias='',canonical='',existing=null){
+  return new Promise(resolve=>{
+    const overlay=document.createElement('div');
+    overlay.className='modal-overlay';
+    overlay.style.zIndex='95';
+    const aliases=existing?.aliases?.join('、')||alias;
+    overlay.innerHTML=`<div class="modal-sheet" style="height:auto;">
+      <div class="modal-header"><span style="font-weight:650;">${existing?'編輯同義詞':'教導搜尋用語'}</span></div>
+      <div class="modal-body">
+        <div class="field"><label>文件正式用語</label>
+          <input id="synonym-canonical" value="${escapeHtml(existing?.canonical||canonical)}" placeholder="例如：無錢購票"></div>
+        <div class="field"><label>口語說法（可用頓號、逗號或換行分隔）</label>
+          <textarea id="synonym-aliases" placeholder="例如：沒有錢買車票、沒錢買票">${escapeHtml(aliases)}</textarea></div>
+        <p class="tiny-muted">儲存後立即套用於離線智慧查詢，並會包含在JSON備份中。</p>
+        <div class="row"><button class="secondary" id="synonym-cancel" style="flex:1;">取消</button>
+          <button class="primary" id="synonym-save" style="flex:1;">儲存</button></div>
+      </div></div>`;
+    document.getElementById('phone').appendChild(overlay);
+    const close=value=>{overlay.remove();resolve(value);};
+    overlay.querySelector('#synonym-cancel').addEventListener('click',()=>close(false));
+    overlay.querySelector('#synonym-save').addEventListener('click',async()=>{
+      const formal=overlay.querySelector('#synonym-canonical').value.trim();
+      const aliasList=[...new Set(overlay.querySelector('#synonym-aliases').value.split(/[、,，\n]+/).map(s=>s.trim()).filter(Boolean))];
+      if(!formal||!aliasList.length) return alert('請輸入正式用語及至少一個口語說法');
+      if(existing){
+        await dbPut('synonymGroups',{...existing,canonical:formal,aliases:aliasList,updatedAt:new Date().toISOString()});
+      }else{
+        const same=cache.synonymGroups.find(g=>g.canonical===formal);
+        if(same){
+          same.aliases=[...new Set([...(same.aliases||[]),...aliasList])];
+          same.updatedAt=new Date().toISOString();
+          await dbPut('synonymGroups',same);
+        }else{
+          await dbAdd('synonymGroups',{canonical:formal,aliases:aliasList,createdAt:new Date().toISOString()});
+        }
+      }
+      await reloadCache();
+      close(true);
+    });
+  });
+}
+function savedKey(item){
+  return item.type==='notice' ? `notice-${item.noticeId}` : `sop-${item.docId}-${item.absolutePage}`;
+}
+function favoriteFor(item){
+  const key=savedKey(item);
+  return cache.favorites.find(f=>savedKey(f)===key);
+}
+async function toggleFavorite(item){
+  const existing=favoriteFor(item);
+  if(existing) await dbDelete('favorites',existing.id);
+  else {
+    const saved=await openProcedureNameDialog(item);
+    if(!saved) return false;
+  }
+  await reloadCache();
+  return true;
+}
+function openProcedureNameDialog(item,existing=null){
+  return new Promise(resolve=>{
+    const defaultName=existing?.title || item.title || '';
+    const sourceTitle=existing?.sourceTitle || item.sourceTitle || item.title || '';
+    const overlay=document.createElement('div');
+    overlay.className='modal-overlay';
+    overlay.style.zIndex='90';
+    overlay.innerHTML=`<div class="modal-sheet" style="height:auto;">
+      <div class="modal-header"><span style="font-weight:650;">${existing?'重新命名':'新增常用程序'}</span></div>
+      <div class="modal-body">
+        <div class="field"><label>常用程序名稱</label><input id="procedure-name-input" maxlength="30" value="${escapeHtml(defaultName)}" placeholder="例如：電梯困人"></div>
+        <p class="tiny-muted" style="line-height:1.6;margin:0;">來源：${escapeHtml(sourceTitle)}${item.type==='sop'&&item.absolutePage?`｜PDF第${item.absolutePage}頁`:''}</p>
+        <div class="row" style="margin-top:16px;">
+          <button class="secondary" id="procedure-name-cancel" style="flex:1;">取消</button>
+          <button class="primary" id="procedure-name-save" style="flex:1;">${existing?'儲存':'加入'}</button>
+        </div>
+      </div></div>`;
+    document.getElementById('phone').appendChild(overlay);
+    const input=overlay.querySelector('#procedure-name-input');
+    input.focus(); input.select();
+    const close=value=>{overlay.remove();resolve(value);};
+    overlay.querySelector('#procedure-name-cancel').addEventListener('click',()=>close(false));
+    overlay.querySelector('#procedure-name-save').addEventListener('click',async()=>{
+      const title=input.value.trim();
+      if(!title) return alert('請輸入常用程序名稱');
+      if(existing){
+        await dbPut('favorites',{...existing,title,sourceTitle});
+      }else{
+        const maxOrder=Math.max(0,...cache.favorites.map(f=>Number(f.sortOrder)||0));
+        await dbAdd('favorites',{...item,title,sourceTitle,sortOrder:maxOrder+1,createdAt:new Date().toISOString()});
+      }
+      await reloadCache();
+      close(true);
+    });
+  });
+}
+async function addRecentView(item){
+  const key=savedKey(item);
+  const old=cache.recentViews.find(r=>savedKey(r)===key);
+  if(old) await dbDelete('recentViews',old.id);
+  await dbAdd('recentViews',{...item,viewedAt:new Date().toISOString()});
+  const rows=await dbGetAll('recentViews');
+  const excess=rows.sort((a,b)=>(b.viewedAt||'').localeCompare(a.viewedAt||'')).slice(5);
+  for(const row of excess) await dbDelete('recentViews',row.id);
+  cache.recentViews=await dbGetAll('recentViews');
+}
+function openSavedItem(item){
+  if(item.type==='notice') openNoticeReader(item.noticeId);
+  else openTextReader(item.docId,item.absolutePage);
+}
+function renderShortcutSection(){
+  const recent=[...cache.recentViews].sort((a,b)=>(b.viewedAt||'').localeCompare(a.viewedAt||'')).slice(0,5);
+  let html=`<div class="ios-entry" id="open-procedures">
+    <div class="ios-entry-icon">▣</div>
+    <div class="ios-entry-main"><p class="ios-entry-title">常用程序</p>
+      <p class="ios-entry-subtitle">已建立 ${cache.favorites.length} 個常用項目</p></div>
+    <span class="ios-chevron">›</span>
+  </div>`;
+  if(recent.length){
+    html+=`<p class="tiny-muted" style="margin:2px 0 6px;">最近查看</p>`;
+    recent.forEach(r=>{
+      html+=`<div class="card" data-open-saved="${r.id}" data-saved-source="recent" style="padding:10px 12px;">
+        <div class="row between"><span style="font-size:13px;">${r.type==='notice'?'📣':'📄'} ${escapeHtml(r.title)}</span>
+        <span class="tiny-muted">${r.type==='notice'?'通告':`第${r.absolutePage}頁`}</span></div>
+      </div>`;
+    });
+  }
+  return html;
+}
+function sortedProcedures(){
+  return [...cache.favorites].sort((a,b)=>
+    (Number(a.sortOrder)||999999)-(Number(b.sortOrder)||999999) ||
+    (a.createdAt||'').localeCompare(b.createdAt||'')
+  );
+}
+async function moveProcedure(id,direction){
+  const rows=sortedProcedures();
+  const index=rows.findIndex(r=>r.id===id);
+  const other=index+direction;
+  if(index<0||other<0||other>=rows.length) return;
+  rows.forEach((row,i)=>{ if(!row.sortOrder) row.sortOrder=i+1; });
+  const temp=rows[index].sortOrder;
+  rows[index].sortOrder=rows[other].sortOrder;
+  rows[other].sortOrder=temp;
+  await dbPut('favorites',rows[index]);
+  await dbPut('favorites',rows[other]);
+  await reloadCache();
+}
+function openCommonProcedures(){
+  procedureKeyword='';
+  procedureEditMode=false;
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.style.zIndex='40';
+  overlay.innerHTML=`<div class="modal-sheet" style="height:100%;max-height:100%;border-radius:0;">
+    <div class="modal-header">
+      <button class="secondary" id="procedure-back" style="border:0;padding:4px;min-height:36px;color:var(--accent);">‹ 返回</button>
+      <span style="font-weight:650;">常用程序</span>
+      <button class="secondary" id="procedure-edit" style="border:0;padding:4px;min-height:36px;color:var(--accent);">編輯</button>
+    </div>
+    <div class="modal-body" id="procedure-body"></div>
+  </div>`;
+  document.getElementById('phone').appendChild(overlay);
+  const body=overlay.querySelector('#procedure-body');
+  function draw(){
+    const query=searchComparable(procedureKeyword);
+    const all=sortedProcedures();
+    const rows=all.filter(f=>!query||searchComparable(`${f.title} ${f.sourceTitle||''}`).includes(query));
+    let html=`<div class="search-field">
+      <span class="search-icon">⌕</span>
+      <input id="procedure-search" placeholder="搜尋常用程序" value="${escapeHtml(procedureKeyword)}">
+      ${procedureKeyword?'<button class="search-clear" id="procedure-clear">×</button>':''}
+    </div>
+    <p class="tiny-muted" style="margin:0 2px 7px;">共 ${all.length} 個常用程序</p>`;
+    if(!rows.length){
+      html+=`<div class="empty" style="padding:45px 20px;"><div class="icon">▣</div><p>${all.length?'沒有符合的常用程序':'尚未建立常用程序'}</p></div>`;
+    }else{
+      html+='<div class="procedure-list">';
+      rows.forEach((f,i)=>{
+        html+=`<div class="procedure-row" data-procedure-open="${f.id}">
+          <div class="ios-entry-icon" style="width:32px;height:32px;font-size:15px;">${f.type==='notice'?'📣':'📄'}</div>
+          <div class="ios-entry-main">
+            <p class="ios-entry-title">${escapeHtml(f.title)}</p>
+            <p class="ios-entry-subtitle">${escapeHtml(f.sourceTitle||f.title)}${f.type==='sop'?`｜PDF第${f.absolutePage}頁`:'｜通告'}</p>
+          </div>
+          ${procedureEditMode?`<div class="procedure-actions">
+            <button class="mini-action" data-procedure-rename="${f.id}">命名</button>
+            <button class="mini-action" data-procedure-up="${f.id}" ${i===0?'disabled':''}>↑</button>
+            <button class="mini-action" data-procedure-down="${f.id}" ${i===rows.length-1?'disabled':''}>↓</button>
+            <button class="mini-action" data-procedure-delete="${f.id}" style="color:#ff3b30;">刪除</button>
+          </div>`:'<span class="ios-chevron">›</span>'}
+        </div>`;
+      });
+      html+='</div>';
+    }
+    body.innerHTML=html;
+    const search=body.querySelector('#procedure-search');
+    bindImeSafeSearch(search,value=>{procedureKeyword=value;},draw);
+    if(procedureKeyword) focusAtEnd('procedure-search');
+    body.querySelector('#procedure-clear')?.addEventListener('click',()=>{procedureKeyword='';draw();});
+    body.querySelectorAll('[data-procedure-open]').forEach(row=>{
+      row.addEventListener('click',e=>{
+        if(procedureEditMode||e.target.closest('button')) return;
+        const item=cache.favorites.find(f=>f.id===Number(row.dataset.procedureOpen));
+        if(item) openSavedItem(item);
+      });
+    });
+    body.querySelectorAll('[data-procedure-rename]').forEach(btn=>btn.addEventListener('click',async e=>{
+      e.stopPropagation();
+      const item=cache.favorites.find(f=>f.id===Number(btn.dataset.procedureRename));
+      if(item&&await openProcedureNameDialog(item,item)) draw();
+    }));
+    body.querySelectorAll('[data-procedure-delete]').forEach(btn=>btn.addEventListener('click',async e=>{
+      e.stopPropagation();
+      if(!confirm('確定移除這個常用程序嗎？')) return;
+      await dbDelete('favorites',Number(btn.dataset.procedureDelete));
+      await reloadCache();draw();
+    }));
+    body.querySelectorAll('[data-procedure-up]').forEach(btn=>btn.addEventListener('click',async e=>{
+      e.stopPropagation();await moveProcedure(Number(btn.dataset.procedureUp),-1);draw();
+    }));
+    body.querySelectorAll('[data-procedure-down]').forEach(btn=>btn.addEventListener('click',async e=>{
+      e.stopPropagation();await moveProcedure(Number(btn.dataset.procedureDown),1);draw();
+    }));
+  }
+  overlay.querySelector('#procedure-back').addEventListener('click',()=>{
+    procedureEditMode=false;
+    procedureKeyword='';
+    overlay.remove();
+    requestAnimationFrame(()=>render());
+  });
+  overlay.querySelector('#procedure-edit').addEventListener('click',()=>{
+    procedureEditMode=!procedureEditMode;
+    overlay.querySelector('#procedure-edit').textContent=procedureEditMode?'完成':'編輯';
+    draw();
+  });
+  draw();
+}
+function bindImportBtn(id){
+  const btn = document.getElementById(id || 'import-pdf-btn');
+  const input = document.getElementById('pdf-file-input');
+  if(!btn || !input) return;
+  btn.addEventListener('click', ()=>input.click());
+  input.addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    await handlePdfImport(file);
+  });
+}
+async function handlePdfImport(file){
+  contentEl.innerHTML = `<div class="empty"><div class="icon">⏳</div><p>解析中，請稍候…</p></div>`;
+  const buf = await file.arrayBuffer();
+  const pages = await parsePdfArrayBuffer(buf);
+  const docs = segmentDocuments(pages);
+  const pdfFileId = await dbAdd('pdfFiles', {
+    fileName:file.name, displayName:file.name.replace(/\.pdf$/i,''), data:buf,
+    uploadedAt:new Date().toISOString(), pageCount:pages.length, documentCount:0,
+    fileSize:file.size, status:'待確認'
+  });
+  showImportReview(docs, pdfFileId);
+}
+function typeLabel(t){ return t==='cover'?'封面':(t==='revision'?'修訂紀錄':'正文'); }
+function labelDisplay(lab){
+  if(!lab || lab.type==='none') return '未偵測到頁碼';
+  if(lab.type==='roman') return `羅馬數字 (值=${lab.value})`;
+  return `阿拉伯數字 ${lab.value}`;
+}
+function renderReviewBody(docs){
+  let html='';
+  docs.forEach((doc,i)=>{
+    const t = {c:0,r:0,ct:0};
+    doc.pages.forEach(p=>{ if(p.type==='cover')t.c++; else if(p.type==='revision')t.r++; else t.ct++; });
+    const startAbs = doc.pages[0].absolutePage, endAbs = doc.pages[doc.pages.length-1].absolutePage;
+    html += `<div class="doc-review-item">
+      <div class="row between">
+        <label style="margin:0;">文件名稱（原始PDF第${startAbs}~${endAbs}頁）</label>
+        ${i>0?`<button class="secondary" style="padding:3px 8px;font-size:12px;" data-merge-up="${i}">↑與上一份合併</button>`:''}
+      </div>
+      <input type="text" data-name-idx="${i}" value="${escapeHtml(doc.name)}">
+      <div class="row between" style="margin-top:6px;">
+        <p class="tiny-muted" style="margin:0;">共${doc.pages.length}頁　正文${t.ct}　封面${t.c}　修訂紀錄${t.r}</p>
+        <button class="secondary" style="padding:3px 8px;font-size:12px;" data-toggle-detail="${i}">頁面明細</button>
+      </div>
+      <div id="detail-${i}" style="display:none;margin-top:8px;border-top:0.5px solid var(--border);padding-top:8px;">
+        ${doc.pages.map((p,pi)=>`
+          <div style="margin-bottom:8px;">
+            <span class="badge ${p.type}">第${p.pageNum}頁（原始第${p.absolutePage}頁）${typeLabel(p.type)}</span>
+            <span class="tiny-muted">　頁碼判定：${labelDisplay(p._label)}</span>
+            <p class="tiny-muted" style="margin:2px 0 0;cursor:pointer;text-decoration:underline;" data-show-full="${i}-${pi}">${escapeHtml(p.text.replace(/\s+/g,'').slice(0,50))}…（點我看完整文字）</p>
+            <pre id="full-${i}-${pi}" style="display:none;white-space:pre-wrap;font-size:11px;background:#f1efe8;padding:6px;border-radius:6px;margin-top:4px;">${escapeHtml(p.text)}</pre>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  });
+  return html;
+}
+function showImportReview(docs, pdfFileId){
+  const html = `<div class="modal-overlay"><div class="modal-sheet">
+    <div class="modal-header"><span style="font-weight:500;">確認匯入結果（共${docs.length}份）</span>
+    <button id="review-cancel" style="background:none;border:none;font-size:18px;">✕</button></div>
+    <div class="modal-body" id="review-body">${renderReviewBody(docs)}</div>
+    <div style="padding:12px 16px;border-top:0.5px solid var(--border);background:var(--card);">
+      <button class="primary" id="review-confirm" style="width:100%;">確認匯入</button>
+    </div>
+  </div></div>`;
+  contentEl.insertAdjacentHTML('beforeend', html);
+
+  function bindReviewEvents(){
+    document.querySelectorAll('[data-name-idx]').forEach(inp=>{
+      inp.addEventListener('input', ()=>{ docs[Number(inp.dataset.nameIdx)].name = inp.value; });
+    });
+    document.querySelectorAll('[data-toggle-detail]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const el = document.getElementById('detail-'+btn.dataset.toggleDetail);
+        el.style.display = el.style.display==='none' ? 'block' : 'none';
+      });
+    });
+    document.querySelectorAll('[data-show-full]').forEach(p=>{
+      p.addEventListener('click', ()=>{
+        const el = document.getElementById('full-'+p.dataset.showFull);
+        el.style.display = el.style.display==='none' ? 'block' : 'none';
+      });
+    });
+    document.querySelectorAll('[data-merge-up]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = Number(btn.dataset.mergeUp);
+        // 合併：把doc[i]的頁面接到doc[i-1]後面，並重新標記型態（此doc原本的封面頁改標為正文，因已併入前一份）
+        const merging = docs[i];
+        merging.pages.forEach((p,idx)=>{ if(idx===0) p.type='content'; });
+        docs[i-1].pages = docs[i-1].pages.concat(merging.pages);
+        docs.splice(i,1);
+        document.getElementById('review-body').innerHTML = renderReviewBody(docs);
+        bindReviewEvents();
+      });
+    });
+  }
+  bindReviewEvents();
+
+  document.getElementById('review-cancel').addEventListener('click', async ()=>{
+    await dbDelete('pdfFiles', pdfFileId);
+    render();
+  });
+  document.getElementById('review-confirm').addEventListener('click', async ()=>{
+    for(const doc of docs){
+      await dbAdd('sopDocs', {pdfFileId, name: doc.name || '未命名文件', pages:doc.pages});
+    }
+    const pdfRec=cache.pdfFiles.find(f=>f.id===pdfFileId) || await new Promise((res,rej)=>{
+      const r=txStore('pdfFiles','readonly').get(pdfFileId);
+      r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
+    });
+    if(pdfRec){
+      pdfRec.documentCount=docs.length;
+      pdfRec.status='已完成';
+      await dbPut('pdfFiles',pdfRec);
+    }
+    await reloadCache();
+    sopKeyword=''; sopFilter='content';
+    currentTab='library';
+    render();
+  });
+}
+
+/* --- SOP text reader modal --- */
+function highlightReaderText(text, terms){
+  const readable = readablePdfText(text);
+  const lower = readable.toLocaleLowerCase();
+  const ranges=[];
+  terms.forEach(term=>{
+    const needle=readablePdfText(term).toLocaleLowerCase();
+    if(!needle) return;
+    let from=0,idx;
+    while((idx=lower.indexOf(needle,from))>=0){
+      ranges.push([idx,idx+needle.length]);
+      from=idx+Math.max(1,needle.length);
+    }
+  });
+  ranges.sort((a,b)=>a[0]-b[0]);
+  const merged=[];
+  ranges.forEach(r=>{
+    const last=merged[merged.length-1];
+    if(last && r[0]<=last[1]) last[1]=Math.max(last[1],r[1]);
+    else merged.push([...r]);
+  });
+  let html='',pos=0;
+  merged.forEach(([start,end])=>{
+    html+=escapeHtml(readable.slice(pos,start));
+    html+=`<span class="highlight">${escapeHtml(readable.slice(start,end))}</span>`;
+    pos=end;
+  });
+  return html+escapeHtml(readable.slice(pos));
+}
+function stripSopPageHeader(text){
+  let source=String(text||'').trim();
+  let rawLines=source.split(/\n+/);
+  const chapterIndex=rawLines.slice(0,6).findIndex(line=>/章\s*節\s*[:：]/.test(line));
+  if(chapterIndex>=0){
+    const chapterLine=rawLines[chapterIndex].replace(/\s+/g,' ').trim();
+    const afterChapter=chapterLine.split(/章\s*節\s*[:：]/).slice(1).join('').trim();
+    const bodyStart=afterChapter.match(/^(?:\d{1,4}\s+)?(\d{1,3}(?:\.\d+)*\.\s*[\u3400-\u9fff][\s\S]*)$/);
+    rawLines=rawLines.slice(chapterIndex+1);
+    if(bodyStart) rawLines.unshift(bodyStart[1]);
+  }else{
+    source=source.replace(/^[\s\S]*?文件名稱[\s\S]*?章節\s*[:：]\s*(?:\d{1,3}\s+(?=\d{1,3}\.))?/,'');
+    rawLines=source.split(/\n+/);
+  }
+  return rawLines.map((line,lineIndex)=>{
+    let cleaned=line.replace(/\s+/g,' ').trim();
+    if(/^(文件名稱|文件編號)\s*[:：]/.test(cleaned)) return '';
+    if(/^最新版別\s*[:：]/.test(cleaned)) return '';
+    if(/^\d{1,4}$/.test(cleaned)) return '';
+    if(/最新版別/.test(cleaned) && /章節/.test(cleaned)){
+      cleaned=cleaned.replace(/^.*?章節\s*[:：]?\s*\d+\s*/,'');
+    }
+    return cleaned;
+  }).filter(Boolean);
+}
+function parenthesisDelta(text){
+  let delta=0;
+  for(const c of text){ if(c==='('||c==='（') delta++; if(c===')'||c==='）') delta--; }
+  return delta;
+}
+function detectClauseMarker(line,insideParentheses){
+  if(insideParentheses) return null;
+  let top=line.match(/^(\d{1,2})\.(?=\s*[\u3400-\u9fff【])/);
+  if(top) return {marker:top[1],className:'level-2'};
+  let m=line.match(/^(\d{1,2}(?:\.\d+){1,4})\.?(?=\s|[^\d.])/);
+  if(m){
+    const after=line.slice(m[0].length).trim();
+    if(/^(?:說明|規定|辦理|所述)/.test(after)) return null;
+    const depth=m[1].split('.').length;
+    return {marker:m[1],className:depth===2?'level-2':'level-3'};
+  }
+  m=line.match(/^([A-Z](?:\.\d+)+|[A-Z]\.)(?=\s|[\u3400-\u9fff【（(])/);
+  if(m) return {marker:m[1].replace(/\.$/,''),className:'letter'};
+  m=line.match(/^[（(](\d+)[）)]/);
+  if(m) return {marker:`(${m[1]})`,className:'subitem'};
+  m=line.match(/^(步驟[一二三四五六七八九十]+)[、：:\s]/);
+  if(m) return {marker:m[1],className:'letter'};
+  return null;
+}
+function splitInlineStructures(line){
+  const candidates=[];
+  const patterns=[
+    /\d{1,2}(?:\.\d+){1,4}\.?(?=\s*[\u3400-\u9fff【])/g,
+    /\d{1,2}\.(?=\s*[\u3400-\u9fff【])/g,
+    /[A-Z]\.(?:\d+)?(?=\s|[\u3400-\u9fff【])/g,
+    /步驟[一二三四五六七八九十]+(?=[、：:\s])/g
+  ];
+  patterns.forEach(pattern=>{
+    for(const m of line.matchAll(pattern)){
+      if(m.index===0) continue;
+      const before=line.slice(0,m.index);
+      const prev=before.slice(-4);
+      if((before.match(/[（(]/g)||[]).length>(before.match(/[）)]/g)||[]).length) continue;
+      if(/(?:見|詳見|參照|依照|比照)\s*$/.test(prev)) continue;
+      const preceding=line[m.index-1]||'';
+      if(!/[\s。；;：:，,）)]/.test(preceding)) continue;
+      candidates.push(m.index);
+    }
+  });
+  const points=[0,...new Set(candidates)].sort((a,b)=>a-b);
+  return points.map((start,i)=>line.slice(start,points[i+1]??line.length).trim()).filter(Boolean);
+}
+function parseSopParagraphs(text){
+  const lines=stripSopPageHeader(text).flatMap(splitInlineStructures);
+  const paragraphs=[];
+  let current=null,parenDepth=0;
+  const pushCurrent=()=>{ if(current?.text) paragraphs.push(current); current=null; };
+  lines.forEach(line=>{
+    const marker=detectClauseMarker(line,parenDepth>0);
+    if(marker){
+      pushCurrent();
+      current={text:line,marker:marker.marker,className:marker.className};
+      parenDepth=Math.max(0,parenthesisDelta(line));
+    }else if(current){
+      current.text+=` ${line}`;
+      parenDepth=Math.max(0,parenDepth+parenthesisDelta(line));
+    }else{
+      current={text:line,marker:null,className:''};
+      parenDepth=Math.max(0,parenthesisDelta(line));
+    }
+  });
+  pushCurrent();
+  return paragraphs;
+}
+function formatStructuredSopText(text,terms){
+  return parseSopParagraphs(text).map(paragraph=>{
+    let content=highlightReaderText(paragraph.text,terms);
+    content=content.replace(/(見|詳見|依照?|參照|比照)(?:第)?((?:\d+(?:\.\d+)+)|(?:[A-Z]\.\d+))/g,
+      '$1<span class="reference-chip" data-clause-ref="$2">$2</span>');
+    const clauseAttr=paragraph.marker?` data-clause="${escapeHtml(paragraph.marker)}"`:'';
+    return `<div class="sop-block ${paragraph.className}"${clauseAttr}>${content}</div>`;
+  }).join('');
+}
+function readablePageForCopy(page){
+  return parseSopParagraphs(page.formattedText||page.text).map(p=>p.text).join('\n\n');
+}
+async function copyTextToClipboard(text){
+  try{
+    if(navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  }catch(_){}
+  const area=document.createElement('textarea');
+  area.value=text;
+  area.style.position='fixed';
+  area.style.opacity='0';
+  document.body.appendChild(area);
+  area.focus();area.select();
+  const ok=document.execCommand('copy');
+  area.remove();
+  return ok;
+}
+async function ensureDocumentLayoutText(doc){
+  if(doc.pages.every(p=>p.formattedText)) return;
+  const rec=cache.pdfFiles.find(f=>f.id===doc.pdfFileId);
+  if(!rec?.data) return;
+  const loading=document.createElement('div');
+  loading.className='modal-overlay';
+  loading.style.zIndex='80';
+  loading.innerHTML=`<div class="modal-sheet" style="height:auto;"><div class="modal-body" style="text-align:center;padding:30px;">
+    <div style="font-size:28px;">⏳</div><p>首次整理PDF原始段落，請稍候…</p>
+  </div></div>`;
+  document.getElementById('phone').appendChild(loading);
+  try{
+    const pdf=await pdfjsLib.getDocument({data:rec.data.slice(0)}).promise;
+    for(const p of doc.pages){
+      if(p.formattedText) continue;
+      const pdfPage=await pdf.getPage(p.absolutePage);
+      const tc=await pdfPage.getTextContent();
+      const viewport=pdfPage.getViewport({scale:1});
+      p.formattedText=extractFormattedText(tc,viewport.height);
+    }
+    await dbPut('sopDocs',doc);
+  }finally{
+    loading.remove();
+  }
+}
+async function openTextReader(docId,absolutePage,targetClause=null){
+  const doc=cache.sopDocs.find(d=>d.id===docId);
+  if(!doc) return alert('找不到這份文件，請重新整理後再試。');
+  await ensureDocumentLayoutText(doc);
+  const displayName=resolvedDocName(doc);
+  await addRecentView({type:'sop',docId:doc.id,absolutePage,title:displayName});
+  const eligible=doc.pages.filter(p=>p.type!=='cover' && !(sopFilter==='content' && p.type==='revision'));
+  let currentIndex=eligible.findIndex(p=>p.absolutePage===absolutePage);
+  if(currentIndex<0) currentIndex=0;
+  const terms=parseSearchTerms(sopKeyword);
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.style.zIndex='70';
+  overlay.innerHTML=`<div class="modal-sheet" style="height:96%;">
+    <div class="modal-header">
+      <span style="font-weight:600;font-size:13px;line-height:1.4;padding-right:8px;">${escapeHtml(displayName)}</span>
+      <button id="reader-close" style="background:none;border:none;font-size:18px;flex-shrink:0;">✕</button>
+    </div>
+    <div class="modal-body" id="reader-body"></div>
+    <div style="padding:10px 14px;border-top:0.5px solid var(--border);background:var(--card);">
+      <div class="reader-nav">
+        <button class="secondary" id="reader-prev">← 上一頁</button>
+        <button class="secondary" id="reader-next">下一頁 →</button>
+      </div>
+      <div class="reader-nav" style="margin-bottom:0;">
+        <button class="secondary" id="reader-favorite">☆ 加入常用</button>
+        <button class="primary" id="reader-pdf">查看PDF原版</button>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('phone').appendChild(overlay);
+  function draw(){
+    const start=Math.max(0,currentIndex-1);
+    const end=Math.min(eligible.length-1,currentIndex+1);
+    let html=`<p class="tiny-muted" style="margin:0 0 10px;">顯示命中頁及相鄰頁；藍框為目前頁面。</p>`;
+    for(let i=start;i<=end;i++){
+      const p=eligible[i];
+      html+=`<section class="reader-page ${i===currentIndex?'current':''}" data-reader-index="${i}">
+        <div class="reader-page-title">
+          <span>${typeLabel(p.type)}</span>
+          <div class="row"><span>PDF第${p.absolutePage}頁</span>
+            <button class="mini-action" data-copy-reader-page="${i}">複製</button></div>
+        </div>
+        <div class="reader-text">${formatStructuredSopText(p.formattedText||p.text,terms)}</div>
+      </section>`;
+    }
+    document.getElementById('reader-body').innerHTML=html;
+    document.getElementById('reader-prev').disabled=currentIndex===0;
+    document.getElementById('reader-next').disabled=currentIndex===eligible.length-1;
+    const currentSaved={type:'sop',docId:doc.id,absolutePage:eligible[currentIndex].absolutePage,title:displayName};
+    document.getElementById('reader-favorite').textContent=favoriteFor(currentSaved)?'★ 已加入常用':'☆ 加入常用';
+    document.querySelectorAll('[data-reader-index]').forEach(el=>{
+      el.addEventListener('click',e=>{
+        if(e.target.closest('button')||window.getSelection()?.toString()) return;
+        currentIndex=Number(el.dataset.readerIndex); draw();
+      });
+    });
+    document.querySelectorAll('[data-copy-reader-page]').forEach(btn=>{
+      btn.addEventListener('click',async e=>{
+        e.stopPropagation();
+        const page=eligible[Number(btn.dataset.copyReaderPage)];
+        const ok=await copyTextToClipboard(readablePageForCopy(page));
+        const original=btn.textContent;
+        btn.textContent=ok?'已複製':'複製失敗';
+        setTimeout(()=>{if(btn.isConnected)btn.textContent=original;},1200);
+      });
+    });
+    document.querySelectorAll('[data-clause-ref]').forEach(refEl=>{
+      refEl.addEventListener('click',e=>{
+        e.stopPropagation();
+        const target=refEl.dataset.clauseRef;
+        const targetIndex=eligible.findIndex(p=>
+          parseSopParagraphs(p.formattedText||p.text).some(paragraph=>paragraph.marker===target)
+        );
+        if(targetIndex<0) return alert(`本文件中找不到條文 ${target}，請查看PDF原版。`);
+        currentIndex=targetIndex;
+        draw();
+        setTimeout(()=>{
+          [...document.querySelectorAll('[data-clause]')].find(el=>el.dataset.clause===target)
+            ?.scrollIntoView({behavior:'smooth',block:'center'});
+        },80);
+      });
+    });
+    requestAnimationFrame(()=>{
+      document.querySelector('.reader-page.current')?.scrollIntoView({block:'center'});
+    });
+  }
+  document.getElementById('reader-close').addEventListener('click',()=>{
+    overlay.remove();
+    if(currentTab==='sop'&&!sopKeyword) render();
+  });
+  document.getElementById('reader-prev').addEventListener('click',()=>{ if(currentIndex>0){currentIndex--;draw();} });
+  document.getElementById('reader-next').addEventListener('click',()=>{ if(currentIndex<eligible.length-1){currentIndex++;draw();} });
+  document.getElementById('reader-favorite').addEventListener('click',async()=>{
+    const p=eligible[currentIndex];
+    await toggleFavorite({type:'sop',docId:doc.id,absolutePage:p.absolutePage,title:displayName});
+    draw();
+  });
+  document.getElementById('reader-pdf').addEventListener('click',()=>{
+    const p=eligible[currentIndex];
+    overlay.remove();
+    openPdfViewer(doc.pdfFileId,p.absolutePage);
+  });
+  draw();
+  if(targetClause){
+    setTimeout(()=>{
+      [...document.querySelectorAll('[data-clause]')].find(el=>el.dataset.clause===targetClause)
+        ?.scrollIntoView({behavior:'smooth',block:'center'});
+    },120);
+  }
+}
+
+/* --- PDF viewer modal --- */
+async function openPdfViewer(pdfFileId, pageNum){
+  const rec = cache.pdfFiles.find(f=>f.id===pdfFileId);
+  if(!rec) return;
+  const html = `<div class="modal-overlay" id="pdf-viewer-overlay" style="z-index:80;"><div class="modal-sheet" style="height:96%;">
+    <div class="modal-header"><span style="font-weight:500;">第${pageNum}頁</span>
+    <button id="pdf-viewer-close" style="background:none;border:none;font-size:18px;">✕</button></div>
+    <div class="modal-body" style="padding:0;" id="pdf-canvas-wrap"><p class="muted" style="padding:20px;">載入中…</p></div>
+  </div></div>`;
+  contentEl.insertAdjacentHTML('beforeend', html);
+  document.getElementById('pdf-viewer-close').addEventListener('click', ()=>{
+    document.getElementById('pdf-viewer-overlay').remove();
+  });
+  const pdf = await pdfjsLib.getDocument({data:rec.data.slice(0)}).promise;
+  const page = await pdf.getPage(pageNum);
+  const viewport = page.getViewport({scale:1.4});
+  const canvas = document.createElement('canvas');
+  canvas.width = viewport.width; canvas.height = viewport.height;
+  const wrap = document.getElementById('pdf-canvas-wrap');
+  wrap.innerHTML=''; wrap.appendChild(canvas);
+  await page.render({canvasContext:canvas.getContext('2d'), viewport}).promise;
+}
+
+async function openNoticeReader(id){
+  const notice=cache.announcements.find(n=>n.id===id);
+  if(!notice) return;
+  await addRecentView({type:'notice',noticeId:notice.id,title:notice.title});
+  const terms=parseSearchTerms(sopKeyword);
+  const saved={type:'notice',noticeId:notice.id,title:notice.title};
+  const html=`<div class="modal-overlay" id="notice-reader" style="z-index:70;"><div class="modal-sheet" style="height:88%;">
+    <div class="modal-header"><span style="font-weight:600;">${escapeHtml(notice.title)}</span>
+      <div class="row"><button class="favorite-btn" id="notice-favorite">${favoriteFor(saved)?'★':'☆'}</button>
+      <button id="notice-reader-close" style="background:none;border:none;font-size:18px;">✕</button></div></div>
+    <div class="modal-body">
+      <p class="tiny-muted">${escapeHtml(notice.category||'通告')}｜${escapeHtml(notice.date||'')}</p>
+      <div class="reader-page current"><p class="reader-text">${highlightReaderText(notice.content||'',terms)}</p></div>
+    </div>
+  </div></div>`;
+  document.getElementById('phone').insertAdjacentHTML('beforeend',html);
+  document.getElementById('notice-reader-close').addEventListener('click',()=>{
+    document.getElementById('notice-reader').remove();
+    if(currentTab==='sop'&&!sopKeyword) render();
+  });
+  document.getElementById('notice-favorite').addEventListener('click',async()=>{
+    await toggleFavorite(saved);
+    document.getElementById('notice-favorite').textContent=favoriteFor(saved)?'★':'☆';
+  });
+}
+
+/* --- Document library tab --- */
+function formatFileSize(bytes){
+  const n=Number(bytes)||0;
+  if(!n) return '未記錄';
+  return n>=1048576 ? `${(n/1048576).toFixed(1)} MB` : `${Math.ceil(n/1024)} KB`;
+}
+function formatUploadDate(value){
+  if(!value) return '舊版匯入';
+  return new Date(value).toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+async function deletePdfSource(id){
+  const related=cache.sopDocs.filter(d=>d.pdfFileId===id);
+  if(!confirm(`確定刪除這個PDF及其 ${related.length} 份SOP搜尋資料嗎？`)) return;
+  for(const doc of related) await dbDelete('sopDocs',doc.id);
+  await dbDelete('pdfFiles',id);
+  await reloadCache(); renderLibrary();
+}
+function openSynonymManager(){
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.style.zIndex='40';
+  overlay.innerHTML=`<div class="modal-sheet" style="height:100%;max-height:100%;border-radius:0;">
+    <div class="modal-header">
+      <button class="secondary" id="synonym-back" style="border:0;padding:4px;min-height:36px;color:var(--accent);">‹ 返回</button>
+      <span style="font-weight:650;">智慧搜尋詞庫</span>
+      <button class="secondary" id="synonym-add" style="border:0;padding:4px;min-height:36px;color:var(--accent);">新增</button>
+    </div>
+    <div class="modal-body" id="synonym-manager-body"></div>
+  </div>`;
+  document.getElementById('phone').appendChild(overlay);
+  const body=overlay.querySelector('#synonym-manager-body');
+  function draw(){
+    const groups=[...cache.synonymGroups].sort((a,b)=>a.canonical.localeCompare(b.canonical,'zh-Hant'));
+    const unmatched=[...cache.unmatchedQueries].sort((a,b)=>(b.lastUsedAt||'').localeCompare(a.lastUsedAt||'')).slice(0,20);
+    let html=`<p class="tiny-muted" style="margin:0 2px 7px;">自訂同義詞（${groups.length}）</p>`;
+    if(!groups.length){
+      html+=`<div class="card"><p class="muted" style="margin:0;">尚未建立自訂同義詞</p></div>`;
+    }else{
+      html+='<div class="procedure-list">';
+      groups.forEach(g=>{
+        html+=`<div class="procedure-row">
+          <div class="ios-entry-main"><p class="ios-entry-title">${escapeHtml(g.canonical)}</p>
+            <p class="ios-entry-subtitle">${escapeHtml((g.aliases||[]).join('、'))}</p></div>
+          <div class="procedure-actions"><button class="mini-action" data-synonym-edit="${g.id}">編輯</button>
+            <button class="mini-action" data-synonym-delete="${g.id}" style="color:#ff3b30;">刪除</button></div>
+        </div>`;
+      });
+      html+='</div>';
+    }
+    if(unmatched.length){
+      html+=`<div class="row between" style="margin-top:18px;"><p class="tiny-muted" style="margin:0 2px 7px;">查無結果紀錄</p>
+        <button class="mini-action" id="clear-unmatched" style="color:#ff3b30;">清除全部</button></div><div class="procedure-list">`;
+      unmatched.forEach(q=>{
+        html+=`<div class="procedure-row">
+          <div class="ios-entry-main"><p class="ios-entry-title">${escapeHtml(q.query)}</p>
+            <p class="ios-entry-subtitle">查詢 ${q.count||1} 次</p></div>
+          <button class="mini-action" data-teach-unmatched="${q.id}">建立對應</button>
+        </div>`;
+      });
+      html+='</div>';
+    }
+    body.innerHTML=html;
+    body.querySelectorAll('[data-synonym-edit]').forEach(btn=>btn.addEventListener('click',async()=>{
+      const group=cache.synonymGroups.find(g=>g.id===Number(btn.dataset.synonymEdit));
+      if(group&&await openSynonymDialog('',group.canonical,group)) draw();
+    }));
+    body.querySelectorAll('[data-synonym-delete]').forEach(btn=>btn.addEventListener('click',async()=>{
+      if(!confirm('確定刪除這組自訂同義詞嗎？')) return;
+      await dbDelete('synonymGroups',Number(btn.dataset.synonymDelete));await reloadCache();draw();
+    }));
+    body.querySelectorAll('[data-teach-unmatched]').forEach(btn=>btn.addEventListener('click',async()=>{
+      const row=cache.unmatchedQueries.find(q=>q.id===Number(btn.dataset.teachUnmatched));
+      if(row&&await openSynonymDialog(row.query,'')){
+        await dbDelete('unmatchedQueries',row.id);await reloadCache();draw();
+      }
+    }));
+    body.querySelector('#clear-unmatched')?.addEventListener('click',async()=>{
+      if(!confirm('確定清除所有查無結果紀錄嗎？')) return;
+      for(const row of cache.unmatchedQueries) await dbDelete('unmatchedQueries',row.id);
+      await reloadCache();draw();
+    });
+  }
+  overlay.querySelector('#synonym-back').addEventListener('click',()=>{overlay.remove();renderLibrary();});
+  overlay.querySelector('#synonym-add').addEventListener('click',async()=>{if(await openSynonymDialog('','')) draw();});
+  draw();
+}
+function renderLibrary(){
+  let html = `<div class="ios-entry" id="open-synonym-manager">
+      <div class="ios-entry-icon">Aa</div>
+      <div class="ios-entry-main"><p class="ios-entry-title">智慧搜尋詞庫</p>
+        <p class="ios-entry-subtitle">${cache.synonymGroups.length} 組自訂同義詞｜${cache.unmatchedQueries.length} 筆待整理問句</p></div>
+      <span class="ios-chevron">›</span>
+    </div>
+    <div class="card">
+      <div class="row between">
+        <div><p style="font-weight:600;margin:0 0 3px;">SOP PDF文件</p><p class="tiny-muted" style="margin:0;">上傳後解析為可搜尋文字</p></div>
+        <button class="primary" id="import-pdf-btn">上傳PDF</button>
+      </div>
+      <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none">
+    </div>
+    <p class="tiny-muted" style="margin:12px 2px 6px;">PDF文件（${cache.pdfFiles.length}）</p>`;
+  if(cache.pdfFiles.length===0){
+    html+=`<div class="card"><p class="muted" style="margin:0;">尚未上傳PDF文件</p></div>`;
+  }else{
+    [...cache.pdfFiles].sort((a,b)=>(b.uploadedAt||'').localeCompare(a.uploadedAt||'')).forEach(f=>{
+      const related=cache.sopDocs.filter(d=>d.pdfFileId===f.id);
+      const pageCount=f.pageCount || Math.max(0,...related.flatMap(d=>d.pages.map(p=>p.absolutePage||0)));
+      const docCount=f.documentCount ?? related.length;
+      html+=`<div class="card">
+        <div class="row between">
+          <span style="font-size:13px;font-weight:600;line-height:1.4;">📄 ${escapeHtml(f.displayName||f.fileName)}</span>
+          <button class="danger-text" data-del-pdf="${f.id}">刪除</button>
+        </div>
+        <p class="tiny-muted" style="margin:6px 0 2px;">上傳：${formatUploadDate(f.uploadedAt)}</p>
+        <p class="muted" style="margin:0;">${pageCount||'—'}頁｜${docCount}份文件｜${formatFileSize(f.fileSize||f.data?.byteLength)}</p>
+        <p class="tiny-muted" style="margin:4px 0 0;color:${f.status==='待確認'?'#854f0b':'var(--text-muted)'};">狀態：${f.status||'已完成'}</p>
+      </div>`;
+    });
+  }
+  html += `<p class="tiny-muted" style="margin:14px 2px 6px;">建立文字通告</p>
+    <div class="card">
+      <div class="field"><label>標題</label><input id="notice-title"></div>
+      <div class="field"><label>分類</label>
+        <select id="notice-cat"><option>一般通告</option><option>緊急通告</option><option>教育訓練</option></select>
+      </div>
+      <div class="field"><label>日期</label><input type="date" id="notice-date" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="field"><label>內容</label><textarea id="notice-content"></textarea></div>
+      <button class="primary" id="notice-add-btn" style="width:100%;">新增通告</button>
+    </div>
+    <p class="tiny-muted" style="margin:14px 2px 6px;">文字通告（${cache.announcements.length}）</p>`;
+  const list = [...cache.announcements].sort((a,b)=>b.date.localeCompare(a.date))
+    ;
+  if(list.length===0){
+    html += `<div class="empty"><p>尚無通告</p></div>`;
+  } else {
+    list.forEach(n=>{
+      html += `<div class="card">
+        <div class="row between"><span style="font-weight:500;font-size:14px;">${escapeHtml(n.title)}</span>
+          <button class="danger-text" data-del-notice="${n.id}">刪除</button></div>
+        <p class="tiny-muted" style="margin:2px 0 6px;">${n.date}　${n.category}</p>
+        <p class="muted" style="margin:0;">${escapeHtml(n.content)}</p>
+      </div>`;
+    });
+  }
+  contentEl.innerHTML = html;
+  document.getElementById('notice-add-btn').addEventListener('click', async ()=>{
+    const title = document.getElementById('notice-title').value.trim();
+    if(!title) return alert('請輸入標題');
+    await dbAdd('announcements', {
+      title, category: document.getElementById('notice-cat').value,
+      date: document.getElementById('notice-date').value,
+      content: document.getElementById('notice-content').value.trim()
+    });
+    await reloadCache(); renderLibrary();
+  });
+  bindImportBtn();
+  document.getElementById('open-synonym-manager')?.addEventListener('click',openSynonymManager);
+  contentEl.querySelectorAll('[data-del-pdf]').forEach(btn=>{
+    btn.addEventListener('click',()=>deletePdfSource(Number(btn.dataset.delPdf)));
+  });
+  contentEl.querySelectorAll('[data-del-notice]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await dbDelete('announcements', Number(btn.dataset.delNotice));
+      await reloadCache(); renderLibrary();
+    });
+  });
+}
+
+/* --- Personnel/event tab --- */
+function renderPersonnel(){
+  let html = `<div class="card">
+      <div class="field"><label>姓名</label><input id="p-name"></div>
+      <div class="field"><label>事件</label><input id="p-event"></div>
+      <div class="field"><label>日期</label><input type="date" id="p-date" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="field"><label>備註</label><textarea id="p-note"></textarea></div>
+      <button class="primary" id="p-add-btn" style="width:100%;">新增紀錄</button>
+    </div>
+    <input type="text" id="p-search" placeholder="搜尋姓名或事件" value="${escapeHtml(personnelKeyword)}" style="margin-bottom:10px;">`;
+  const kw = personnelKeyword;
+  const list = [...cache.personnel].sort((a,b)=>b.date.localeCompare(a.date))
+    .filter(p=> !kw || p.name.includes(kw) || p.event.includes(kw));
+  if(list.length===0){
+    html += `<div class="empty"><p>尚無資料</p></div>`;
+  } else {
+    list.forEach(p=>{
+      html += `<div class="card">
+        <div class="row between"><span style="font-weight:500;font-size:14px;">${escapeHtml(p.name)}</span>
+          <button class="danger-text" data-del-p="${p.id}">刪除</button></div>
+        <p class="tiny-muted" style="margin:2px 0 6px;">${p.date}　${escapeHtml(p.event)}</p>
+        ${p.note?`<p class="muted" style="margin:0;">${escapeHtml(p.note)}</p>`:''}
+      </div>`;
+    });
+  }
+  contentEl.innerHTML = html;
+  document.getElementById('p-add-btn').addEventListener('click', async ()=>{
+    const name = document.getElementById('p-name').value.trim();
+    if(!name) return alert('請輸入姓名');
+    await dbAdd('personnel', {
+      name, event: document.getElementById('p-event').value.trim(),
+      date: document.getElementById('p-date').value,
+      note: document.getElementById('p-note').value.trim()
+    });
+    await reloadCache(); renderPersonnel();
+  });
+  bindImeSafeSearch(document.getElementById('p-search'), value=>{ personnelKeyword=value; }, renderPersonnel);
+  if(personnelKeyword) focusAtEnd('p-search');
+  contentEl.querySelectorAll('[data-del-p]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await dbDelete('personnel', Number(btn.dataset.delP));
+      await reloadCache(); renderPersonnel();
+    });
+  });
+}
+
+/* --- Ridership tab --- */
+function renderRidership(){
+  let html = `<div class="card">
+      <div class="field"><label>站名</label><input id="r-station"></div>
+      <div class="field"><label>日期</label><input type="date" id="r-date" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="field"><label>人數</label><input type="number" id="r-count"></div>
+      <button class="primary" id="r-add-btn" style="width:100%;">新增紀錄</button>
+    </div>
+    <input type="text" id="r-search" placeholder="依站名篩選" value="${escapeHtml(ridershipKeyword)}" style="margin-bottom:10px;">`;
+  const kw = ridershipKeyword;
+  const list = [...cache.ridership].sort((a,b)=>b.date.localeCompare(a.date))
+    .filter(r=> !kw || r.station.includes(kw));
+  const max = Math.max(1, ...list.map(r=>Number(r.count)||0));
+  if(list.length===0){
+    html += `<div class="empty"><p>尚無資料</p></div>`;
+  } else {
+    list.forEach(r=>{
+      const pct = Math.round((Number(r.count)||0)/max*100);
+      html += `<div class="card">
+        <div class="row between"><span style="font-weight:500;font-size:14px;">${escapeHtml(r.station)}</span>
+          <button class="danger-text" data-del-r="${r.id}">刪除</button></div>
+        <p class="tiny-muted" style="margin:2px 0 6px;">${r.date}</p>
+        <div style="background:#f1efe8;border-radius:6px;height:8px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:var(--accent);"></div>
+        </div>
+        <p class="muted" style="margin:4px 0 0;">${Number(r.count).toLocaleString()} 人次</p>
+      </div>`;
+    });
+  }
+  contentEl.innerHTML = html;
+  document.getElementById('r-add-btn').addEventListener('click', async ()=>{
+    const station = document.getElementById('r-station').value.trim();
+    const count = Number(document.getElementById('r-count').value);
+    if(!station || !count) return alert('請輸入站名與人數');
+    await dbAdd('ridership', {station, date: document.getElementById('r-date').value, count});
+    await reloadCache(); renderRidership();
+  });
+  bindImeSafeSearch(document.getElementById('r-search'), value=>{ ridershipKeyword=value; }, renderRidership);
+  if(ridershipKeyword) focusAtEnd('r-search');
+  contentEl.querySelectorAll('[data-del-r]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await dbDelete('ridership', Number(btn.dataset.delR));
+      await reloadCache(); renderRidership();
+    });
+  });
+}
+
+/* --- Data management (export/import) --- */
+function bufToBase64(buf){
+  let binary=''; const bytes = new Uint8Array(buf);
+  const chunk = 0x8000;
+  for(let i=0;i<bytes.length;i+=chunk){
+    binary += String.fromCharCode.apply(null, bytes.subarray(i,i+chunk));
+  }
+  return btoa(binary);
+}
+function base64ToBuf(b64){
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+  return bytes.buffer;
+}
+async function exportData(){
+  const dump = {};
+  for(const name of STORES){
+    const rows = await dbGetAll(name);
+    dump[name] = rows.map(r=>{
+      if(name==='pdfFiles') return {...r, data: bufToBase64(r.data)};
+      return r;
+    });
+  }
+  const blob = new Blob([JSON.stringify(dump)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `station-assistant-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+async function importData(file){
+  const text = await file.text();
+  const dump = JSON.parse(text);
+  for(const name of STORES){
+    if(!dump[name]) continue;
+    for(const row of dump[name]){
+      const copy = {...row};
+      delete copy.id;
+      if(name==='pdfFiles') copy.data = base64ToBuf(copy.data);
+      await dbAdd(name, copy);
+    }
+  }
+  await reloadCache();
+  render();
+}
+function openDataMgmt(){
+  const html = `<div class="modal-overlay" id="dm-overlay"><div class="modal-sheet" style="height:auto;">
+    <div class="modal-header"><span style="font-weight:500;">資料管理</span>
+      <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
+    <div class="modal-body">
+      <p class="muted" style="margin-top:0;">匯出資料後可傳到另一台裝置匯入，兩邊資料會維持同步。</p>
+      <button class="primary" id="dm-export" style="width:100%;margin-bottom:10px;">匯出資料備份</button>
+      <button class="secondary" id="dm-import" style="width:100%;">匯入資料備份</button>
+      <input type="file" id="dm-import-input" accept="application/json" style="display:none">
+    </div>
+  </div></div>`;
+  contentEl.insertAdjacentHTML('beforeend', html);
+  document.getElementById('dm-close').addEventListener('click', ()=>document.getElementById('dm-overlay').remove());
+  document.getElementById('dm-export').addEventListener('click', exportData);
+  document.getElementById('dm-import').addEventListener('click', ()=>document.getElementById('dm-import-input').click());
+  document.getElementById('dm-import-input').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    if(confirm('匯入的資料會加進目前資料庫（不會清除既有資料），確定匯入嗎？')){
+      await importData(file);
+      document.getElementById('dm-overlay').remove();
+    }
+  });
+}
+
+/* ---------- Init ---------- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{ currentTab = btn.dataset.tab; sopKeyword=''; render(); });
+});
+document.getElementById('data-mgmt-btn').addEventListener('click', openDataMgmt);
+
+(async function init(){
+  await openDB();
+  await reloadCache();
+  render();
+  if('serviceWorker' in navigator && location.protocol !== 'file:'){
+    navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('離線快取註冊失敗：',err));
+  }
+})();
+</script>
+</body>
+</html>

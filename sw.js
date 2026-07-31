@@ -1,4 +1,4 @@
-const CACHE_NAME = 'station-assistant-static-v1';
+const CACHE_NAME = 'station-assistant-static-v2.1-pdf-progress';
 const APP_SHELL = [
   './',
   './index.html',

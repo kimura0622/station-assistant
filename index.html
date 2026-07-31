@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="站務助手">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手</title>
@@ -18,38 +18,85 @@
     --text:#1c1c1e; --text-2:#636366; --text-muted:#8e8e93;
     --accent:#007aff; --accent-bg:#eaf4ff; --accent-text:#005bb5;
     --danger:#a32d2d; --danger-bg:#fcebeb;
-    --radius:12px;
+    --radius:12px; --sidebar:#151a24; --sidebar-2:#202738;
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:#d1d1d6;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--text);display:flex;justify-content:center;padding:24px 0;min-height:100vh;}
+  body{margin:0;background:#e9edf3;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--text);display:flex;justify-content:center;padding:20px;min-height:100vh;}
   #phone{
-    width:390px; height:820px; background:var(--bg); border-radius:38px; border:7px solid #1c1c1e;
-    box-shadow:0 12px 40px rgba(0,0,0,0.25); overflow:hidden; display:flex; flex-direction:column; position:relative;
+    width:min(1440px,100%); height:calc(100vh - 40px); min-height:680px;background:var(--bg);border:1px solid rgba(28,28,30,.08);
+    border-radius:20px;box-shadow:0 18px 60px rgba(31,42,68,.16);overflow:hidden;display:grid;
+    grid-template-columns:248px minmax(0,1fr);grid-template-rows:72px minmax(0,1fr);position:relative;
   }
   #topbar{
-    height:56px; flex-shrink:0; background:rgba(249,249,249,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:0.5px solid var(--border);
-    display:flex; align-items:center; justify-content:space-between; padding:0 16px;
+    grid-column:2;grid-row:1;background:rgba(255,255,255,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:0.5px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;padding:0 28px;
   }
-  #topbar h1{font-size:17px;font-weight:650;margin:0;}
-  #topbar button{background:none;border:none;font-size:20px;color:var(--text-2);cursor:pointer;padding:4px;}
-  #content{flex:1; overflow-y:auto; padding:14px;}
+  .page-heading{min-width:0;}
+  #topbar h1{font-size:20px;font-weight:700;letter-spacing:-.25px;margin:0 0 3px;}
+  #device-summary{font-size:12px;color:var(--text-muted);margin:0;}
+  #topbar button{background:#fff;border:.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text-2);cursor:pointer;padding:8px 11px;min-height:38px;}
+  .desktop-button-label{margin-left:5px;}
+  #content{grid-column:2;grid-row:2;overflow-y:auto;padding:24px 28px 40px;width:100%;}
+  #content>*{max-width:1060px;margin-left:auto;margin-right:auto;}
   #tabbar{
-    height:68px;flex-shrink:0;background:rgba(249,249,249,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:0.5px solid var(--border);
-    display:flex; align-items:stretch;
+    grid-column:1;grid-row:1/3;background:linear-gradient(180deg,var(--sidebar),#111620);
+    display:flex;flex-direction:column;align-items:stretch;padding:18px 14px;gap:5px;
   }
+  .desktop-brand{display:flex;align-items:center;gap:11px;padding:5px 8px 22px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,.1);}
+  .brand-icon{width:38px;height:38px;border-radius:11px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:20px;box-shadow:0 8px 20px rgba(0,122,255,.3);}
+  .brand-title{color:#fff;font-size:15px;font-weight:700;margin:0 0 2px;}
+  .brand-subtitle{color:#8e9aaf;font-size:11px;margin:0;}
+  .desktop-privacy{margin-top:auto;padding:13px 12px;border-radius:12px;background:rgba(255,255,255,.055);color:#aeb8c8;font-size:11px;line-height:1.55;}
+  .privacy-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#34c759;margin-right:6px;box-shadow:0 0 0 3px rgba(52,199,89,.12);}
   @media (max-width:600px){
     body{padding:0;background:var(--bg);}
-    #phone{width:100%;height:100dvh;border:0;border-radius:0;box-shadow:none;}
-    #topbar{padding-top:env(safe-area-inset-top);height:calc(56px + env(safe-area-inset-top));}
-    #tabbar{padding-bottom:env(safe-area-inset-bottom);height:calc(68px + env(safe-area-inset-bottom));}
+    #phone{width:100%;height:100dvh;min-height:0;border:0;border-radius:0;box-shadow:none;display:flex;flex-direction:column;}
+    #topbar{height:calc(56px + env(safe-area-inset-top));flex-shrink:0;padding:env(safe-area-inset-top) 16px 0;display:flex;}
+    #topbar h1{font-size:17px;margin:0;}
+    #device-summary,.desktop-button-label{display:none;}
+    #topbar button{background:none;border:0;border-radius:0;font-size:20px;min-height:0;padding:4px;}
+    #content{flex:1;width:auto;padding:14px;display:block;}
+    #content>*{max-width:none;}
+    #tabbar{height:calc(68px + env(safe-area-inset-bottom));flex-shrink:0;padding:0 0 env(safe-area-inset-bottom);background:rgba(249,249,249,.9);border-top:.5px solid var(--border);display:flex;flex-direction:row;gap:0;}
+    .desktop-brand,.desktop-privacy{display:none;}
   }
-  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;}
-  .tab-btn.active{color:var(--accent);}
-  .tab-btn .icon{font-size:20px;}
+  .tab-btn{display:flex;align-items:center;gap:11px;background:none;border:0;border-radius:10px;color:#9ca8ba;font-size:14px;font-weight:550;cursor:pointer;padding:11px 13px;text-align:left;}
+  .tab-btn:hover{background:rgba(255,255,255,.06);color:#fff;}
+  .tab-btn.active{background:rgba(0,122,255,.18);color:#fff;}
+  .tab-btn .icon{font-size:18px;width:24px;text-align:center;}
+  @media (max-width:600px){
+    .tab-btn{flex:1;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:0;color:var(--text-muted);font-size:11px;font-weight:400;padding:0;}
+    .tab-btn:hover{background:none;color:var(--text-muted);}
+    .tab-btn.active{background:none;color:var(--accent);}
+    .tab-btn .icon{font-size:20px;width:auto;}
+  }
 
   .card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.035);}
+  @media (min-width:601px){
+    .card{border-radius:14px;padding:17px 18px;margin-bottom:12px;box-shadow:0 2px 10px rgba(31,42,68,.045);}
+    .search-field{margin-top:2px;}
+    .search-field input{height:50px;font-size:16px;padding-left:44px;background:#fff;border:.5px solid var(--border);box-shadow:0 3px 14px rgba(31,42,68,.05);}
+    .search-field .search-icon{left:16px;}
+    .search-snippet{font-size:14px;line-height:1.75;padding:11px 13px;}
+    .shortcut-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+    .shortcut-card{min-height:84px;padding:14px;}
+    .ios-entry{max-width:1060px;padding:13px 15px;}
+  }
   .row{display:flex;align-items:center;gap:8px;}
   .between{justify-content:space-between;}
+  .desktop-split{max-width:1060px!important;}
+  .section-heading{margin:0 0 12px;}
+  .section-heading h2{font-size:16px;margin:0 0 3px;letter-spacing:-.1px;}
+  .section-heading p{font-size:12px;color:var(--text-muted);margin:0;}
+  @media (min-width:801px){
+    .desktop-split{display:grid;grid-template-columns:minmax(290px,360px) minmax(0,1fr);gap:22px;align-items:start;}
+    .desktop-form-panel{position:sticky;top:0;}
+    .desktop-list-panel{min-width:0;}
+  }
+  @media (max-width:800px){
+    .desktop-split{display:block;}
+    .desktop-list-panel{margin-top:18px;}
+  }
   .muted{color:var(--text-2);font-size:12px;}
   .tiny-muted{color:var(--text-muted);font-size:11px;}
   input, select, textarea{
@@ -118,10 +165,17 @@
   .badge.cover{background:var(--accent-bg);color:var(--accent-text);}
   .badge.revision{background:#faeeda;color:#854f0b;}
   .modal-overlay{
-    position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;z-index:20;
+    position:absolute;inset:0;background:rgba(17,24,39,.48);display:flex;align-items:flex-end;z-index:20;backdrop-filter:blur(2px);
   }
   .modal-sheet{
     background:var(--bg);width:100%;max-height:92%;border-radius:16px 16px 0 0;display:flex;flex-direction:column;overflow:hidden;
+  }
+  @media (min-width:601px){
+    .modal-overlay{position:fixed;align-items:center;justify-content:center;padding:28px;}
+    .modal-sheet{width:min(1040px,calc(100vw - 56px));height:min(860px,calc(100vh - 56px))!important;max-height:calc(100vh - 56px)!important;border-radius:18px!important;box-shadow:0 24px 80px rgba(15,23,42,.3);}
+    .modal-header{padding:15px 20px;}
+    .modal-body{padding:20px 22px;}
+    #pdf-canvas-wrap{border-radius:12px;}
   }
   .modal-header{padding:12px 16px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--card);}
   .modal-body{padding:14px;overflow-y:auto;flex:1;}
@@ -133,15 +187,23 @@
 <body>
 <div id="phone">
   <div id="topbar">
-    <h1 id="page-title">作業查詢</h1>
-    <button id="data-mgmt-btn" title="資料管理">⋯</button>
+    <div class="page-heading">
+      <h1 id="page-title">作業查詢</h1>
+      <p id="device-summary">讀取本機資料中…</p>
+    </div>
+    <button id="data-mgmt-btn" title="資料管理">⋯<span class="desktop-button-label">資料管理</span></button>
   </div>
   <div id="content"></div>
   <div id="tabbar">
+    <div class="desktop-brand">
+      <div class="brand-icon">✓</div>
+      <div><p class="brand-title">站務工作助手</p><p class="brand-subtitle">離線作業查詢系統</p></div>
+    </div>
     <button class="tab-btn" data-tab="sop"><span class="icon">🔎</span>作業查詢</button>
     <button class="tab-btn" data-tab="library"><span class="icon">🗂️</span>文件庫</button>
     <button class="tab-btn" data-tab="personnel"><span class="icon">👤</span>事件/人員</button>
     <button class="tab-btn" data-tab="ridership"><span class="icon">📊</span>車站運量</button>
+    <div class="desktop-privacy"><span class="privacy-dot"></span>本機離線儲存<br>PDF及查詢資料不會上傳</div>
   </div>
 </div>
 
@@ -291,10 +353,18 @@ function extractFormattedText(textContent,pageHeight){
   flushLine();
   return layoutLines.filter(Boolean).join('\n');
 }
-async function parsePdfArrayBuffer(buf){
-  const pdf = await pdfjsLib.getDocument({data:buf.slice(0)}).promise;
+async function parsePdfArrayBuffer(buf,onProgress=()=>{},shouldCancel=()=>false){
+  const loadingTask=pdfjsLib.getDocument({data:buf.slice(0)});
+  const pdf = await loadingTask.promise;
   const pages = [];
+  onProgress(0,pdf.numPages,'開始解析');
   for(let i=1;i<=pdf.numPages;i++){
+    if(shouldCancel()){
+      await loadingTask.destroy();
+      const err=new Error('使用者已取消PDF解析');
+      err.name='ImportCancelledError';
+      throw err;
+    }
     const page = await pdf.getPage(i);
     const tc = await page.getTextContent();
     const text = tc.items.map(it=>it.str).join(' ');
@@ -304,9 +374,14 @@ async function parsePdfArrayBuffer(buf){
       text:(it.str || '').trim(),
       x:it.transform ? it.transform[4] : 0,
       y:it.transform ? it.transform[5] : 0
-    })).filter(it=>it.text);
+    })).filter(it=>it.text && it.y<=viewport.height*.18);
     pages.push({absolutePage:i, text, formattedText, positionedText, pageWidth:viewport.width, pageHeight:viewport.height});
+    page.cleanup();
+    onProgress(i,pdf.numPages,'解析頁面文字');
+    // 大型合併PDF定期讓出主執行緒，避免瀏覽器將頁面判定為沒有回應。
+    if(i%4===0) await new Promise(resolve=>setTimeout(resolve,0));
   }
+  await loadingTask.destroy();
   return pages;
 }
 function romanToInt(s){
@@ -431,6 +506,11 @@ function focusAtEnd(id){
 
 function render(){
   titleEl.textContent = titleMap[currentTab];
+  document.getElementById('phone').dataset.view=currentTab;
+  const summary=document.getElementById('device-summary');
+  if(summary){
+    summary.textContent=`本裝置：${cache.pdfFiles.length} 個PDF來源・${cache.sopDocs.length} 份SOP・${cache.announcements.length} 則通告`;
+  }
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===currentTab));
   if(currentTab==='sop') renderSop();
   if(currentTab==='library') renderLibrary();
@@ -950,20 +1030,89 @@ function bindImportBtn(id){
   input.addEventListener('change', async (e)=>{
     const file = e.target.files[0];
     if(!file) return;
+    e.target.value='';
     await handlePdfImport(file);
   });
 }
 async function handlePdfImport(file){
-  contentEl.innerHTML = `<div class="empty"><div class="icon">⏳</div><p>解析中，請稍候…</p></div>`;
-  const buf = await file.arrayBuffer();
-  const pages = await parsePdfArrayBuffer(buf);
-  const docs = segmentDocuments(pages);
-  const pdfFileId = await dbAdd('pdfFiles', {
-    fileName:file.name, displayName:file.name.replace(/\.pdf$/i,''), data:buf,
-    uploadedAt:new Date().toISOString(), pageCount:pages.length, documentCount:0,
-    fileSize:file.size, status:'待確認'
+  let cancelled=false;
+  const startedAt=Date.now();
+  contentEl.innerHTML = `<div class="card" style="max-width:620px;text-align:center;padding:30px 26px;">
+    <div style="font-size:32px;margin-bottom:10px;">📄</div>
+    <h2 style="font-size:18px;margin:0 0 6px;">正在解析PDF</h2>
+    <p id="pdf-progress-file" class="muted" style="margin:0 0 18px;word-break:break-all;">${escapeHtml(file.name)}</p>
+    <div style="height:9px;background:#e5e5ea;border-radius:99px;overflow:hidden;">
+      <div id="pdf-progress-bar" style="width:1%;height:100%;background:var(--accent);border-radius:99px;transition:width .2s ease;"></div>
+    </div>
+    <p id="pdf-progress-main" style="font-size:15px;font-weight:650;margin:14px 0 4px;">讀取檔案中…</p>
+    <p id="pdf-progress-time" class="tiny-muted" style="margin:0 0 18px;">大型合併PDF可能需要數分鐘，請保持此頁開啟</p>
+    <button class="secondary" id="pdf-import-cancel">取消解析</button>
+  </div>`;
+  const cancelBtn=document.getElementById('pdf-import-cancel');
+  cancelBtn.addEventListener('click',()=>{
+    cancelled=true;
+    cancelBtn.disabled=true;
+    cancelBtn.textContent='正在取消…';
   });
-  showImportReview(docs, pdfFileId);
+  const timer=setInterval(()=>{
+    const elapsed=Math.floor((Date.now()-startedAt)/1000);
+    const timeEl=document.getElementById('pdf-progress-time');
+    if(timeEl) timeEl.textContent=`已執行 ${Math.floor(elapsed/60)}分${String(elapsed%60).padStart(2,'0')}秒｜大型合併PDF可能需要數分鐘`;
+  },1000);
+  try{
+    const buf = await file.arrayBuffer();
+    if(cancelled){
+      const err=new Error('使用者已取消PDF解析');
+      err.name='ImportCancelledError';
+      throw err;
+    }
+    const pages = await parsePdfArrayBuffer(buf,(current,total,stage)=>{
+      const pct=total?Math.max(1,Math.round(current/total*100)):1;
+      const bar=document.getElementById('pdf-progress-bar');
+      const main=document.getElementById('pdf-progress-main');
+      if(bar) bar.style.width=`${pct}%`;
+      if(main) main.textContent=current===0
+        ? `共 ${total.toLocaleString()} 頁，準備開始`
+        : `${stage}：第 ${current.toLocaleString()}／${total.toLocaleString()} 頁（${pct}%）`;
+    },()=>cancelled);
+    const main=document.getElementById('pdf-progress-main');
+    if(main) main.textContent='正在辨識封面、修訂紀錄與文件邊界…';
+    const docs = segmentDocuments(pages);
+    if(cancelled){
+      const err=new Error('使用者已取消PDF解析');
+      err.name='ImportCancelledError';
+      throw err;
+    }
+    if(main) main.textContent='正在儲存至本機資料庫…';
+    const pdfFileId = await dbAdd('pdfFiles', {
+      fileName:file.name, displayName:file.name.replace(/\.pdf$/i,''), data:buf,
+      uploadedAt:new Date().toISOString(), pageCount:pages.length, documentCount:0,
+      fileSize:file.size, status:'待確認'
+    });
+    clearInterval(timer);
+    showImportReview(docs, pdfFileId);
+  }catch(err){
+    clearInterval(timer);
+    console.error('PDF匯入失敗',err);
+    if(err?.name==='ImportCancelledError'){
+      renderLibrary();
+      return;
+    }
+    const quota=/quota|storage|空間/i.test(`${err?.name||''} ${err?.message||''}`);
+    contentEl.innerHTML=`<div class="card" style="max-width:620px;text-align:center;padding:30px 26px;">
+      <div style="font-size:34px;margin-bottom:10px;">⚠️</div>
+      <h2 style="font-size:18px;margin:0 0 8px;">PDF解析未完成</h2>
+      <p class="muted" style="line-height:1.7;margin:0 0 8px;">${quota?'瀏覽器本機儲存空間不足，請先匯出備份並清理不需要的文件。':'可能是PDF格式、密碼保護、記憶體不足或解析元件載入失敗。'}</p>
+      <p class="tiny-muted" style="word-break:break-all;background:#f2f2f7;padding:9px;border-radius:8px;margin:0 0 16px;">${escapeHtml(err?.message||'未知錯誤')}</p>
+      <button class="primary" id="pdf-import-retry" style="margin-right:8px;">重新選擇PDF</button>
+      <button class="secondary" id="pdf-import-back">返回文件庫</button>
+    </div>`;
+    document.getElementById('pdf-import-retry').addEventListener('click',()=>{
+      renderLibrary();
+      setTimeout(()=>document.getElementById('pdf-file-input')?.click(),0);
+    });
+    document.getElementById('pdf-import-back').addEventListener('click',()=>renderLibrary());
+  }
 }
 function typeLabel(t){ return t==='cover'?'封面':(t==='revision'?'修訂紀錄':'正文'); }
 function labelDisplay(lab){
@@ -1574,14 +1723,20 @@ function renderLibrary(){
 
 /* --- Personnel/event tab --- */
 function renderPersonnel(){
-  let html = `<div class="card">
+  let html = `<div class="desktop-split">
+    <section class="desktop-form-panel">
+      <div class="section-heading"><h2>建立事件紀錄</h2><p>資料僅儲存在目前裝置</p></div>
+      <div class="card">
       <div class="field"><label>姓名</label><input id="p-name"></div>
       <div class="field"><label>事件</label><input id="p-event"></div>
       <div class="field"><label>日期</label><input type="date" id="p-date" value="${new Date().toISOString().slice(0,10)}"></div>
       <div class="field"><label>備註</label><textarea id="p-note"></textarea></div>
       <button class="primary" id="p-add-btn" style="width:100%;">新增紀錄</button>
-    </div>
-    <input type="text" id="p-search" placeholder="搜尋姓名或事件" value="${escapeHtml(personnelKeyword)}" style="margin-bottom:10px;">`;
+      </div>
+    </section>
+    <section class="desktop-list-panel">
+      <div class="section-heading"><h2>事件與人員清冊</h2><p>共 ${cache.personnel.length} 筆本機紀錄</p></div>
+      <input type="text" id="p-search" placeholder="搜尋姓名或事件" value="${escapeHtml(personnelKeyword)}" style="margin-bottom:10px;">`;
   const kw = personnelKeyword;
   const list = [...cache.personnel].sort((a,b)=>b.date.localeCompare(a.date))
     .filter(p=> !kw || p.name.includes(kw) || p.event.includes(kw));
@@ -1597,6 +1752,7 @@ function renderPersonnel(){
       </div>`;
     });
   }
+  html += `</section></div>`;
   contentEl.innerHTML = html;
   document.getElementById('p-add-btn').addEventListener('click', async ()=>{
     const name = document.getElementById('p-name').value.trim();
@@ -1620,13 +1776,19 @@ function renderPersonnel(){
 
 /* --- Ridership tab --- */
 function renderRidership(){
-  let html = `<div class="card">
+  let html = `<div class="desktop-split">
+    <section class="desktop-form-panel">
+      <div class="section-heading"><h2>新增運量資料</h2><p>輸入單站日期與人次</p></div>
+      <div class="card">
       <div class="field"><label>站名</label><input id="r-station"></div>
       <div class="field"><label>日期</label><input type="date" id="r-date" value="${new Date().toISOString().slice(0,10)}"></div>
       <div class="field"><label>人數</label><input type="number" id="r-count"></div>
       <button class="primary" id="r-add-btn" style="width:100%;">新增紀錄</button>
-    </div>
-    <input type="text" id="r-search" placeholder="依站名篩選" value="${escapeHtml(ridershipKeyword)}" style="margin-bottom:10px;">`;
+      </div>
+    </section>
+    <section class="desktop-list-panel">
+      <div class="section-heading"><h2>車站運量比較</h2><p>共 ${cache.ridership.length} 筆本機紀錄</p></div>
+      <input type="text" id="r-search" placeholder="依站名篩選" value="${escapeHtml(ridershipKeyword)}" style="margin-bottom:10px;">`;
   const kw = ridershipKeyword;
   const list = [...cache.ridership].sort((a,b)=>b.date.localeCompare(a.date))
     .filter(r=> !kw || r.station.includes(kw));
@@ -1647,6 +1809,7 @@ function renderRidership(){
       </div>`;
     });
   }
+  html += `</section></div>`;
   contentEl.innerHTML = html;
   document.getElementById('r-add-btn').addEventListener('click', async ()=>{
     const station = document.getElementById('r-station').value.trim();
@@ -1715,9 +1878,14 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="muted" style="margin-top:0;">匯出資料後可傳到另一台裝置匯入，兩邊資料會維持同步。</p>
-      <button class="primary" id="dm-export" style="width:100%;margin-bottom:10px;">匯出資料備份</button>
-      <button class="secondary" id="dm-import" style="width:100%;">匯入資料備份</button>
+      <div class="card" style="margin-top:0;">
+        <div class="row between"><strong style="font-size:14px;">本機資料狀態</strong><span class="badge cover">離線儲存</span></div>
+        <p class="muted" style="margin:8px 0 0;">${cache.pdfFiles.length} 個PDF來源・${cache.sopDocs.length} 份SOP・${cache.announcements.length} 則通告</p>
+        <p class="tiny-muted" style="margin:5px 0 0;">響應式版本 v2.1・2026.07.31</p>
+      </div>
+      <p class="muted">匯出後可透過公司允許的方式傳到另一台裝置，再手動匯入。各裝置資料彼此獨立，不會自動同步。</p>
+      <button class="primary" id="dm-export" style="width:100%;margin-bottom:10px;">匯出至其他裝置</button>
+      <button class="secondary" id="dm-import" style="width:100%;">從其他裝置匯入</button>
       <input type="file" id="dm-import-input" accept="application/json" style="display:none">
     </div>
   </div></div>`;

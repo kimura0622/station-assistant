@@ -213,7 +213,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js';
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
 const STORES = ['pdfFiles','sopDocs','announcements','personnel','ridership','favorites','recentViews','synonymGroups','unmatchedQueries'];
-let db;
+// 避免直接內嵌的PDF worker在受管制瀏覽器假Worker模式下與通用變數名稱 db 衝突。
+let stationAssistantDb;
 function openDB(){
   return new Promise((resolve,reject)=>{
     const req = indexedDB.open(DB_NAME, 3);
@@ -225,36 +226,63 @@ function openDB(){
         }
       });
     };
-    req.onsuccess = ()=>{db=req.result; resolve(db);};
+    req.onsuccess = ()=>{
+      stationAssistantDb=req.result;
+      stationAssistantDb.onversionchange=()=>{stationAssistantDb?.close();stationAssistantDb=undefined;};
+      stationAssistantDb.onclose=()=>{stationAssistantDb=undefined;};
+      resolve(stationAssistantDb);
+    };
     req.onerror = ()=>reject(req.error);
   });
 }
-function txStore(name, mode){
-  return db.transaction(name, mode).objectStore(name);
+function ensureDB(){
+  return stationAssistantDb ? Promise.resolve(stationAssistantDb) : openDB();
 }
-function dbGetAll(name){
+function txStore(name, mode){
+  if(!stationAssistantDb) throw new Error('本機資料庫尚未開啟');
+  return stationAssistantDb.transaction(name, mode).objectStore(name);
+}
+async function dbGetAll(name){
+  await ensureDB();
   return new Promise((res,rej)=>{
     const r = txStore(name,'readonly').getAll();
     r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
   });
 }
-function dbAdd(name, obj){
+async function dbAdd(name, obj){
+  await ensureDB();
   return new Promise((res,rej)=>{
     const r = txStore(name,'readwrite').add(obj);
     r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
   });
 }
-function dbPut(name, obj){
+async function dbPut(name, obj){
+  await ensureDB();
   return new Promise((res,rej)=>{
     const r = txStore(name,'readwrite').put(obj);
     r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
   });
 }
-function dbDelete(name, id){
+async function dbDelete(name, id){
+  await ensureDB();
   return new Promise((res,rej)=>{
     const r = txStore(name,'readwrite').delete(id);
     r.onsuccess=()=>res(); r.onerror=()=>rej(r.error);
   });
+}
+async function dbGet(name,id){
+  await ensureDB();
+  return new Promise((res,rej)=>{
+    const r=txStore(name,'readonly').get(id);
+    r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);
+  });
+}
+function withTimeout(promise,ms,message){
+  let timer;
+  const timeout=new Promise((_,reject)=>{
+    timer=setTimeout(()=>reject(new Error(message)),ms);
+  });
+  return Promise.race([promise,timeout]).finally(()=>clearTimeout(timer));
 }
 
 /* ---------- In-memory cache ---------- */
@@ -1036,6 +1064,7 @@ function bindImportBtn(id){
 }
 async function handlePdfImport(file){
   let cancelled=false;
+  let importStage='讀取PDF';
   const startedAt=Date.now();
   contentEl.innerHTML = `<div class="card" style="max-width:620px;text-align:center;padding:30px 26px;">
     <div style="font-size:32px;margin-bottom:10px;">📄</div>
@@ -1066,6 +1095,7 @@ async function handlePdfImport(file){
       err.name='ImportCancelledError';
       throw err;
     }
+    importStage='解析PDF';
     const pages = await parsePdfArrayBuffer(buf,(current,total,stage)=>{
       const pct=total?Math.max(1,Math.round(current/total*100)):1;
       const bar=document.getElementById('pdf-progress-bar');
@@ -1077,20 +1107,28 @@ async function handlePdfImport(file){
     },()=>cancelled);
     const main=document.getElementById('pdf-progress-main');
     if(main) main.textContent='正在辨識封面、修訂紀錄與文件邊界…';
+    importStage='辨識文件邊界';
     const docs = segmentDocuments(pages);
     if(cancelled){
       const err=new Error('使用者已取消PDF解析');
       err.name='ImportCancelledError';
       throw err;
     }
-    if(main) main.textContent='正在儲存至本機資料庫…';
-    const pdfFileId = await dbAdd('pdfFiles', {
-      fileName:file.name, displayName:file.name.replace(/\.pdf$/i,''), data:buf,
+    const textOnlyMode=location.protocol==='file:';
+    if(main) main.textContent=textOnlyMode
+      ? '正在建立本機文字索引…'
+      : '正在儲存至本機資料庫…';
+    importStage='寫入本機資料庫';
+    await ensureDB();
+    const pdfFileId = await withTimeout(dbAdd('pdfFiles', {
+      fileName:file.name, displayName:file.name.replace(/\.pdf$/i,''),
+      // file:// 受管制電腦不把大型PDF二進位檔寫入IndexedDB，避免交易長時間停滯。
+      data:textOnlyMode?null:buf, originalStored:!textOnlyMode,
       uploadedAt:new Date().toISOString(), pageCount:pages.length, documentCount:0,
-      fileSize:file.size, status:'待確認'
-    });
+      fileSize:file.size, status:textOnlyMode?'待確認（文字索引模式）':'待確認'
+    }),20000,'本機資料庫在20秒內沒有回應，請關閉所有舊版頁面並重新開啟瀏覽器。');
     clearInterval(timer);
-    showImportReview(docs, pdfFileId);
+    showImportReview(docs, pdfFileId, textOnlyMode);
   }catch(err){
     clearInterval(timer);
     console.error('PDF匯入失敗',err);
@@ -1099,10 +1137,12 @@ async function handlePdfImport(file){
       return;
     }
     const quota=/quota|storage|空間/i.test(`${err?.name||''} ${err?.message||''}`);
+    const databaseError=importStage==='寫入本機資料庫'||/transaction|database|indexeddb|本機資料庫/i.test(`${err?.name||''} ${err?.message||''}`);
     contentEl.innerHTML=`<div class="card" style="max-width:620px;text-align:center;padding:30px 26px;">
       <div style="font-size:34px;margin-bottom:10px;">⚠️</div>
-      <h2 style="font-size:18px;margin:0 0 8px;">PDF解析未完成</h2>
-      <p class="muted" style="line-height:1.7;margin:0 0 8px;">${quota?'瀏覽器本機儲存空間不足，請先匯出備份並清理不需要的文件。':'可能是PDF格式、密碼保護、記憶體不足或解析元件載入失敗。'}</p>
+      <h2 style="font-size:18px;margin:0 0 8px;">${databaseError?'本機資料儲存未完成':'PDF解析未完成'}</h2>
+      <p class="muted" style="line-height:1.7;margin:0 0 8px;">${quota?'瀏覽器本機儲存空間不足，請先匯出備份並清理不需要的文件。':databaseError?'PDF已完成解析，但瀏覽器本機資料庫連線中斷，請關閉其他同版本頁面後重試。':'可能是PDF格式、密碼保護、記憶體不足或解析元件載入失敗。'}</p>
+      <p class="tiny-muted" style="margin:0 0 8px;">失敗階段：${escapeHtml(importStage)}</p>
       <p class="tiny-muted" style="word-break:break-all;background:#f2f2f7;padding:9px;border-radius:8px;margin:0 0 16px;">${escapeHtml(err?.message||'未知錯誤')}</p>
       <button class="primary" id="pdf-import-retry" style="margin-right:8px;">重新選擇PDF</button>
       <button class="secondary" id="pdf-import-back">返回文件庫</button>
@@ -1149,11 +1189,17 @@ function renderReviewBody(docs){
   });
   return html;
 }
-function showImportReview(docs, pdfFileId){
+function showImportReview(docs, pdfFileId, textOnlyMode=false){
   const html = `<div class="modal-overlay"><div class="modal-sheet">
     <div class="modal-header"><span style="font-weight:500;">確認匯入結果（共${docs.length}份）</span>
     <button id="review-cancel" style="background:none;border:none;font-size:18px;">✕</button></div>
-    <div class="modal-body" id="review-body">${renderReviewBody(docs)}</div>
+    <div class="modal-body">
+      ${textOnlyMode?`<div class="card" style="border-color:#b5d4ef;background:#f6fbff;">
+        <strong style="font-size:14px;color:var(--accent-text);">電腦文字索引模式</strong>
+        <p class="muted" style="line-height:1.65;margin:6px 0 0;">已完成PDF解析。為避免公司電腦的本機資料庫卡住，系統只保存文字、文件分段及頁碼；原始PDF請直接從電腦資料夾開啟。</p>
+      </div>`:''}
+      <div id="review-body">${renderReviewBody(docs)}</div>
+    </div>
     <div style="padding:12px 16px;border-top:0.5px solid var(--border);background:var(--card);">
       <button class="primary" id="review-confirm" style="width:100%;">確認匯入</button>
     </div>
@@ -1199,13 +1245,10 @@ function showImportReview(docs, pdfFileId){
     for(const doc of docs){
       await dbAdd('sopDocs', {pdfFileId, name: doc.name || '未命名文件', pages:doc.pages});
     }
-    const pdfRec=cache.pdfFiles.find(f=>f.id===pdfFileId) || await new Promise((res,rej)=>{
-      const r=txStore('pdfFiles','readonly').get(pdfFileId);
-      r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
-    });
+    const pdfRec=cache.pdfFiles.find(f=>f.id===pdfFileId) || await dbGet('pdfFiles',pdfFileId);
     if(pdfRec){
       pdfRec.documentCount=docs.length;
-      pdfRec.status='已完成';
+      pdfRec.status=textOnlyMode?'已完成（文字索引）':'已完成';
       await dbPut('pdfFiles',pdfRec);
     }
     await reloadCache();
@@ -1508,6 +1551,9 @@ async function openTextReader(docId,absolutePage,targetClause=null){
 async function openPdfViewer(pdfFileId, pageNum){
   const rec = cache.pdfFiles.find(f=>f.id===pdfFileId);
   if(!rec) return;
+  if(!rec.data){
+    return alert(`此文件以電腦文字索引模式匯入，未將原始PDF存入瀏覽器。\n\n請直接從電腦資料夾開啟：${rec.fileName||'原始PDF'}`);
+  }
   const html = `<div class="modal-overlay" id="pdf-viewer-overlay" style="z-index:80;"><div class="modal-sheet" style="height:96%;">
     <div class="modal-header"><span style="font-weight:500;">第${pageNum}頁</span>
     <button id="pdf-viewer-close" style="background:none;border:none;font-size:18px;">✕</button></div>
@@ -1848,7 +1894,7 @@ async function exportData(){
   for(const name of STORES){
     const rows = await dbGetAll(name);
     dump[name] = rows.map(r=>{
-      if(name==='pdfFiles') return {...r, data: bufToBase64(r.data)};
+      if(name==='pdfFiles') return {...r, data:r.data?bufToBase64(r.data):null};
       return r;
     });
   }
@@ -1866,7 +1912,15 @@ async function importData(file){
     for(const row of dump[name]){
       const copy = {...row};
       delete copy.id;
-      if(name==='pdfFiles') copy.data = base64ToBuf(copy.data);
+      if(name==='pdfFiles'){
+        if(location.protocol==='file:'){
+          copy.data=null;
+          copy.originalStored=false;
+          if(copy.status?.startsWith('已完成')) copy.status='已完成（文字索引）';
+        }else{
+          copy.data=copy.data?base64ToBuf(copy.data):null;
+        }
+      }
       await dbAdd(name, copy);
     }
   }
@@ -1881,7 +1935,7 @@ function openDataMgmt(){
       <div class="card" style="margin-top:0;">
         <div class="row between"><strong style="font-size:14px;">本機資料狀態</strong><span class="badge cover">離線儲存</span></div>
         <p class="muted" style="margin:8px 0 0;">${cache.pdfFiles.length} 個PDF來源・${cache.sopDocs.length} 份SOP・${cache.announcements.length} 則通告</p>
-        <p class="tiny-muted" style="margin:5px 0 0;">響應式版本 v2.1・2026.07.31</p>
+        <p class="tiny-muted" style="margin:5px 0 0;">手機 GitHub PWA版本 v3.0・2026.07.31</p>
       </div>
       <p class="muted">匯出後可透過公司允許的方式傳到另一台裝置，再手動匯入。各裝置資料彼此獨立，不會自動同步。</p>
       <button class="primary" id="dm-export" style="width:100%;margin-bottom:10px;">匯出至其他裝置</button>

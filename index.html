@@ -3,100 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#f2f2f7">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="站務助手">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手</title>
-<script src="./vendor/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --bg:#f2f2f7; --card:#ffffff; --border:#e5e5ea; --border-strong:#c7c7cc;
     --text:#1c1c1e; --text-2:#636366; --text-muted:#8e8e93;
     --accent:#007aff; --accent-bg:#eaf4ff; --accent-text:#005bb5;
     --danger:#a32d2d; --danger-bg:#fcebeb;
-    --radius:12px; --sidebar:#151a24; --sidebar-2:#202738;
+    --radius:12px;
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:#e9edf3;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--text);display:flex;justify-content:center;padding:20px;min-height:100vh;}
+  body{margin:0;background:#d1d1d6;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--text);display:flex;justify-content:center;padding:24px 0;min-height:100vh;}
   #phone{
-    width:min(1440px,100%); height:calc(100vh - 40px); min-height:680px;background:var(--bg);border:1px solid rgba(28,28,30,.08);
-    border-radius:20px;box-shadow:0 18px 60px rgba(31,42,68,.16);overflow:hidden;display:grid;
-    grid-template-columns:248px minmax(0,1fr);grid-template-rows:72px minmax(0,1fr);position:relative;
+    width:390px; height:820px; background:var(--bg); border-radius:38px; border:7px solid #1c1c1e;
+    box-shadow:0 12px 40px rgba(0,0,0,0.25); overflow:hidden; display:flex; flex-direction:column; position:relative;
   }
   #topbar{
-    grid-column:2;grid-row:1;background:rgba(255,255,255,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:0.5px solid var(--border);
-    display:flex;align-items:center;justify-content:space-between;padding:0 28px;
+    height:56px; flex-shrink:0; background:rgba(249,249,249,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:0.5px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between; padding:0 16px;
   }
-  .page-heading{min-width:0;}
-  #topbar h1{font-size:20px;font-weight:700;letter-spacing:-.25px;margin:0 0 3px;}
-  #device-summary{font-size:12px;color:var(--text-muted);margin:0;}
-  #topbar button{background:#fff;border:.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text-2);cursor:pointer;padding:8px 11px;min-height:38px;}
-  .desktop-button-label{margin-left:5px;}
-  #content{grid-column:2;grid-row:2;overflow-y:auto;padding:24px 28px 40px;width:100%;}
-  #content>*{max-width:1060px;margin-left:auto;margin-right:auto;}
+  #topbar h1{font-size:17px;font-weight:650;margin:0;}
+  #topbar button{background:none;border:none;font-size:20px;color:var(--text-2);cursor:pointer;padding:4px;}
+  #content{flex:1; overflow-y:auto; padding:14px;}
   #tabbar{
-    grid-column:1;grid-row:1/3;background:linear-gradient(180deg,var(--sidebar),#111620);
-    display:flex;flex-direction:column;align-items:stretch;padding:18px 14px;gap:5px;
+    height:68px;flex-shrink:0;background:rgba(249,249,249,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:0.5px solid var(--border);
+    display:flex; align-items:stretch;
   }
-  .desktop-brand{display:flex;align-items:center;gap:11px;padding:5px 8px 22px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,.1);}
-  .brand-icon{width:38px;height:38px;border-radius:11px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:20px;box-shadow:0 8px 20px rgba(0,122,255,.3);}
-  .brand-title{color:#fff;font-size:15px;font-weight:700;margin:0 0 2px;}
-  .brand-subtitle{color:#8e9aaf;font-size:11px;margin:0;}
-  .desktop-privacy{margin-top:auto;padding:13px 12px;border-radius:12px;background:rgba(255,255,255,.055);color:#aeb8c8;font-size:11px;line-height:1.55;}
-  .privacy-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#34c759;margin-right:6px;box-shadow:0 0 0 3px rgba(52,199,89,.12);}
-  @media (max-width:600px){
-    body{padding:0;background:var(--bg);}
-    #phone{width:100%;height:100dvh;min-height:0;border:0;border-radius:0;box-shadow:none;display:flex;flex-direction:column;}
-    #topbar{height:calc(56px + env(safe-area-inset-top));flex-shrink:0;padding:env(safe-area-inset-top) 16px 0;display:flex;}
-    #topbar h1{font-size:17px;margin:0;}
-    #device-summary,.desktop-button-label{display:none;}
-    #topbar button{background:none;border:0;border-radius:0;font-size:20px;min-height:0;padding:4px;}
-    #content{flex:1;width:auto;padding:14px;display:block;}
-    #content>*{max-width:none;}
-    #tabbar{height:calc(68px + env(safe-area-inset-bottom));flex-shrink:0;padding:0 0 env(safe-area-inset-bottom);background:rgba(249,249,249,.9);border-top:.5px solid var(--border);display:flex;flex-direction:row;gap:0;}
-    .desktop-brand,.desktop-privacy{display:none;}
-  }
-  .tab-btn{display:flex;align-items:center;gap:11px;background:none;border:0;border-radius:10px;color:#9ca8ba;font-size:14px;font-weight:550;cursor:pointer;padding:11px 13px;text-align:left;}
-  .tab-btn:hover{background:rgba(255,255,255,.06);color:#fff;}
-  .tab-btn.active{background:rgba(0,122,255,.18);color:#fff;}
-  .tab-btn .icon{font-size:18px;width:24px;text-align:center;}
-  @media (max-width:600px){
-    .tab-btn{flex:1;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:0;color:var(--text-muted);font-size:11px;font-weight:400;padding:0;}
-    .tab-btn:hover{background:none;color:var(--text-muted);}
-    .tab-btn.active{background:none;color:var(--accent);}
-    .tab-btn .icon{font-size:20px;width:auto;}
-  }
+  .desktop-brand,.desktop-version{display:none;}
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;}
+  .tab-btn.active{color:var(--accent);}
+  .tab-btn .icon{font-size:20px;}
 
   .card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.035);}
-  @media (min-width:601px){
-    .card{border-radius:14px;padding:17px 18px;margin-bottom:12px;box-shadow:0 2px 10px rgba(31,42,68,.045);}
-    .search-field{margin-top:2px;}
-    .search-field input{height:50px;font-size:16px;padding-left:44px;background:#fff;border:.5px solid var(--border);box-shadow:0 3px 14px rgba(31,42,68,.05);}
-    .search-field .search-icon{left:16px;}
-    .search-snippet{font-size:14px;line-height:1.75;padding:11px 13px;}
-    .shortcut-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
-    .shortcut-card{min-height:84px;padding:14px;}
-    .ios-entry{max-width:1060px;padding:13px 15px;}
-  }
   .row{display:flex;align-items:center;gap:8px;}
   .between{justify-content:space-between;}
-  .desktop-split{max-width:1060px!important;}
-  .section-heading{margin:0 0 12px;}
-  .section-heading h2{font-size:16px;margin:0 0 3px;letter-spacing:-.1px;}
-  .section-heading p{font-size:12px;color:var(--text-muted);margin:0;}
-  @media (min-width:801px){
-    .desktop-split{display:grid;grid-template-columns:minmax(290px,360px) minmax(0,1fr);gap:22px;align-items:start;}
-    .desktop-form-panel{position:sticky;top:0;}
-    .desktop-list-panel{min-width:0;}
-  }
-  @media (max-width:800px){
-    .desktop-split{display:block;}
-    .desktop-list-panel{margin-top:18px;}
-  }
   .muted{color:var(--text-2);font-size:12px;}
   .tiny-muted{color:var(--text-muted);font-size:11px;}
   input, select, textarea{
@@ -165,56 +107,156 @@
   .badge.cover{background:var(--accent-bg);color:var(--accent-text);}
   .badge.revision{background:#faeeda;color:#854f0b;}
   .modal-overlay{
-    position:absolute;inset:0;background:rgba(17,24,39,.48);display:flex;align-items:flex-end;z-index:20;backdrop-filter:blur(2px);
+    position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;z-index:20;
   }
   .modal-sheet{
     background:var(--bg);width:100%;max-height:92%;border-radius:16px 16px 0 0;display:flex;flex-direction:column;overflow:hidden;
-  }
-  @media (min-width:601px){
-    .modal-overlay{position:fixed;align-items:center;justify-content:center;padding:28px;}
-    .modal-sheet{width:min(1040px,calc(100vw - 56px));height:min(860px,calc(100vh - 56px))!important;max-height:calc(100vh - 56px)!important;border-radius:18px!important;box-shadow:0 24px 80px rgba(15,23,42,.3);}
-    .modal-header{padding:15px 20px;}
-    .modal-body{padding:20px 22px;}
-    #pdf-canvas-wrap{border-radius:12px;}
   }
   .modal-header{padding:12px 16px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--card);}
   .modal-body{padding:14px;overflow-y:auto;flex:1;}
   .doc-review-item{border:0.5px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;background:#fff;}
   #pdf-canvas-wrap{display:flex;justify-content:center;padding:8px;background:#3a3a38;}
   canvas{max-width:100%;height:auto;background:#fff;}
+  .pdf-reader-shell{height:96%;max-height:96%;}
+  .pdf-reader-toolbar{padding:9px 12px;border-bottom:.5px solid var(--border);background:var(--card);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .pdf-reader-toolbar .toolbar-group{display:flex;align-items:center;gap:6px;}
+  .pdf-reader-toolbar button{min-height:36px;padding:6px 10px;}
+  .pdf-reader-page-input{width:74px;min-height:36px;padding:6px 8px;font-size:14px;text-align:center;}
+  .pdf-reader-status{font-size:12px;color:var(--text-2);margin-left:auto;white-space:nowrap;}
+  .pdf-reader-stage{background:#30343b;overflow:auto;flex:1;padding:18px 12px;scroll-behavior:smooth;}
+  .pdf-page-frame{width:fit-content;max-width:100%;margin:0 auto 18px;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.28);position:relative;}
+  .pdf-page-frame.current{outline:3px solid var(--accent);outline-offset:3px;}
+  .pdf-page-label{position:sticky;top:4px;z-index:2;width:max-content;margin:0 0 -30px 8px;padding:5px 9px;border-radius:999px;background:rgba(28,28,30,.78);color:#fff;font-size:11px;backdrop-filter:blur(8px);}
+  .pdf-page-frame canvas{display:block;max-width:none;}
+  .pdf-text-layer{position:absolute;inset:0;overflow:hidden;line-height:1;opacity:1;z-index:1;pointer-events:auto;}
+  .pdf-text-layer span,.pdf-text-layer br{position:absolute;color:transparent;white-space:pre;transform-origin:0 0;cursor:text;}
+  .pdf-text-layer ::selection{background:rgba(0,122,255,.3);}
+  .procedure-range-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+  .procedure-range-help{margin:8px 0 0;padding:9px 10px;border-radius:9px;background:var(--accent-bg);color:var(--accent-text);font-size:11px;line-height:1.6;}
+  .procedure-heading{display:flex;align-items:center;justify-content:space-between;margin:16px 2px 8px;}
+  .procedure-heading h2{font-size:15px;margin:0;}
+  .procedure-card-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:16px;}
+  .procedure-card{position:relative;min-height:76px;border:0;border-radius:13px;padding:14px 30px 14px 12px;display:flex;align-items:center;justify-content:center;text-align:center;cursor:grab;box-shadow:0 1px 3px rgba(0,0,0,.07);color:#17324d;transition:transform .14s ease,box-shadow .14s ease,opacity .14s ease;user-select:none;}
+  .procedure-card:active{cursor:grabbing;}
+  .procedure-card.dragging{opacity:.42;transform:scale(.97);}
+  .procedure-card.drag-over{box-shadow:0 0 0 3px var(--accent),0 5px 16px rgba(0,0,0,.12);transform:translateY(-2px);}
+  .procedure-card-name{font-size:14px;font-weight:700;line-height:1.4;margin:0;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .procedure-card-menu{position:absolute;right:7px;top:7px;width:28px;height:28px;min-height:0;border:0;border-radius:50%;background:rgba(255,255,255,.62);color:#334155;font-size:18px;line-height:1;cursor:pointer;}
+  .procedure-blue{background:#dceeff}.procedure-green{background:#dff4e7}.procedure-orange{background:#ffead2}.procedure-purple{background:#eee4ff}.procedure-red{background:#ffe1e1}.procedure-gray{background:#e9ebef}
+  .color-options{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px;}
+  .color-choice{width:36px;height:36px;min-height:0;border:3px solid transparent;border-radius:50%;cursor:pointer;}
+  .color-choice.selected{border-color:#1c1c1e;box-shadow:0 0 0 2px #fff inset;}
+  .recent-searches{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 14px;}
+  .recent-search-item{display:inline-flex;align-items:center;background:#fff;border:.5px solid var(--border);border-radius:999px;overflow:hidden;}
+  .recent-search-use,.recent-search-remove{border:0;background:transparent;min-height:34px;cursor:pointer;color:var(--text-2);}
+  .recent-search-use{padding:6px 4px 6px 11px;font-size:12px;}.recent-search-remove{padding:4px 9px 4px 5px;color:var(--text-muted);font-size:15px;}
+
+  /* ---------- 專業桌面版（不更動PDF與資料庫核心） ---------- */
+  .section-title{font-size:18px;font-weight:700;margin:0 0 4px;}
+  .section-subtitle{font-size:13px;color:var(--text-2);margin:0;}
+  .toolbar-card{display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .toolbar-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px;}
+  .stat-card{background:#fff;border:.5px solid var(--border);border-radius:14px;padding:14px;min-width:0;}
+  .stat-label{font-size:12px;color:var(--text-2);margin-bottom:7px;}
+  .stat-value{font-size:22px;font-weight:720;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .stat-note{font-size:11px;color:var(--text-muted);margin-top:5px;}
+  .analysis-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.85fr);gap:12px;}
+  .panel{background:#fff;border:.5px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.035);margin-bottom:12px;}
+  .panel-title{font-size:15px;font-weight:700;margin:0 0 3px;}
+  .panel-note{font-size:12px;color:var(--text-2);margin:0 0 12px;}
+  .filter-grid{display:grid;grid-template-columns:1fr 1.5fr 1fr auto;gap:10px;align-items:end;}
+  .rank-columns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .rank-list{margin:0;padding:0;list-style:none;}
+  .rank-item{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-bottom:.5px solid var(--border);}
+  .rank-item:last-child{border-bottom:0;}
+  .rank-no{width:26px;height:26px;border-radius:8px;background:#f2f2f7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text-2);}
+  .rank-station{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rank-line{font-size:11px;color:var(--text-muted);margin-top:2px;}
+  .rank-value{text-align:right;font-size:12px;font-variant-numeric:tabular-nums;}
+  .chart-wrap{width:100%;overflow:hidden;}
+  .chart-wrap svg{display:block;width:100%;height:auto;}
+  .chart-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text-2);margin:4px 0 10px;}
+  .legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;}
+  .data-table-wrap{overflow:auto;border:.5px solid var(--border);border-radius:12px;}
+  .data-table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap;}
+  .data-table th{position:sticky;top:0;background:#f7f7fa;color:var(--text-2);font-weight:650;text-align:right;padding:9px;border-bottom:.5px solid var(--border);}
+  .data-table th:first-child,.data-table td:first-child{text-align:left;}
+  .data-table td{text-align:right;padding:9px;border-bottom:.5px solid var(--border);font-variant-numeric:tabular-nums;}
+  .positive{color:#218739}.negative{color:#c43b32}.neutral{color:var(--text-2)}
+  .import-report{background:#f7f7fa;border-radius:12px;padding:11px 12px;font-size:12px;line-height:1.7;color:var(--text-2);margin-top:10px;}
+  .segmented{display:flex;background:#eeeeF3;border-radius:9px;padding:2px;}
+  .segmented button{border:0;background:transparent;border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text-2);cursor:pointer;min-height:32px;}
+  .segmented button.active{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:650;}
+
+  @media (min-width:900px){
+    body{display:block;padding:0;background:#eef1f6;overflow:hidden;}
+    #phone{width:100vw;height:100vh;border:0;border-radius:0;box-shadow:none;background:#f5f6fa;display:grid;grid-template-columns:236px minmax(0,1fr);grid-template-rows:64px minmax(0,1fr);overflow:hidden;}
+    #topbar{grid-column:2;grid-row:1;height:64px;padding:0 28px;background:rgba(255,255,255,.92);border-bottom:1px solid #e5e8ef;}
+    #topbar h1{font-size:20px;letter-spacing:-.01em;}
+    #topbar button{width:38px;height:38px;border-radius:10px;background:#f3f4f8;font-size:22px;}
+    #content{grid-column:2;grid-row:2;padding:24px 28px 40px;overflow:auto;}
+    #content>div:not(.modal-overlay),#content>.card,#content>input{max-width:1440px;margin-left:auto;margin-right:auto;}
+    #tabbar{grid-column:1;grid-row:1 / 3;height:auto;background:#121d2f;border:0;display:flex;flex-direction:column;align-items:stretch;padding:18px 12px;gap:6px;order:-1;}
+    .desktop-brand{display:block;color:#fff;font-size:18px;font-weight:750;padding:6px 10px 20px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:12px;}
+    .desktop-brand small{display:block;color:#91a0b6;font-size:11px;font-weight:500;margin-top:5px;}
+    .desktop-version{display:block;margin-top:auto;color:#73829a;font-size:10px;padding:12px 10px 2px;}
+    .tab-btn{flex:0 0 auto;min-height:48px;flex-direction:row;justify-content:flex-start;padding:0 12px;gap:12px;border-radius:10px;color:#aeb9ca;font-size:14px;font-weight:600;text-align:left;}
+    .tab-btn:hover{background:rgba(255,255,255,.07);color:#fff;}
+    .tab-btn.active{background:#1677ff;color:#fff;box-shadow:0 6px 18px rgba(0,101,255,.22);}
+    .tab-btn .icon{font-size:18px;width:22px;text-align:center;}
+    .card{border-radius:16px;padding:16px 18px;margin-bottom:12px;}
+    .modal-overlay{position:fixed;align-items:center;justify-content:center;padding:30px;}
+    .modal-sheet{width:min(960px,92vw);max-height:88vh;border-radius:18px;box-shadow:0 24px 70px rgba(13,25,45,.35);}
+    .modal-header{padding:15px 20px}.modal-body{padding:20px;}
+    .reader-text,.sop-block{font-size:15px;}
+    .pdf-reader-shell{width:min(1180px,94vw);max-height:94vh;}
+  }
+  @media (max-width:899px){
+    html,body{width:100%;height:100%;min-height:100%;overflow:hidden;background:var(--bg);}
+    body{display:block;padding:0;}
+    #phone{width:100%;height:100%;height:100dvh;border:0;border-radius:0;box-shadow:none;}
+    #topbar{padding-top:env(safe-area-inset-top);height:calc(56px + env(safe-area-inset-top));}
+    #content{padding-bottom:calc(14px + env(safe-area-inset-bottom));}
+    #tabbar{height:calc(68px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);}
+    .stat-grid{grid-template-columns:1fr 1fr;}
+    .analysis-grid,.filter-grid,.rank-columns{grid-template-columns:1fr;}
+    .toolbar-card{align-items:flex-start;flex-direction:column;}
+    .pdf-reader-shell{height:100%;max-height:100%;border-radius:0;}
+    .pdf-reader-toolbar{gap:6px;padding:8px;}
+    .pdf-reader-status{width:100%;margin:0;text-align:center;order:5;}
+    .pdf-reader-stage{padding:12px 6px;}
+    .procedure-card-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+    .procedure-card{min-height:72px;}
+  }
+  @media (max-width:520px){.procedure-card-grid{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
 <body>
 <div id="phone">
   <div id="topbar">
-    <div class="page-heading">
-      <h1 id="page-title">作業查詢</h1>
-      <p id="device-summary">讀取本機資料中…</p>
-    </div>
-    <button id="data-mgmt-btn" title="資料管理">⋯<span class="desktop-button-label">資料管理</span></button>
+    <h1 id="page-title">作業查詢</h1>
+    <button id="data-mgmt-btn" title="資料管理">⋯</button>
   </div>
   <div id="content"></div>
   <div id="tabbar">
-    <div class="desktop-brand">
-      <div class="brand-icon">✓</div>
-      <div><p class="brand-title">站務工作助手</p><p class="brand-subtitle">離線作業查詢系統</p></div>
-    </div>
+    <div class="desktop-brand">站務工作助手<small>內部離線資料工作台</small></div>
     <button class="tab-btn" data-tab="sop"><span class="icon">🔎</span>作業查詢</button>
     <button class="tab-btn" data-tab="library"><span class="icon">🗂️</span>文件庫</button>
     <button class="tab-btn" data-tab="personnel"><span class="icon">👤</span>事件/人員</button>
     <button class="tab-btn" data-tab="ridership"><span class="icon">📊</span>車站運量</button>
-    <div class="desktop-privacy"><span class="privacy-dot"></span>本機離線儲存<br>PDF及查詢資料不會上傳</div>
+    <div class="desktop-version">電腦／手機版 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
 const STORES = ['pdfFiles','sopDocs','announcements','personnel','ridership','favorites','recentViews','synonymGroups','unmatchedQueries'];
-// 避免直接內嵌的PDF worker在受管制瀏覽器假Worker模式下與通用變數名稱 db 衝突。
-let stationAssistantDb;
+// 使用專用名稱，避免PDF.js在file://假Worker模式下與通用全域名稱 db 衝突。
+let stationOperationsDatabase;
 function openDB(){
   return new Promise((resolve,reject)=>{
     const req = indexedDB.open(DB_NAME, 3);
@@ -226,63 +268,36 @@ function openDB(){
         }
       });
     };
-    req.onsuccess = ()=>{
-      stationAssistantDb=req.result;
-      stationAssistantDb.onversionchange=()=>{stationAssistantDb?.close();stationAssistantDb=undefined;};
-      stationAssistantDb.onclose=()=>{stationAssistantDb=undefined;};
-      resolve(stationAssistantDb);
-    };
+    req.onsuccess = ()=>{stationOperationsDatabase=req.result; resolve(stationOperationsDatabase);};
     req.onerror = ()=>reject(req.error);
   });
 }
-function ensureDB(){
-  return stationAssistantDb ? Promise.resolve(stationAssistantDb) : openDB();
-}
 function txStore(name, mode){
-  if(!stationAssistantDb) throw new Error('本機資料庫尚未開啟');
-  return stationAssistantDb.transaction(name, mode).objectStore(name);
+  return stationOperationsDatabase.transaction(name, mode).objectStore(name);
 }
-async function dbGetAll(name){
-  await ensureDB();
+function dbGetAll(name){
   return new Promise((res,rej)=>{
     const r = txStore(name,'readonly').getAll();
     r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
   });
 }
-async function dbAdd(name, obj){
-  await ensureDB();
+function dbAdd(name, obj){
   return new Promise((res,rej)=>{
     const r = txStore(name,'readwrite').add(obj);
     r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
   });
 }
-async function dbPut(name, obj){
-  await ensureDB();
+function dbPut(name, obj){
   return new Promise((res,rej)=>{
     const r = txStore(name,'readwrite').put(obj);
     r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
   });
 }
-async function dbDelete(name, id){
-  await ensureDB();
+function dbDelete(name, id){
   return new Promise((res,rej)=>{
     const r = txStore(name,'readwrite').delete(id);
     r.onsuccess=()=>res(); r.onerror=()=>rej(r.error);
   });
-}
-async function dbGet(name,id){
-  await ensureDB();
-  return new Promise((res,rej)=>{
-    const r=txStore(name,'readonly').get(id);
-    r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);
-  });
-}
-function withTimeout(promise,ms,message){
-  let timer;
-  const timeout=new Promise((_,reject)=>{
-    timer=setTimeout(()=>reject(new Error(message)),ms);
-  });
-  return Promise.race([promise,timeout]).finally(()=>clearTimeout(timer));
 }
 
 /* ---------- In-memory cache ---------- */
@@ -299,8 +314,12 @@ let sopKeyword = '';
 let noticeKeyword = '';
 let personnelKeyword = '';
 let ridershipKeyword = '';
+let ridershipView = {year:'', stationKey:'', metric:'averageDaily', rankMonth:'01'};
+let lastRidershipImportReport = '';
 let procedureKeyword = '';
 let procedureEditMode = false;
+const SEARCH_HISTORY_KEY='stationAssistantSearchHistory';
+const PROCEDURE_COLORS=['blue','green','orange','purple','red','gray'];
 
 const titleMap = {sop:'作業查詢', library:'文件庫', personnel:'特殊事件/人員', ridership:'車站運量查詢'};
 
@@ -381,18 +400,11 @@ function extractFormattedText(textContent,pageHeight){
   flushLine();
   return layoutLines.filter(Boolean).join('\n');
 }
-async function parsePdfArrayBuffer(buf,onProgress=()=>{},shouldCancel=()=>false){
-  const loadingTask=pdfjsLib.getDocument({data:buf.slice(0)});
-  const pdf = await loadingTask.promise;
+async function parsePdfArrayBuffer(buf,onProgress=()=>{}){
+  const pdf = await pdfjsLib.getDocument({data:buf.slice(0)}).promise;
   const pages = [];
-  onProgress(0,pdf.numPages,'開始解析');
+  onProgress(0,pdf.numPages);
   for(let i=1;i<=pdf.numPages;i++){
-    if(shouldCancel()){
-      await loadingTask.destroy();
-      const err=new Error('使用者已取消PDF解析');
-      err.name='ImportCancelledError';
-      throw err;
-    }
     const page = await pdf.getPage(i);
     const tc = await page.getTextContent();
     const text = tc.items.map(it=>it.str).join(' ');
@@ -402,14 +414,10 @@ async function parsePdfArrayBuffer(buf,onProgress=()=>{},shouldCancel=()=>false)
       text:(it.str || '').trim(),
       x:it.transform ? it.transform[4] : 0,
       y:it.transform ? it.transform[5] : 0
-    })).filter(it=>it.text && it.y<=viewport.height*.18);
+    })).filter(it=>it.text);
     pages.push({absolutePage:i, text, formattedText, positionedText, pageWidth:viewport.width, pageHeight:viewport.height});
-    page.cleanup();
-    onProgress(i,pdf.numPages,'解析頁面文字');
-    // 大型合併PDF定期讓出主執行緒，避免瀏覽器將頁面判定為沒有回應。
-    if(i%4===0) await new Promise(resolve=>setTimeout(resolve,0));
+    onProgress(i,pdf.numPages);
   }
-  await loadingTask.destroy();
   return pages;
 }
 function romanToInt(s){
@@ -534,11 +542,6 @@ function focusAtEnd(id){
 
 function render(){
   titleEl.textContent = titleMap[currentTab];
-  document.getElementById('phone').dataset.view=currentTab;
-  const summary=document.getElementById('device-summary');
-  if(summary){
-    summary.textContent=`本裝置：${cache.pdfFiles.length} 個PDF來源・${cache.sopDocs.length} 份SOP・${cache.announcements.length} 則通告`;
-  }
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===currentTab));
   if(currentTab==='sop') renderSop();
   if(currentTab==='library') renderLibrary();
@@ -554,6 +557,7 @@ function countTypes(doc){
 }
 function renderSop(){
   const results = sopKeyword.trim() ? searchUnified(sopKeyword.trim()) : null;
+  const recentSearches=getSearchHistory();
   let html = `
     <div class="search-field">
       <span class="search-icon">⌕</span>
@@ -566,14 +570,15 @@ function renderSop(){
       <span class="chip ${searchSource==='sop'?'active':''}" data-source="sop">SOP</span>
       <span class="chip ${searchSource==='notice'?'active':''}" data-source="notice">通告</span>
       <span class="chip ${sopFilter==='all'?'active':''}" data-revision-toggle="1">含修訂紀錄</span>
-    </div>`;
+    </div>
+    ${!results&&recentSearches.length?`<div class="recent-searches"><span class="tiny-muted">最近搜尋</span>${recentSearches.map((q,i)=>`<span class="recent-search-item"><button class="recent-search-use" data-search-history-use="${i}">${escapeHtml(q)}</button><button class="recent-search-remove" data-search-history-remove="${i}" aria-label="刪除 ${escapeHtml(q)}">×</button></span>`).join('')}<button class="danger-text" id="clear-search-history">清除全部</button></div>`:''}`;
 
   if(results){
     const terms = lastSearchPlan?.expanded||parseSearchTerms(sopKeyword);
     const docCount = new Set(results.map(r=>`${r.source}-${r.docName}`)).size;
     html += `${lastSearchPlan?.isSmart?'<p class="tiny-muted" style="margin:0 0 5px;">智慧擴充搜尋：</p>':''}
       <div class="search-keywords">${terms.slice(0,12).map(t=>`<span class="search-keyword">${escapeHtml(t)}</span>`).join('')}</div>
-      <p class="search-summary">找到 ${docCount} 份資料、${results.length} 條相關內容</p>`;
+      <p class="search-summary">找到 ${docCount} 份資料、${results.length} 條相關內容｜點選卡片直接閱讀原始PDF</p>`;
     results.forEach(r=>{
       const savedItem=r.source==='sop'
         ? {type:'sop',docId:r.docId,absolutePage:r.absolutePage,title:r.docName}
@@ -585,7 +590,7 @@ function renderSop(){
       html += `<div class="card" ${openAttr}>
         <div class="row between" style="margin-bottom:4px;">
           <span class="search-doc-title">${r.source==='sop'?'📄':'📣'} ${escapeHtml(r.docName)}</span>
-          <span class="search-page-badge">${r.source==='sop'?`SOP${r.clauseMarker?`・${r.clauseMarker}`:''}・第${r.absolutePage}頁`:'通告'}</span>
+          <span class="search-page-badge">${r.source==='sop'?`PDF第${r.absolutePage}頁${r.clauseMarker?`・${r.clauseMarker}`:''}`:'通告'}</span>
           <button class="favorite-btn" data-fav-type="${savedItem.type}" data-fav-id="${r.source==='sop'?r.docId:r.noticeId}" data-fav-page="${r.absolutePage||''}" data-fav-title="${escapeHtml(r.docName)}">${isFav?'★':'☆'}</button>
         </div>
         ${r.titleMatched?`<p class="tiny-muted" style="margin:6px 0 0;">✓ 文件名稱符合</p>`:''}
@@ -597,13 +602,7 @@ function renderSop(){
       html += `<div class="empty" style="padding:38px 20px;"><p>沒有符合的結果</p>
         <button class="primary" id="teach-no-result">新增同義詞</button></div>`;
     }
-  } else {
-    html += renderShortcutSection()+`<div class="card" style="text-align:center;padding:24px 16px;">
-      <div style="font-size:32px;margin-bottom:8px;">🔎</div>
-      <p style="margin:0 0 6px;font-weight:600;">查詢SOP與通告</p>
-      <p class="muted" style="margin:0;">目前有 ${cache.sopDocs.length} 份SOP、${cache.announcements.length} 則通告可供查詢</p>
-    </div>`;
-  }
+  } else html += renderShortcutSection();
   contentEl.innerHTML = html;
 
   const searchInput = document.getElementById('sop-search-input');
@@ -611,6 +610,7 @@ function renderSop(){
     bindImeSafeSearch(searchInput, value=>{ sopKeyword=value; }, render);
     searchInput.addEventListener('keydown',e=>{
       if(e.key==='Escape'){ sopKeyword=''; render(); }
+      if(e.key==='Enter'&&sopKeyword.trim()) saveSearchHistory(sopKeyword);
     });
     focusAtEnd('sop-search-input');
   }
@@ -627,11 +627,12 @@ function renderSop(){
   });
   contentEl.querySelectorAll('[data-open-text]').forEach(card=>{
     card.addEventListener('click', ()=>{
-      openTextReader(Number(card.dataset.openText),Number(card.dataset.page),card.dataset.clauseTarget||null);
+      saveSearchHistory(sopKeyword);
+      openSopPdfReader(Number(card.dataset.openText),Number(card.dataset.page));
     });
   });
   contentEl.querySelectorAll('[data-open-notice]').forEach(card=>{
-    card.addEventListener('click', ()=>openNoticeReader(Number(card.dataset.openNotice)));
+    card.addEventListener('click', ()=>{saveSearchHistory(sopKeyword);openNoticeReader(Number(card.dataset.openNotice));});
   });
   contentEl.querySelectorAll('[data-fav-type]').forEach(btn=>{
     btn.addEventListener('click',async e=>{
@@ -652,14 +653,22 @@ function renderSop(){
     await recordUnmatchedQuery(sopKeyword);
     if(await openSynonymDialog(sopKeyword,'')) render();
   });
-  contentEl.querySelectorAll('[data-open-saved]').forEach(card=>{
-    card.addEventListener('click',()=>{
-      const rows=card.dataset.savedSource==='favorite'?cache.favorites:cache.recentViews;
-      const item=rows.find(x=>x.id===Number(card.dataset.openSaved));
-      if(item) openSavedItem(item);
-    });
-  });
-  document.getElementById('open-procedures')?.addEventListener('click',openCommonProcedures);
+  contentEl.querySelectorAll('[data-procedure-card]').forEach(card=>card.addEventListener('click',e=>{
+    if(e.target.closest('[data-procedure-menu]')||Date.now()-procedureDragEndedAt<350) return;
+    const item=cache.favorites.find(x=>x.id===Number(card.dataset.procedureCard));
+    if(item) openSavedItem(item);
+  }));
+  bindProcedureCardSorting();
+  contentEl.querySelectorAll('[data-procedure-menu]').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();openProcedureCardMenu(Number(btn.dataset.procedureMenu));
+  }));
+  contentEl.querySelectorAll('[data-search-history-use]').forEach(btn=>btn.addEventListener('click',()=>{
+    sopKeyword=getSearchHistory()[Number(btn.dataset.searchHistoryUse)]||'';render();
+  }));
+  contentEl.querySelectorAll('[data-search-history-remove]').forEach(btn=>btn.addEventListener('click',()=>{
+    const rows=getSearchHistory();rows.splice(Number(btn.dataset.searchHistoryRemove),1);setSearchHistory(rows);render();
+  }));
+  document.getElementById('clear-search-history')?.addEventListener('click',()=>{setSearchHistory([]);render();});
   contentEl.querySelectorAll('[data-remove-favorite]').forEach(btn=>{
     btn.addEventListener('click',async e=>{
       e.stopPropagation();
@@ -667,6 +676,14 @@ function renderSop(){
       await reloadCache(); render();
     });
   });
+}
+function getSearchHistory(){
+  try{return JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY)||'[]').filter(x=>typeof x==='string').slice(0,8);}catch{return [];}
+}
+function setSearchHistory(rows){localStorage.setItem(SEARCH_HISTORY_KEY,JSON.stringify(rows.slice(0,8)));}
+function saveSearchHistory(value){
+  const q=String(value||'').trim();if(!q)return;
+  setSearchHistory([q,...getSearchHistory().filter(x=>x!==q)]);
 }
 function escapeHtml(s){
   return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -872,10 +889,21 @@ async function toggleFavorite(item){
   await reloadCache();
   return true;
 }
+function getSopPageBounds(item){
+  const doc=cache.sopDocs.find(d=>d.id===Number(item.docId));
+  const pages=(doc?.pages||[]).map(p=>Number(p.absolutePage)).filter(Number.isFinite);
+  if(!pages.length) return {min:1,max:Math.max(1,Number(item.absolutePage)||1)};
+  return {min:Math.min(...pages),max:Math.max(...pages)};
+}
 function openProcedureNameDialog(item,existing=null){
   return new Promise(resolve=>{
     const defaultName=existing?.title || item.title || '';
     const sourceTitle=existing?.sourceTitle || item.sourceTitle || item.title || '';
+    const bounds=item.type==='sop'?getSopPageBounds(item):null;
+    const anchor=Math.min(bounds?.max||1,Math.max(bounds?.min||1,Number(existing?.absolutePage||item.absolutePage)||1));
+    const defaultStart=Number(existing?.startPage)||Math.max(bounds?.min||1,anchor-1);
+    const defaultEnd=Number(existing?.endPage)||Math.min(bounds?.max||anchor,anchor+1);
+    let selectedColor=existing?.color||item.color||'blue';
     const overlay=document.createElement('div');
     overlay.className='modal-overlay';
     overlay.style.zIndex='90';
@@ -883,7 +911,13 @@ function openProcedureNameDialog(item,existing=null){
       <div class="modal-header"><span style="font-weight:650;">${existing?'重新命名':'新增常用程序'}</span></div>
       <div class="modal-body">
         <div class="field"><label>常用程序名稱</label><input id="procedure-name-input" maxlength="30" value="${escapeHtml(defaultName)}" placeholder="例如：電梯困人"></div>
-        <p class="tiny-muted" style="line-height:1.6;margin:0;">來源：${escapeHtml(sourceTitle)}${item.type==='sop'&&item.absolutePage?`｜PDF第${item.absolutePage}頁`:''}</p>
+        <div class="field"><label>卡片顏色</label><div class="color-options">${PROCEDURE_COLORS.map(color=>`<button type="button" class="color-choice procedure-${color} ${color===selectedColor?'selected':''}" data-procedure-color="${color}" aria-label="${color}"></button>`).join('')}</div></div>
+        <p class="tiny-muted" style="line-height:1.6;margin:0;">來源：${escapeHtml(sourceTitle)}${item.type==='sop'&&item.absolutePage?`｜命中PDF第${item.absolutePage}頁`:''}</p>
+        ${item.type==='sop'?`<div class="procedure-range-grid">
+          <div class="field" style="margin:0;"><label>起始PDF頁</label><input type="number" id="procedure-start-page" min="${bounds.min}" max="${bounds.max}" value="${defaultStart}"></div>
+          <div class="field" style="margin:0;"><label>結束PDF頁</label><input type="number" id="procedure-end-page" min="${bounds.min}" max="${bounds.max}" value="${defaultEnd}"></div>
+        </div>
+        <div class="procedure-range-help">本文件範圍：PDF第 ${bounds.min}～${bounds.max} 頁。預設帶入命中頁前後各1頁，可依完整程序自行調整。</div>`:''}
         <div class="row" style="margin-top:16px;">
           <button class="secondary" id="procedure-name-cancel" style="flex:1;">取消</button>
           <button class="primary" id="procedure-name-save" style="flex:1;">${existing?'儲存':'加入'}</button>
@@ -892,16 +926,30 @@ function openProcedureNameDialog(item,existing=null){
     document.getElementById('phone').appendChild(overlay);
     const input=overlay.querySelector('#procedure-name-input');
     input.focus(); input.select();
+    overlay.querySelectorAll('[data-procedure-color]').forEach(btn=>btn.addEventListener('click',()=>{
+      selectedColor=btn.dataset.procedureColor;
+      overlay.querySelectorAll('[data-procedure-color]').forEach(b=>b.classList.toggle('selected',b===btn));
+    }));
     const close=value=>{overlay.remove();resolve(value);};
     overlay.querySelector('#procedure-name-cancel').addEventListener('click',()=>close(false));
     overlay.querySelector('#procedure-name-save').addEventListener('click',async()=>{
       const title=input.value.trim();
       if(!title) return alert('請輸入常用程序名稱');
+      let rangeData={};
+      if(item.type==='sop'){
+        const startPage=Number(overlay.querySelector('#procedure-start-page').value);
+        const endPage=Number(overlay.querySelector('#procedure-end-page').value);
+        if(!Number.isInteger(startPage)||!Number.isInteger(endPage)) return alert('請輸入正確的PDF頁碼');
+        if(startPage<bounds.min||endPage>bounds.max) return alert(`頁碼必須在本文件第 ${bounds.min}～${bounds.max} 頁內`);
+        if(startPage>endPage) return alert('起始頁不能大於結束頁');
+        if(endPage-startPage+1>15&&!confirm(`此常用程序共有 ${endPage-startPage+1} 頁，確定要儲存嗎？`)) return;
+        rangeData={startPage,endPage,absolutePage:Math.min(endPage,Math.max(startPage,anchor))};
+      }
       if(existing){
-        await dbPut('favorites',{...existing,title,sourceTitle});
+        await dbPut('favorites',{...existing,...rangeData,title,sourceTitle,color:selectedColor});
       }else{
         const maxOrder=Math.max(0,...cache.favorites.map(f=>Number(f.sortOrder)||0));
-        await dbAdd('favorites',{...item,title,sourceTitle,sortOrder:maxOrder+1,createdAt:new Date().toISOString()});
+        await dbAdd('favorites',{...item,...rangeData,title,sourceTitle,color:selectedColor,sortOrder:maxOrder+1,createdAt:new Date().toISOString()});
       }
       await reloadCache();
       close(true);
@@ -920,26 +968,72 @@ async function addRecentView(item){
 }
 function openSavedItem(item){
   if(item.type==='notice') openNoticeReader(item.noticeId);
-  else openTextReader(item.docId,item.absolutePage);
+  else openSopPdfReader(item.docId,item.startPage||item.absolutePage,{startPage:item.startPage,endPage:item.endPage,favoriteId:item.id});
 }
 function renderShortcutSection(){
-  const recent=[...cache.recentViews].sort((a,b)=>(b.viewedAt||'').localeCompare(a.viewedAt||'')).slice(0,5);
-  let html=`<div class="ios-entry" id="open-procedures">
-    <div class="ios-entry-icon">▣</div>
-    <div class="ios-entry-main"><p class="ios-entry-title">常用程序</p>
-      <p class="ios-entry-subtitle">已建立 ${cache.favorites.length} 個常用項目</p></div>
-    <span class="ios-chevron">›</span>
-  </div>`;
-  if(recent.length){
-    html+=`<p class="tiny-muted" style="margin:2px 0 6px;">最近查看</p>`;
-    recent.forEach(r=>{
-      html+=`<div class="card" data-open-saved="${r.id}" data-saved-source="recent" style="padding:10px 12px;">
-        <div class="row between"><span style="font-size:13px;">${r.type==='notice'?'📣':'📄'} ${escapeHtml(r.title)}</span>
-        <span class="tiny-muted">${r.type==='notice'?'通告':`第${r.absolutePage}頁`}</span></div>
-      </div>`;
+  const rows=sortedProcedures();
+  let html=`<div class="procedure-heading"><h2>常用程序</h2><span class="tiny-muted">${rows.length?`${rows.length} 個項目`:'尚未建立'}</span></div>`;
+  if(!rows.length) return html+`<div class="card"><p class="muted" style="margin:0;">在搜尋結果或 PDF 閱讀器點選「加入常用」，程序會直接顯示在這裡。</p></div>`;
+  html+='<div class="procedure-card-grid">';
+  rows.forEach(f=>{
+    html+=`<article class="procedure-card procedure-${PROCEDURE_COLORS.includes(f.color)?f.color:'blue'}" data-procedure-card="${f.id}" draggable="true" title="拖曳可調整順序">
+      <button class="procedure-card-menu" data-procedure-menu="${f.id}" aria-label="設定">⋯</button>
+      <p class="procedure-card-name">${escapeHtml(f.title)}</p>
+    </article>`;
+  });
+  return html+'</div>';
+}
+let procedureDragEndedAt=0;
+function bindProcedureCardSorting(){
+  const cards=[...contentEl.querySelectorAll('[data-procedure-card]')];
+  let draggedId=null;
+  cards.forEach(card=>{
+    card.addEventListener('dragstart',e=>{
+      if(e.target.closest('[data-procedure-menu]')){e.preventDefault();return;}
+      draggedId=Number(card.dataset.procedureCard);
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain',String(draggedId));
     });
+    card.addEventListener('dragover',e=>{
+      if(!draggedId||draggedId===Number(card.dataset.procedureCard))return;
+      e.preventDefault();e.dataTransfer.dropEffect='move';card.classList.add('drag-over');
+    });
+    card.addEventListener('dragleave',()=>card.classList.remove('drag-over'));
+    card.addEventListener('drop',async e=>{
+      e.preventDefault();card.classList.remove('drag-over');
+      const targetId=Number(card.dataset.procedureCard);
+      if(draggedId&&draggedId!==targetId) await reorderProcedures(draggedId,targetId);
+      draggedId=null;render();
+    });
+    card.addEventListener('dragend',()=>{
+      procedureDragEndedAt=Date.now();
+      draggedId=null;cards.forEach(x=>x.classList.remove('dragging','drag-over'));
+    });
+  });
+}
+async function reorderProcedures(draggedId,targetId){
+  const rows=sortedProcedures();
+  const from=rows.findIndex(row=>row.id===Number(draggedId));
+  const to=rows.findIndex(row=>row.id===Number(targetId));
+  if(from<0||to<0||from===to)return;
+  const [moved]=rows.splice(from,1);rows.splice(to,0,moved);
+  for(let i=0;i<rows.length;i++){
+    rows[i].sortOrder=i+1;
+    await dbPut('favorites',rows[i]);
   }
-  return html;
+  await reloadCache();
+}
+function openProcedureCardMenu(id){
+  const item=cache.favorites.find(f=>f.id===Number(id));if(!item)return;
+  const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='88';
+  overlay.innerHTML=`<div class="modal-sheet" style="height:auto;max-width:460px;"><div class="modal-header"><span style="font-weight:650;">${escapeHtml(item.title)}</span><button id="procedure-menu-close" style="border:0;background:none;font-size:18px;">✕</button></div><div class="modal-body"><button class="secondary" id="procedure-menu-edit" style="width:100%;margin-bottom:9px;">名稱、頁碼與顏色設定</button><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px;"><button class="secondary" id="procedure-menu-earlier">向前移動</button><button class="secondary" id="procedure-menu-later">向後移動</button></div><button class="secondary" id="procedure-menu-delete" style="width:100%;color:var(--danger);">刪除常用程序</button></div></div>`;
+  document.getElementById('phone').appendChild(overlay);
+  overlay.querySelector('#procedure-menu-close').addEventListener('click',()=>overlay.remove());
+  overlay.querySelector('#procedure-menu-edit').addEventListener('click',async()=>{overlay.remove();if(await openProcedureNameDialog(item,item))render();});
+  overlay.querySelector('#procedure-menu-earlier').addEventListener('click',async()=>{await moveProcedure(item.id,-1);overlay.remove();render();});
+  overlay.querySelector('#procedure-menu-later').addEventListener('click',async()=>{await moveProcedure(item.id,1);overlay.remove();render();});
+  overlay.querySelector('#procedure-menu-delete').addEventListener('click',async()=>{if(!confirm('確定移除這個常用程序嗎？'))return;await dbDelete('favorites',item.id);await reloadCache();overlay.remove();render();});
 }
 function sortedProcedures(){
   return [...cache.favorites].sort((a,b)=>
@@ -995,10 +1089,10 @@ function openCommonProcedures(){
           <div class="ios-entry-icon" style="width:32px;height:32px;font-size:15px;">${f.type==='notice'?'📣':'📄'}</div>
           <div class="ios-entry-main">
             <p class="ios-entry-title">${escapeHtml(f.title)}</p>
-            <p class="ios-entry-subtitle">${escapeHtml(f.sourceTitle||f.title)}${f.type==='sop'?`｜PDF第${f.absolutePage}頁`:'｜通告'}</p>
+            <p class="ios-entry-subtitle">${escapeHtml(f.sourceTitle||f.title)}${f.type==='sop'?`｜PDF第${f.startPage||f.absolutePage}～${f.endPage||f.absolutePage}頁`:'｜通告'}</p>
           </div>
           ${procedureEditMode?`<div class="procedure-actions">
-            <button class="mini-action" data-procedure-rename="${f.id}">命名</button>
+            <button class="mini-action" data-procedure-rename="${f.id}">設定</button>
             <button class="mini-action" data-procedure-up="${f.id}" ${i===0?'disabled':''}>↑</button>
             <button class="mini-action" data-procedure-down="${f.id}" ${i===rows.length-1?'disabled':''}>↓</button>
             <button class="mini-action" data-procedure-delete="${f.id}" style="color:#ff3b30;">刪除</button>
@@ -1016,7 +1110,7 @@ function openCommonProcedures(){
       row.addEventListener('click',e=>{
         if(procedureEditMode||e.target.closest('button')) return;
         const item=cache.favorites.find(f=>f.id===Number(row.dataset.procedureOpen));
-        if(item) openSavedItem(item);
+        if(item){overlay.remove();openSavedItem(item);}
       });
     });
     body.querySelectorAll('[data-procedure-rename]').forEach(btn=>btn.addEventListener('click',async e=>{
@@ -1058,100 +1152,57 @@ function bindImportBtn(id){
   input.addEventListener('change', async (e)=>{
     const file = e.target.files[0];
     if(!file) return;
-    e.target.value='';
     await handlePdfImport(file);
   });
 }
 async function handlePdfImport(file){
-  let cancelled=false;
-  let importStage='讀取PDF';
   const startedAt=Date.now();
-  contentEl.innerHTML = `<div class="card" style="max-width:620px;text-align:center;padding:30px 26px;">
-    <div style="font-size:32px;margin-bottom:10px;">📄</div>
-    <h2 style="font-size:18px;margin:0 0 6px;">正在解析PDF</h2>
-    <p id="pdf-progress-file" class="muted" style="margin:0 0 18px;word-break:break-all;">${escapeHtml(file.name)}</p>
-    <div style="height:9px;background:#e5e5ea;border-radius:99px;overflow:hidden;">
-      <div id="pdf-progress-bar" style="width:1%;height:100%;background:var(--accent);border-radius:99px;transition:width .2s ease;"></div>
+  contentEl.innerHTML = `<div class="card" style="text-align:center;padding:28px 20px;">
+    <div style="font-size:30px;">📄</div>
+    <p style="font-weight:600;margin:8px 0 4px;">正在解析PDF</p>
+    <p class="tiny-muted" style="margin:0 0 14px;word-break:break-all;">${escapeHtml(file.name)}</p>
+    <div style="height:8px;background:#e5e5ea;border-radius:99px;overflow:hidden;">
+      <div id="pc-progress-bar" style="height:100%;width:1%;background:var(--accent);transition:width .2s;"></div>
     </div>
-    <p id="pdf-progress-main" style="font-size:15px;font-weight:650;margin:14px 0 4px;">讀取檔案中…</p>
-    <p id="pdf-progress-time" class="tiny-muted" style="margin:0 0 18px;">大型合併PDF可能需要數分鐘，請保持此頁開啟</p>
-    <button class="secondary" id="pdf-import-cancel">取消解析</button>
+    <p id="pc-progress-main" class="muted" style="margin:12px 0 4px;">正在讀取檔案…</p>
+    <p id="pc-progress-time" class="tiny-muted" style="margin:0;">大型合併PDF可能需要數十分鐘</p>
   </div>`;
-  const cancelBtn=document.getElementById('pdf-import-cancel');
-  cancelBtn.addEventListener('click',()=>{
-    cancelled=true;
-    cancelBtn.disabled=true;
-    cancelBtn.textContent='正在取消…';
-  });
   const timer=setInterval(()=>{
-    const elapsed=Math.floor((Date.now()-startedAt)/1000);
-    const timeEl=document.getElementById('pdf-progress-time');
-    if(timeEl) timeEl.textContent=`已執行 ${Math.floor(elapsed/60)}分${String(elapsed%60).padStart(2,'0')}秒｜大型合併PDF可能需要數分鐘`;
+    const sec=Math.floor((Date.now()-startedAt)/1000);
+    const el=document.getElementById('pc-progress-time');
+    if(el) el.textContent=`已執行 ${Math.floor(sec/60)}分${String(sec%60).padStart(2,'0')}秒`;
   },1000);
   try{
     const buf = await file.arrayBuffer();
-    if(cancelled){
-      const err=new Error('使用者已取消PDF解析');
-      err.name='ImportCancelledError';
-      throw err;
-    }
-    importStage='解析PDF';
-    const pages = await parsePdfArrayBuffer(buf,(current,total,stage)=>{
+    const pages = await parsePdfArrayBuffer(buf,(current,total)=>{
       const pct=total?Math.max(1,Math.round(current/total*100)):1;
-      const bar=document.getElementById('pdf-progress-bar');
-      const main=document.getElementById('pdf-progress-main');
+      const bar=document.getElementById('pc-progress-bar');
+      const main=document.getElementById('pc-progress-main');
       if(bar) bar.style.width=`${pct}%`;
       if(main) main.textContent=current===0
         ? `共 ${total.toLocaleString()} 頁，準備開始`
-        : `${stage}：第 ${current.toLocaleString()}／${total.toLocaleString()} 頁（${pct}%）`;
-    },()=>cancelled);
-    const main=document.getElementById('pdf-progress-main');
-    if(main) main.textContent='正在辨識封面、修訂紀錄與文件邊界…';
-    importStage='辨識文件邊界';
+        : `第 ${current.toLocaleString()}／${total.toLocaleString()} 頁（${pct}%）`;
+    });
+    const main=document.getElementById('pc-progress-main');
+    if(main) main.textContent='解析完成，正在辨識文件並儲存…';
     const docs = segmentDocuments(pages);
-    if(cancelled){
-      const err=new Error('使用者已取消PDF解析');
-      err.name='ImportCancelledError';
-      throw err;
-    }
-    const textOnlyMode=location.protocol==='file:';
-    if(main) main.textContent=textOnlyMode
-      ? '正在建立本機文字索引…'
-      : '正在儲存至本機資料庫…';
-    importStage='寫入本機資料庫';
-    await ensureDB();
-    const pdfFileId = await withTimeout(dbAdd('pdfFiles', {
-      fileName:file.name, displayName:file.name.replace(/\.pdf$/i,''),
-      // file:// 受管制電腦不把大型PDF二進位檔寫入IndexedDB，避免交易長時間停滯。
-      data:textOnlyMode?null:buf, originalStored:!textOnlyMode,
+    const pdfFileId = await dbAdd('pdfFiles', {
+      fileName:file.name, displayName:file.name.replace(/\.pdf$/i,''), data:buf,
       uploadedAt:new Date().toISOString(), pageCount:pages.length, documentCount:0,
-      fileSize:file.size, status:textOnlyMode?'待確認（文字索引模式）':'待確認'
-    }),20000,'本機資料庫在20秒內沒有回應，請關閉所有舊版頁面並重新開啟瀏覽器。');
+      fileSize:file.size, status:'待確認'
+    });
     clearInterval(timer);
-    showImportReview(docs, pdfFileId, textOnlyMode);
+    showImportReview(docs, pdfFileId);
   }catch(err){
     clearInterval(timer);
-    console.error('PDF匯入失敗',err);
-    if(err?.name==='ImportCancelledError'){
-      renderLibrary();
-      return;
-    }
-    const quota=/quota|storage|空間/i.test(`${err?.name||''} ${err?.message||''}`);
-    const databaseError=importStage==='寫入本機資料庫'||/transaction|database|indexeddb|本機資料庫/i.test(`${err?.name||''} ${err?.message||''}`);
-    contentEl.innerHTML=`<div class="card" style="max-width:620px;text-align:center;padding:30px 26px;">
-      <div style="font-size:34px;margin-bottom:10px;">⚠️</div>
-      <h2 style="font-size:18px;margin:0 0 8px;">${databaseError?'本機資料儲存未完成':'PDF解析未完成'}</h2>
-      <p class="muted" style="line-height:1.7;margin:0 0 8px;">${quota?'瀏覽器本機儲存空間不足，請先匯出備份並清理不需要的文件。':databaseError?'PDF已完成解析，但瀏覽器本機資料庫連線中斷，請關閉其他同版本頁面後重試。':'可能是PDF格式、密碼保護、記憶體不足或解析元件載入失敗。'}</p>
-      <p class="tiny-muted" style="margin:0 0 8px;">失敗階段：${escapeHtml(importStage)}</p>
-      <p class="tiny-muted" style="word-break:break-all;background:#f2f2f7;padding:9px;border-radius:8px;margin:0 0 16px;">${escapeHtml(err?.message||'未知錯誤')}</p>
-      <button class="primary" id="pdf-import-retry" style="margin-right:8px;">重新選擇PDF</button>
-      <button class="secondary" id="pdf-import-back">返回文件庫</button>
+    console.error(err);
+    contentEl.innerHTML=`<div class="card" style="text-align:center;padding:28px 20px;">
+      <div style="font-size:32px;">⚠️</div>
+      <p style="font-weight:600;margin:8px 0;">PDF匯入未完成</p>
+      <p class="tiny-muted" style="padding:8px;background:#f2f2f7;border-radius:8px;word-break:break-all;">${escapeHtml(err?.message||'未知錯誤')}</p>
+      <button class="secondary" id="pc-import-back">返回文件庫</button>
     </div>`;
-    document.getElementById('pdf-import-retry').addEventListener('click',()=>{
-      renderLibrary();
-      setTimeout(()=>document.getElementById('pdf-file-input')?.click(),0);
-    });
-    document.getElementById('pdf-import-back').addEventListener('click',()=>renderLibrary());
+    document.getElementById('pc-import-back').addEventListener('click',renderLibrary);
   }
 }
 function typeLabel(t){ return t==='cover'?'封面':(t==='revision'?'修訂紀錄':'正文'); }
@@ -1189,17 +1240,11 @@ function renderReviewBody(docs){
   });
   return html;
 }
-function showImportReview(docs, pdfFileId, textOnlyMode=false){
+function showImportReview(docs, pdfFileId){
   const html = `<div class="modal-overlay"><div class="modal-sheet">
     <div class="modal-header"><span style="font-weight:500;">確認匯入結果（共${docs.length}份）</span>
     <button id="review-cancel" style="background:none;border:none;font-size:18px;">✕</button></div>
-    <div class="modal-body">
-      ${textOnlyMode?`<div class="card" style="border-color:#b5d4ef;background:#f6fbff;">
-        <strong style="font-size:14px;color:var(--accent-text);">電腦文字索引模式</strong>
-        <p class="muted" style="line-height:1.65;margin:6px 0 0;">已完成PDF解析。為避免公司電腦的本機資料庫卡住，系統只保存文字、文件分段及頁碼；原始PDF請直接從電腦資料夾開啟。</p>
-      </div>`:''}
-      <div id="review-body">${renderReviewBody(docs)}</div>
-    </div>
+    <div class="modal-body" id="review-body">${renderReviewBody(docs)}</div>
     <div style="padding:12px 16px;border-top:0.5px solid var(--border);background:var(--card);">
       <button class="primary" id="review-confirm" style="width:100%;">確認匯入</button>
     </div>
@@ -1245,10 +1290,13 @@ function showImportReview(docs, pdfFileId, textOnlyMode=false){
     for(const doc of docs){
       await dbAdd('sopDocs', {pdfFileId, name: doc.name || '未命名文件', pages:doc.pages});
     }
-    const pdfRec=cache.pdfFiles.find(f=>f.id===pdfFileId) || await dbGet('pdfFiles',pdfFileId);
+    const pdfRec=cache.pdfFiles.find(f=>f.id===pdfFileId) || await new Promise((res,rej)=>{
+      const r=txStore('pdfFiles','readonly').get(pdfFileId);
+      r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
+    });
     if(pdfRec){
       pdfRec.documentCount=docs.length;
-      pdfRec.status=textOnlyMode?'已完成（文字索引）':'已完成';
+      pdfRec.status='已完成';
       await dbPut('pdfFiles',pdfRec);
     }
     await reloadCache();
@@ -1530,13 +1578,14 @@ async function openTextReader(docId,absolutePage,targetClause=null){
   document.getElementById('reader-next').addEventListener('click',()=>{ if(currentIndex<eligible.length-1){currentIndex++;draw();} });
   document.getElementById('reader-favorite').addEventListener('click',async()=>{
     const p=eligible[currentIndex];
-    await toggleFavorite({type:'sop',docId:doc.id,absolutePage:p.absolutePage,title:displayName});
+    const item={type:'sop',docId:doc.id,absolutePage:p.absolutePage,startPage:Math.max(getSopPageBounds({docId:doc.id}).min,p.absolutePage-1),endPage:Math.min(getSopPageBounds({docId:doc.id}).max,p.absolutePage+1),title:displayName,sourceTitle:displayName};
+    await openProcedureNameDialog(item,favoriteFor(item)||null);
     draw();
   });
   document.getElementById('reader-pdf').addEventListener('click',()=>{
     const p=eligible[currentIndex];
     overlay.remove();
-    openPdfViewer(doc.pdfFileId,p.absolutePage);
+    openSopPdfReader(doc.id,p.absolutePage);
   });
   draw();
   if(targetClause){
@@ -1547,13 +1596,155 @@ async function openTextReader(docId,absolutePage,targetClause=null){
   }
 }
 
+/* --- SOP PDF優先閱讀器：文字負責搜尋，PDF負責正式閱讀 --- */
+async function openSopPdfReader(docId,absolutePage,options={}){
+  const doc=cache.sopDocs.find(d=>d.id===Number(docId));
+  if(!doc) return alert('找不到這份文件，請重新整理後再試。');
+  const rec=cache.pdfFiles.find(f=>f.id===doc.pdfFileId);
+  if(!rec?.data) return alert('找不到原始PDF，請至文件庫確認檔案是否仍存在。');
+  const displayName=resolvedDocName(doc);
+  const bounds=getSopPageBounds({type:'sop',docId:doc.id,absolutePage});
+  let currentPage=Math.min(bounds.max,Math.max(bounds.min,Number(absolutePage)||bounds.min));
+  const hasSavedRange=Number.isFinite(Number(options.startPage))&&Number.isFinite(Number(options.endPage));
+  let rangeStart=hasSavedRange?Math.max(bounds.min,Number(options.startPage)):Math.max(bounds.min,currentPage-1);
+  let rangeEnd=hasSavedRange?Math.min(bounds.max,Number(options.endPage)):Math.min(bounds.max,currentPage+1);
+  if(rangeStart>rangeEnd){rangeStart=currentPage;rangeEnd=currentPage;}
+  currentPage=Math.min(rangeEnd,Math.max(rangeStart,currentPage));
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.style.zIndex='75';
+  overlay.innerHTML=`<div class="modal-sheet pdf-reader-shell">
+    <div class="modal-header">
+      <span style="font-weight:650;font-size:13px;line-height:1.4;padding-right:8px;">${escapeHtml(displayName)}</span>
+      <button id="sop-pdf-close" style="background:none;border:none;font-size:18px;flex-shrink:0;">✕</button>
+    </div>
+    <div class="pdf-reader-toolbar">
+      <div class="toolbar-group">
+        <button class="secondary" id="sop-pdf-prev" title="上一頁">←</button>
+        <input class="pdf-reader-page-input" type="number" id="sop-pdf-jump" value="${currentPage}" min="${hasSavedRange?rangeStart:bounds.min}" max="${hasSavedRange?rangeEnd:bounds.max}" aria-label="跳至PDF頁碼">
+        <button class="secondary" id="sop-pdf-next" title="下一頁">→</button>
+      </div>
+      <div class="toolbar-group">
+        <button class="secondary" id="sop-pdf-zoom-out" title="縮小">−</button>
+        <button class="secondary" id="sop-pdf-fit" title="適合寬度">適合寬度</button>
+        <button class="secondary" id="sop-pdf-zoom-in" title="放大">＋</button>
+      </div>
+      <div class="toolbar-group">
+        <button class="secondary" id="sop-pdf-text">文字模式</button>
+        <button class="primary" id="sop-pdf-favorite">☆ 加入／設定常用</button>
+      </div>
+      <span class="pdf-reader-status" id="sop-pdf-status">PDF第 ${rangeStart}～${rangeEnd} 頁</span>
+    </div>
+    <div class="pdf-reader-stage" id="sop-pdf-stage"><p style="color:#fff;text-align:center;padding:30px;">正在載入PDF…</p></div>
+  </div>`;
+  document.getElementById('phone').appendChild(overlay);
+  const stage=overlay.querySelector('#sop-pdf-stage');
+  let pdf=null,zoom=1,renderToken=0,closed=false;
+
+  function updateControls(){
+    overlay.querySelector('#sop-pdf-jump').value=currentPage;
+    overlay.querySelector('#sop-pdf-prev').disabled=currentPage<=(hasSavedRange?rangeStart:bounds.min);
+    overlay.querySelector('#sop-pdf-next').disabled=currentPage>=(hasSavedRange?rangeEnd:bounds.max);
+    overlay.querySelector('#sop-pdf-status').textContent=`PDF第 ${rangeStart}～${rangeEnd} 頁｜目前第 ${currentPage} 頁｜${Math.round(zoom*100)}%`;
+    overlay.querySelector('#sop-pdf-favorite').textContent='☆ 加入／設定常用';
+  }
+  function buildFrames(){
+    let html='';
+    for(let page=rangeStart;page<=rangeEnd;page++){
+      html+=`<section class="pdf-page-frame ${page===currentPage?'current':''}" data-pdf-page="${page}">
+        <div class="pdf-page-label">PDF第${page}頁</div><div style="color:#636366;padding:70px 50px;text-align:center;">載入中…</div>
+      </section>`;
+    }
+    stage.innerHTML=html;
+  }
+  async function renderPages(scrollToCurrent=true){
+    if(!pdf||closed) return;
+    const token=++renderToken;
+    buildFrames();updateControls();
+    const available=Math.max(280,stage.clientWidth-30);
+    for(let pageNum=rangeStart;pageNum<=rangeEnd;pageNum++){
+      if(closed||token!==renderToken) return;
+      const page=await pdf.getPage(pageNum);
+      const base=page.getViewport({scale:1});
+      const fit=Math.min(1.65,available/base.width);
+      const cssScale=fit*zoom;
+      const pixelRatio=Math.min(1.6,window.devicePixelRatio||1);
+      const cssViewport=page.getViewport({scale:cssScale});
+      const viewport=page.getViewport({scale:cssScale*pixelRatio});
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.floor(viewport.width);canvas.height=Math.floor(viewport.height);
+      canvas.style.width=`${Math.floor(cssViewport.width)}px`;
+      canvas.style.height=`${Math.floor(cssViewport.height)}px`;
+      const frame=stage.querySelector(`[data-pdf-page="${pageNum}"]`);
+      if(!frame) continue;
+      frame.style.width=`${Math.floor(cssViewport.width)}px`;
+      frame.style.height=`${Math.floor(cssViewport.height)}px`;
+      frame.querySelector('div:last-child').replaceWith(canvas);
+      await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;
+      if(closed||token!==renderToken) return;
+      try{
+        const textContent=await page.getTextContent();
+        if(textContent.items?.length){
+          const textLayer=document.createElement('div');
+          textLayer.className='pdf-text-layer';
+          textLayer.style.width=`${Math.floor(cssViewport.width)}px`;
+          textLayer.style.height=`${Math.floor(cssViewport.height)}px`;
+          frame.appendChild(textLayer);
+          await pdfjsLib.renderTextLayer({textContentSource:textContent,container:textLayer,viewport:cssViewport,textDivs:[]}).promise;
+        }
+      }catch(textError){console.warn('PDF文字圖層無法建立',textError);}
+    }
+    if(scrollToCurrent&&!closed){
+      requestAnimationFrame(()=>stage.querySelector(`[data-pdf-page="${currentPage}"]`)?.scrollIntoView({block:'start'}));
+    }
+  }
+  function goToPage(next){
+    const min=hasSavedRange?rangeStart:bounds.min,max=hasSavedRange?rangeEnd:bounds.max;
+    const target=Math.min(max,Math.max(min,Number(next)||currentPage));
+    currentPage=target;
+    if(!hasSavedRange){
+      rangeStart=Math.max(bounds.min,currentPage-1);
+      rangeEnd=Math.min(bounds.max,currentPage+1);
+      renderPages(true);
+    }else{
+      stage.querySelectorAll('[data-pdf-page]').forEach(el=>el.classList.toggle('current',Number(el.dataset.pdfPage)===currentPage));
+      updateControls();
+      stage.querySelector(`[data-pdf-page="${currentPage}"]`)?.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+  }
+  overlay.querySelector('#sop-pdf-close').addEventListener('click',()=>{closed=true;renderToken++;overlay.remove();});
+  overlay.querySelector('#sop-pdf-prev').addEventListener('click',()=>goToPage(currentPage-1));
+  overlay.querySelector('#sop-pdf-next').addEventListener('click',()=>goToPage(currentPage+1));
+  overlay.querySelector('#sop-pdf-jump').addEventListener('change',e=>goToPage(e.target.value));
+  overlay.querySelector('#sop-pdf-zoom-out').addEventListener('click',()=>{zoom=Math.max(.6,zoom-.15);renderPages(false);});
+  overlay.querySelector('#sop-pdf-zoom-in').addEventListener('click',()=>{zoom=Math.min(2,zoom+.15);renderPages(false);});
+  overlay.querySelector('#sop-pdf-fit').addEventListener('click',()=>{zoom=1;renderPages(false);});
+  overlay.querySelector('#sop-pdf-text').addEventListener('click',()=>{closed=true;renderToken++;overlay.remove();openTextReader(doc.id,currentPage);});
+  overlay.querySelector('#sop-pdf-favorite').addEventListener('click',async()=>{
+    const item={type:'sop',docId:doc.id,absolutePage:currentPage,startPage:rangeStart,endPage:rangeEnd,title:displayName,sourceTitle:displayName};
+    const existing=options.favoriteId?cache.favorites.find(f=>f.id===Number(options.favoriteId)):favoriteFor(item);
+    if(await openProcedureNameDialog(item,existing||null)) updateControls();
+  });
+  stage.addEventListener('click',e=>{
+    const frame=e.target.closest('[data-pdf-page]');
+    if(!frame) return;
+    currentPage=Number(frame.dataset.pdfPage);
+    stage.querySelectorAll('[data-pdf-page]').forEach(el=>el.classList.toggle('current',el===frame));
+    updateControls();
+  });
+  try{
+    pdf=await pdfjsLib.getDocument({data:rec.data.slice(0)}).promise;
+    if(pdf.numPages<bounds.max){bounds.max=pdf.numPages;rangeEnd=Math.min(rangeEnd,pdf.numPages);}
+    await renderPages(true);
+  }catch(error){
+    stage.innerHTML=`<div style="color:#fff;text-align:center;padding:40px 20px;"><p style="font-size:28px;">⚠️</p><p>PDF載入失敗</p><p style="font-size:12px;color:#c7c7cc;">${escapeHtml(String(error?.message||error))}</p></div>`;
+  }
+}
+
 /* --- PDF viewer modal --- */
 async function openPdfViewer(pdfFileId, pageNum){
   const rec = cache.pdfFiles.find(f=>f.id===pdfFileId);
   if(!rec) return;
-  if(!rec.data){
-    return alert(`此文件以電腦文字索引模式匯入，未將原始PDF存入瀏覽器。\n\n請直接從電腦資料夾開啟：${rec.fileName||'原始PDF'}`);
-  }
   const html = `<div class="modal-overlay" id="pdf-viewer-overlay" style="z-index:80;"><div class="modal-sheet" style="height:96%;">
     <div class="modal-header"><span style="font-weight:500;">第${pageNum}頁</span>
     <button id="pdf-viewer-close" style="background:none;border:none;font-size:18px;">✕</button></div>
@@ -1769,20 +1960,14 @@ function renderLibrary(){
 
 /* --- Personnel/event tab --- */
 function renderPersonnel(){
-  let html = `<div class="desktop-split">
-    <section class="desktop-form-panel">
-      <div class="section-heading"><h2>建立事件紀錄</h2><p>資料僅儲存在目前裝置</p></div>
-      <div class="card">
+  let html = `<div class="card">
       <div class="field"><label>姓名</label><input id="p-name"></div>
       <div class="field"><label>事件</label><input id="p-event"></div>
       <div class="field"><label>日期</label><input type="date" id="p-date" value="${new Date().toISOString().slice(0,10)}"></div>
       <div class="field"><label>備註</label><textarea id="p-note"></textarea></div>
       <button class="primary" id="p-add-btn" style="width:100%;">新增紀錄</button>
-      </div>
-    </section>
-    <section class="desktop-list-panel">
-      <div class="section-heading"><h2>事件與人員清冊</h2><p>共 ${cache.personnel.length} 筆本機紀錄</p></div>
-      <input type="text" id="p-search" placeholder="搜尋姓名或事件" value="${escapeHtml(personnelKeyword)}" style="margin-bottom:10px;">`;
+    </div>
+    <input type="text" id="p-search" placeholder="搜尋姓名或事件" value="${escapeHtml(personnelKeyword)}" style="margin-bottom:10px;">`;
   const kw = personnelKeyword;
   const list = [...cache.personnel].sort((a,b)=>b.date.localeCompare(a.date))
     .filter(p=> !kw || p.name.includes(kw) || p.event.includes(kw));
@@ -1798,7 +1983,6 @@ function renderPersonnel(){
       </div>`;
     });
   }
-  html += `</section></div>`;
   contentEl.innerHTML = html;
   document.getElementById('p-add-btn').addEventListener('click', async ()=>{
     const name = document.getElementById('p-name').value.trim();
@@ -1821,56 +2005,253 @@ function renderPersonnel(){
 }
 
 /* --- Ridership tab --- */
-function renderRidership(){
-  let html = `<div class="desktop-split">
-    <section class="desktop-form-panel">
-      <div class="section-heading"><h2>新增運量資料</h2><p>輸入單站日期與人次</p></div>
-      <div class="card">
-      <div class="field"><label>站名</label><input id="r-station"></div>
-      <div class="field"><label>日期</label><input type="date" id="r-date" value="${new Date().toISOString().slice(0,10)}"></div>
-      <div class="field"><label>人數</label><input type="number" id="r-count"></div>
-      <button class="primary" id="r-add-btn" style="width:100%;">新增紀錄</button>
-      </div>
-    </section>
-    <section class="desktop-list-panel">
-      <div class="section-heading"><h2>車站運量比較</h2><p>共 ${cache.ridership.length} 筆本機紀錄</p></div>
-      <input type="text" id="r-search" placeholder="依站名篩選" value="${escapeHtml(ridershipKeyword)}" style="margin-bottom:10px;">`;
-  const kw = ridershipKeyword;
-  const list = [...cache.ridership].sort((a,b)=>b.date.localeCompare(a.date))
-    .filter(r=> !kw || r.station.includes(kw));
-  const max = Math.max(1, ...list.map(r=>Number(r.count)||0));
-  if(list.length===0){
-    html += `<div class="empty"><p>尚無資料</p></div>`;
-  } else {
-    list.forEach(r=>{
-      const pct = Math.round((Number(r.count)||0)/max*100);
-      html += `<div class="card">
-        <div class="row between"><span style="font-weight:500;font-size:14px;">${escapeHtml(r.station)}</span>
-          <button class="danger-text" data-del-r="${r.id}">刪除</button></div>
-        <p class="tiny-muted" style="margin:2px 0 6px;">${r.date}</p>
-        <div style="background:#f1efe8;border-radius:6px;height:8px;overflow:hidden;">
-          <div style="width:${pct}%;height:100%;background:var(--accent);"></div>
-        </div>
-        <p class="muted" style="margin:4px 0 0;">${Number(r.count).toLocaleString()} 人次</p>
-      </div>`;
+const RIDERSHIP_LINES = {
+  BR:'文湖線', R:'淡水信義線', G:'松山新店線',
+  O:'中和新蘆線', BL:'板南線', Y:'環狀線'
+};
+const MONTH_LABELS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+function parseRidershipStation(raw){
+  const source = String(raw||'').replace(/\s+/g,' ').trim();
+  const match = source.match(/^(.*?)\s*[（(]\s*((?:BR|BL|R|G|O|Y)\s*\d*)\s*[)）]\s*$/i);
+  if(!match) return {station:source, code:'', lineCode:'', lineName:'未識別線別', stationKey:source};
+  const station = match[1].trim();
+  const code = match[2].replace(/\s+/g,'').toUpperCase();
+  const prefix = (code.match(/^(BR|BL|R|G|O|Y)/)||[])[1] || '';
+  return {station, code, lineCode:prefix, lineName:RIDERSHIP_LINES[prefix]||'未識別線別', stationKey:code||source};
+}
+function normalizeHeader(value){
+  return String(value??'').replace(/[\s\u3000_\-()（）]/g,'').toLowerCase();
+}
+function detectWorkbookYear(fileName){
+  const western = String(fileName).match(/(?:^|[^\d])((?:19|20)\d{2})(?:[^\d]|$)/);
+  if(western) return Number(western[1]);
+  const roc = String(fileName).match(/(?:^|[^\d])(\d{3})(?:[^\d]|$)/);
+  if(roc && Number(roc[1])>=100 && Number(roc[1])<=199) return Number(roc[1])+1911;
+  return null;
+}
+function daysInMonth(year, month){
+  return new Date(Number(year), Number(month), 0).getDate();
+}
+function formatRidershipValue(value, metric){
+  if(value===null || value===undefined || Number.isNaN(Number(value))) return '—';
+  return `${Math.round(Number(value)).toLocaleString()}${metric==='averageDaily'?' 人次/日':' 人次'}`;
+}
+function stationDisplay(row){
+  return `${row.station}${row.code?`（${row.lineName}・${row.code}）`:''}`;
+}
+function monthlyRidershipRecords(){
+  return cache.ridership.filter(r=>r.recordType==='monthlyAverage' && r.year && r.month);
+}
+function makeLineChart(current, previous, metric){
+  const width=760,height=265,left=56,right=18,top=18,bottom=38;
+  const values=[...current,...previous].filter(v=>Number.isFinite(v));
+  if(!values.length) return '<div class="empty" style="padding:55px 10px;">尚無可繪製資料</div>';
+  const max=Math.max(...values,1), min=Math.min(...values,0);
+  const x=i=>left+i*(width-left-right)/11;
+  const y=v=>top+(max-v)*(height-top-bottom)/(max-min||1);
+  const path=arr=>{
+    let d='',started=false;
+    arr.forEach((v,i)=>{
+      if(!Number.isFinite(v)){started=false;return;}
+      d+=`${started?' L':'M'} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`;started=true;
     });
+    return d;
+  };
+  let grid='',labels='';
+  for(let i=0;i<=4;i++){
+    const gy=top+i*(height-top-bottom)/4;
+    const val=max-i*(max-min)/4;
+    grid+=`<line x1="${left}" y1="${gy}" x2="${width-right}" y2="${gy}" stroke="#e5e8ef" stroke-width="1"/>`;
+    labels+=`<text x="${left-8}" y="${gy+4}" text-anchor="end" font-size="10" fill="#8e8e93">${Math.round(val).toLocaleString()}</text>`;
   }
-  html += `</section></div>`;
-  contentEl.innerHTML = html;
-  document.getElementById('r-add-btn').addEventListener('click', async ()=>{
-    const station = document.getElementById('r-station').value.trim();
-    const count = Number(document.getElementById('r-count').value);
-    if(!station || !count) return alert('請輸入站名與人數');
-    await dbAdd('ridership', {station, date: document.getElementById('r-date').value, count});
-    await reloadCache(); renderRidership();
+  MONTH_LABELS.forEach((m,i)=>labels+=`<text x="${x(i)}" y="${height-12}" text-anchor="middle" font-size="10" fill="#8e8e93">${m.replace('月','')}</text>`);
+  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="年度每月運量折線圖">
+    ${grid}${labels}
+    <path d="${path(previous)}" fill="none" stroke="#9aa3af" stroke-width="2.5" stroke-dasharray="7 6"/>
+    <path d="${path(current)}" fill="none" stroke="#1677ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    ${current.map((v,i)=>Number.isFinite(v)?`<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="#1677ff"><title>${MONTH_LABELS[i]} ${formatRidershipValue(v,metric)}</title></circle>`:'').join('')}
+  </svg></div>`;
+}
+function makeYoyChart(current, previous){
+  const changes=current.map((v,i)=>Number.isFinite(v)&&Number.isFinite(previous[i])&&previous[i]!==0?(v-previous[i])/previous[i]*100:null);
+  if(!changes.some(Number.isFinite)) return '<div class="empty" style="padding:38px 10px;">尚無前一年度資料可比較</div>';
+  const width=760,height=190,left=42,right=18,top=14,bottom=34,maxAbs=Math.max(10,...changes.filter(Number.isFinite).map(Math.abs));
+  const zero=(height-bottom+top)/2, barW=(width-left-right)/12*.58;
+  const bars=changes.map((v,i)=>{
+    if(!Number.isFinite(v)) return '';
+    const h=Math.abs(v)/maxAbs*(height-top-bottom)/2;
+    const yy=v>=0?zero-h:zero;
+    const color=v>=0?'#34a853':'#df4b3f';
+    return `<rect x="${left+i*(width-left-right)/12+((width-left-right)/12-barW)/2}" y="${yy}" width="${barW}" height="${Math.max(1,h)}" rx="3" fill="${color}"><title>${MONTH_LABELS[i]} ${v>=0?'+':''}${v.toFixed(1)}%</title></rect>
+      <text x="${left+(i+.5)*(width-left-right)/12}" y="${height-12}" text-anchor="middle" font-size="10" fill="#8e8e93">${i+1}</text>`;
+  }).join('');
+  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="年增率長條圖">
+    <line x1="${left}" y1="${zero}" x2="${width-right}" y2="${zero}" stroke="#b8c0cc"/>
+    ${bars}
+  </svg></div>`;
+}
+function rankRows(records, metric){
+  return [...records].filter(r=>Number.isFinite(Number(r[metric]))).sort((a,b)=>Number(b[metric])-Number(a[metric]));
+}
+async function importRidershipWorkbook(file){
+  if(typeof XLSX==='undefined') throw new Error('Excel 解析元件未載入，請確認電腦可連線至 cdnjs.cloudflare.com 後重新開啟程式。');
+  const guessedYear=detectWorkbookYear(file.name);
+  const input=prompt('請確認資料年度（西元年）', guessedYear||new Date().getFullYear());
+  if(input===null) return;
+  const year=Number(input);
+  if(!Number.isInteger(year)||year<2000||year>2200) throw new Error('年度格式錯誤，請輸入例如 2025。');
+  const workbook=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:false});
+  const accepted=workbook.SheetNames.filter(n=>/^(0[1-9]|1[0-2])$/.test(n));
+  const ignored=workbook.SheetNames.filter(n=>!accepted.includes(n));
+  const missing=Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0')).filter(n=>!accepted.includes(n));
+  const rows=[], warnings=[];
+  accepted.forEach(month=>{
+    const grid=XLSX.utils.sheet_to_json(workbook.Sheets[month],{header:1,defval:null,raw:true});
+    let headerRow=-1, stationCol=-1, averageCol=-1;
+    for(let r=0;r<Math.min(grid.length,15);r++){
+      const normalized=(grid[r]||[]).map(normalizeHeader);
+      const s=normalized.findIndex(h=>h.includes('車站名稱')||h==='站名'||h==='車站');
+      const a=normalized.findIndex(h=>h.includes('平均日運量')||h.includes('日平均運量')||h.includes('平均每日運量'));
+      if(s>=0&&a>=0){headerRow=r;stationCol=s;averageCol=a;break;}
+    }
+    if(headerRow<0){warnings.push(`${month}：找不到「車站名稱／平均日運量」欄位`);return;}
+    for(let r=headerRow+1;r<grid.length;r++){
+      const rawStation=grid[r]?.[stationCol];
+      const rawAverage=grid[r]?.[averageCol];
+      if(rawStation===null||String(rawStation).trim()==='') continue;
+      const average=Number(String(rawAverage??'').replace(/,/g,'').trim());
+      if(!Number.isFinite(average)){warnings.push(`${month} 第${r+1}列：平均日運量不是數字`);continue;}
+      const parsed=parseRidershipStation(rawStation);
+      const days=daysInMonth(year,Number(month));
+      rows.push({
+        recordType:'monthlyAverage', year, month, ...parsed,
+        averageDaily:average, days, estimatedMonthly:average*days,
+        sourceFile:file.name, importedAt:new Date().toISOString(),
+        importKey:`${year}-${month}-${parsed.stationKey}`
+      });
+    }
   });
-  bindImeSafeSearch(document.getElementById('r-search'), value=>{ ridershipKeyword=value; }, renderRidership);
-  if(ridershipKeyword) focusAtEnd('r-search');
-  contentEl.querySelectorAll('[data-del-r]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      await dbDelete('ridership', Number(btn.dataset.delR));
-      await reloadCache(); renderRidership();
-    });
+  if(!rows.length) throw new Error('12個月份分頁中沒有找到可匯入的運量資料。');
+  const summary=`檔案：${file.name}\n年度：${year}\n讀取月份：${accepted.join('、')||'無'}\n忽略分頁：${ignored.join('、')||'無'}\n缺少月份：${missing.join('、')||'無'}\n可匯入：${rows.length.toLocaleString()} 筆\n警告：${warnings.length} 項`;
+  if(!confirm(`${summary}\n\n確定寫入本機資料庫嗎？相同年度、月份及工程代號將更新原資料。`)) return;
+  const existing=new Map(monthlyRidershipRecords().map(r=>[r.importKey||`${r.year}-${r.month}-${r.stationKey||r.code||r.station}`,r]));
+  let added=0,updated=0;
+  for(const row of rows){
+    const old=existing.get(row.importKey);
+    if(old){await dbPut('ridership',{...old,...row,id:old.id});updated++;}
+    else{await dbAdd('ridership',row);added++;}
+  }
+  lastRidershipImportReport=`成功匯入 ${year} 年：新增 ${added.toLocaleString()} 筆、更新 ${updated.toLocaleString()} 筆。${ignored.length?` 已忽略 ${ignored.length} 個非月份分頁。`:''}${missing.length?` 缺少 ${missing.join('、')} 月。`:''}`;
+  await reloadCache();
+  ridershipView.year=String(year);
+  renderRidership();
+}
+function renderRidership(){
+  const records=monthlyRidershipRecords();
+  const years=[...new Set(records.map(r=>Number(r.year)))].sort((a,b)=>b-a);
+  if(!ridershipView.year&&years.length) ridershipView.year=String(years[0]);
+  const year=Number(ridershipView.year||years[0]||new Date().getFullYear());
+  const stationMap=new Map();
+  records.forEach(r=>{
+    const key=r.stationKey||r.code||r.station;
+    if(!stationMap.has(key)) stationMap.set(key,r);
+  });
+  const stations=[...stationMap.entries()].sort((a,b)=>stationDisplay(a[1]).localeCompare(stationDisplay(b[1]),'zh-Hant'));
+  if(!ridershipView.stationKey&&stations.length) ridershipView.stationKey=stations[0][0];
+  if(ridershipView.stationKey&&!stationMap.has(ridershipView.stationKey)&&stations.length) ridershipView.stationKey=stations[0][0];
+  const metric=ridershipView.metric;
+  const stationKey=ridershipView.stationKey;
+  const selected=stationMap.get(stationKey);
+  const current=Array(12).fill(null),previous=Array(12).fill(null);
+  records.filter(r=>(r.stationKey||r.code||r.station)===stationKey).forEach(r=>{
+    const idx=Number(r.month)-1;
+    if(Number(r.year)===year) current[idx]=Number(r[metric]);
+    if(Number(r.year)===year-1) previous[idx]=Number(r[metric]);
+  });
+  const currentTotal=current.filter(Number.isFinite).reduce((a,b)=>a+b,0);
+  const validMonths=current.filter(Number.isFinite).length;
+  const comparableMonths=current.map((v,i)=>Number.isFinite(v)&&Number.isFinite(previous[i])?i:-1).filter(i=>i>=0);
+  const currentComparable=comparableMonths.reduce((sum,i)=>sum+current[i],0);
+  const previousComparable=comparableMonths.reduce((sum,i)=>sum+previous[i],0);
+  const currentKpi=metric==='averageDaily'&&validMonths?currentTotal/validMonths:currentTotal;
+  const yoy=previousComparable?((currentComparable-previousComparable)/previousComparable*100):null;
+  const currentYearMonth=records.filter(r=>Number(r.year)===year&&r.month===ridershipView.rankMonth);
+  const ranked=rankRows(currentYearMonth,metric);
+  const selectedRank=ranked.findIndex(r=>(r.stationKey||r.code||r.station)===stationKey)+1;
+  const top=ranked.slice(0,10), bottom=ranked.length>10?ranked.slice(-10).reverse():[];
+  const yearOptions=years.map(y=>`<option value="${y}" ${y===year?'selected':''}>${y} 年</option>`).join('');
+  const stationOptions=stations.map(([key,r])=>`<option value="${escapeHtml(key)}" ${key===stationKey?'selected':''}>${escapeHtml(stationDisplay(r))}</option>`).join('');
+  const rankList=(list,emptyText)=>list.length?`<ol class="rank-list">${list.map((r,i)=>{
+    const actualRank=ranked.indexOf(r)+1;
+    return `<li class="rank-item"><span class="rank-no">${actualRank}</span><div><div class="rank-station">${escapeHtml(r.station)}${r.code?` (${escapeHtml(r.code)})`:''}</div><div class="rank-line">${escapeHtml(r.lineName||'未識別線別')}</div></div><div class="rank-value">${formatRidershipValue(r[metric],metric)}</div></li>`;
+  }).join('')}</ol>`:`<div class="empty" style="padding:30px 10px;">${emptyText}</div>`;
+  let html=`<div class="card toolbar-card">
+      <div><h2 class="section-title">車站運量分析</h2><p class="section-subtitle">Excel 在本機解析；只讀取 01–12 月分頁，其他分頁自動忽略。</p></div>
+      <div class="toolbar-actions">
+        <button class="primary" id="ridership-import-btn">匯入年度 Excel</button>
+        <button class="secondary" id="ridership-delete-year-btn" ${years.length?'':'disabled'}>刪除本年度資料</button>
+        <input id="ridership-file-input" type="file" accept=".xlsx,.xls" style="display:none">
+      </div>
+    </div>
+    ${lastRidershipImportReport?`<div class="import-report">${escapeHtml(lastRidershipImportReport)}</div>`:''}
+    <div class="panel">
+      <div class="filter-grid">
+        <div class="field" style="margin:0"><label>分析年度</label><select id="ridership-year">${yearOptions||`<option value="${year}">${year} 年</option>`}</select></div>
+        <div class="field" style="margin:0"><label>車站（交會站依工程代號分開）</label><select id="ridership-station">${stationOptions||'<option value="">尚無資料</option>'}</select></div>
+        <div class="field" style="margin:0"><label>排名月份</label><select id="ridership-rank-month">${MONTH_LABELS.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}" ${ridershipView.rankMonth===String(i+1).padStart(2,'0')?'selected':''}>${m}</option>`).join('')}</select></div>
+        <div class="segmented" aria-label="運量指標">
+          <button data-metric="averageDaily" class="${metric==='averageDaily'?'active':''}">平均日運量</button>
+          <button data-metric="estimatedMonthly" class="${metric==='estimatedMonthly'?'active':''}">推估月運量</button>
+        </div>
+      </div>
+    </div>`;
+  if(!records.length){
+    html+=`<div class="panel empty"><div class="icon">📈</div><p>尚無年度運量資料</p><p class="muted">請匯入含 01–12 分頁的 Excel 檔開始分析。</p></div>`;
+  }else{
+    html+=`<div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">${year} 年資料月份</div><div class="stat-value">${validMonths}<small style="font-size:13px;color:var(--text-2)"> / 12</small></div><div class="stat-note">${selected?escapeHtml(stationDisplay(selected)):'—'}</div></div>
+      <div class="stat-card"><div class="stat-label">${metric==='averageDaily'?'月平均之平均':'年度推估總運量'}</div><div class="stat-value">${formatRidershipValue(currentKpi,metric)}</div><div class="stat-note">僅計入已有資料月份</div></div>
+      <div class="stat-card"><div class="stat-label">較 ${year-1} 年</div><div class="stat-value ${yoy===null?'neutral':yoy>=0?'positive':'negative'}">${yoy===null?'—':`${yoy>=0?'+':''}${yoy.toFixed(1)}%`}</div><div class="stat-note">${comparableMonths.length?`以 ${comparableMonths.length} 個相同月份比較`:'缺少前一年可比資料'}</div></div>
+      <div class="stat-card"><div class="stat-label">${Number(ridershipView.rankMonth)} 月排名</div><div class="stat-value">${selectedRank?`第 ${selectedRank} 名`:'—'}</div><div class="stat-note">${ranked.length?`共 ${ranked.length} 個站點代號`:'該月尚無資料'}</div></div>
+    </div>
+    <div class="analysis-grid">
+      <div>
+        <div class="panel"><h3 class="panel-title">每月運量趨勢</h3><p class="panel-note">${escapeHtml(stationDisplay(selected||{}))}｜${metric==='averageDaily'?'平均日運量':'推估月運量'}</p>
+          <div class="chart-legend"><span><i class="legend-dot" style="background:#1677ff"></i>${year}</span><span><i class="legend-dot" style="background:#9aa3af"></i>${year-1}（虛線）</span></div>
+          ${makeLineChart(current,previous,metric)}
+        </div>
+        <div class="panel"><h3 class="panel-title">較前一年變化</h3><p class="panel-note">綠色為增加，紅色為減少；滑鼠停留可查看精確百分比。</p>${makeYoyChart(current,previous)}</div>
+      </div>
+      <div class="panel"><h3 class="panel-title">${year} 年每月明細</h3><p class="panel-note">缺少資料顯示「—」，不會當作 0。</p>
+        <div class="data-table-wrap"><table class="data-table"><thead><tr><th>月份</th><th>${year}</th><th>${year-1}</th><th>年增率</th></tr></thead><tbody>
+          ${MONTH_LABELS.map((m,i)=>{
+            const change=Number.isFinite(current[i])&&Number.isFinite(previous[i])&&previous[i]!==0?(current[i]-previous[i])/previous[i]*100:null;
+            return `<tr><td>${m}</td><td>${formatRidershipValue(current[i],metric).replace(' 人次/日','').replace(' 人次','')}</td><td>${formatRidershipValue(previous[i],metric).replace(' 人次/日','').replace(' 人次','')}</td><td class="${change===null?'neutral':change>=0?'positive':'negative'}">${change===null?'—':`${change>=0?'+':''}${change.toFixed(1)}%`}</td></tr>`;
+          }).join('')}
+        </tbody></table></div>
+      </div>
+    </div>
+    <div class="rank-columns">
+      <div class="panel"><h3 class="panel-title">${Number(ridershipView.rankMonth)} 月前 10 名</h3><p class="panel-note">交會站各線獨立排名。</p>${rankList(top,'該月尚無資料')}</div>
+      <div class="panel"><h3 class="panel-title">${Number(ridershipView.rankMonth)} 月後 10 名</h3><p class="panel-note">灰色中性呈現；真正的 0 仍保留參與排名。</p>${rankList(bottom,ranked.length&&ranked.length<=10?'資料未超過 10 筆':'該月尚無資料')}</div>
+    </div>`;
+  }
+  contentEl.innerHTML=html;
+  document.getElementById('ridership-import-btn').addEventListener('click',()=>document.getElementById('ridership-file-input').click());
+  document.getElementById('ridership-file-input').addEventListener('change',async e=>{
+    const file=e.target.files[0]; if(!file)return;
+    try{await importRidershipWorkbook(file);}catch(error){alert(`Excel 匯入失敗：${error.message||error}`);}
+  });
+  document.getElementById('ridership-year').addEventListener('change',e=>{ridershipView.year=e.target.value;renderRidership();});
+  document.getElementById('ridership-station').addEventListener('change',e=>{ridershipView.stationKey=e.target.value;renderRidership();});
+  document.getElementById('ridership-rank-month').addEventListener('change',e=>{ridershipView.rankMonth=e.target.value;renderRidership();});
+  contentEl.querySelectorAll('[data-metric]').forEach(btn=>btn.addEventListener('click',()=>{ridershipView.metric=btn.dataset.metric;renderRidership();}));
+  const deleteBtn=document.getElementById('ridership-delete-year-btn');
+  if(deleteBtn) deleteBtn.addEventListener('click',async()=>{
+    const targets=monthlyRidershipRecords().filter(r=>Number(r.year)===year);
+    if(!targets.length||!confirm(`確定刪除 ${year} 年的 ${targets.length.toLocaleString()} 筆運量資料嗎？此動作無法復原。`))return;
+    for(const r of targets) await dbDelete('ridership',r.id);
+    await reloadCache();ridershipView.year='';ridershipView.stationKey='';renderRidership();
   });
 }
 
@@ -1894,7 +2275,7 @@ async function exportData(){
   for(const name of STORES){
     const rows = await dbGetAll(name);
     dump[name] = rows.map(r=>{
-      if(name==='pdfFiles') return {...r, data:r.data?bufToBase64(r.data):null};
+      if(name==='pdfFiles') return {...r, data: bufToBase64(r.data)};
       return r;
     });
   }
@@ -1912,15 +2293,7 @@ async function importData(file){
     for(const row of dump[name]){
       const copy = {...row};
       delete copy.id;
-      if(name==='pdfFiles'){
-        if(location.protocol==='file:'){
-          copy.data=null;
-          copy.originalStored=false;
-          if(copy.status?.startsWith('已完成')) copy.status='已完成（文字索引）';
-        }else{
-          copy.data=copy.data?base64ToBuf(copy.data):null;
-        }
-      }
+      if(name==='pdfFiles') copy.data = base64ToBuf(copy.data);
       await dbAdd(name, copy);
     }
   }
@@ -1932,14 +2305,10 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <div class="card" style="margin-top:0;">
-        <div class="row between"><strong style="font-size:14px;">本機資料狀態</strong><span class="badge cover">離線儲存</span></div>
-        <p class="muted" style="margin:8px 0 0;">${cache.pdfFiles.length} 個PDF來源・${cache.sopDocs.length} 份SOP・${cache.announcements.length} 則通告</p>
-        <p class="tiny-muted" style="margin:5px 0 0;">手機 GitHub PWA版本 v3.0・2026.07.31</p>
-      </div>
-      <p class="muted">匯出後可透過公司允許的方式傳到另一台裝置，再手動匯入。各裝置資料彼此獨立，不會自動同步。</p>
-      <button class="primary" id="dm-export" style="width:100%;margin-bottom:10px;">匯出至其他裝置</button>
-      <button class="secondary" id="dm-import" style="width:100%;">從其他裝置匯入</button>
+      <p class="tiny-muted" style="margin-top:0;">電腦專業版 v1.2・2026.08.04</p>
+      <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
+      <button class="primary" id="dm-export" style="width:100%;margin-bottom:10px;">匯出資料備份</button>
+      <button class="secondary" id="dm-import" style="width:100%;">匯入資料備份</button>
       <input type="file" id="dm-import-input" accept="application/json" style="display:none">
     </div>
   </div></div>`;
@@ -1967,9 +2336,6 @@ document.getElementById('data-mgmt-btn').addEventListener('click', openDataMgmt)
   await openDB();
   await reloadCache();
   render();
-  if('serviceWorker' in navigator && location.protocol !== 'file:'){
-    navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('離線快取註冊失敗：',err));
-  }
 })();
 </script>
 </body>

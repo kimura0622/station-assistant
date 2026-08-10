@@ -1,7 +1,7 @@
 {
   "name": "站務工作助手",
   "short_name": "站務助手",
-  "description": "離線查詢 SOP、通告、特殊事件與車站運量。",
+  "description": "離線查詢 SOP、通告、特殊事件與車站運量。手機 PWA v4.1。",
   "lang": "zh-Hant",
   "start_url": "./index.html",
   "scope": "./",

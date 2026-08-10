@@ -158,6 +158,11 @@
   .recent-search-item{display:inline-flex;align-items:center;background:#fff;border:.5px solid var(--border);border-radius:999px;overflow:hidden;}
   .recent-search-use,.recent-search-remove{border:0;background:transparent;min-height:34px;cursor:pointer;color:var(--text-2);}
   .recent-search-use{padding:6px 4px 6px 11px;font-size:12px;}.recent-search-remove{padding:4px 9px 4px 5px;color:var(--text-muted);font-size:15px;}
+  .match-label{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:650;margin-right:5px;background:#eaf2ff;color:#1d5fa7;}
+  .match-label.synonym{background:#f1ebff;color:#6842a6;}.match-label.notice{background:#fff1df;color:#92540a;}
+  .recent-view-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px;}
+  .recent-view-card{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;min-width:0;padding:10px 12px;background:#fff;border:.5px solid var(--border);border-radius:12px;}
+  .recent-view-open{border:0;background:transparent;text-align:left;min-width:0;flex:1;padding:0;color:var(--text);cursor:pointer;}.recent-view-open b,.recent-view-open span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.recent-view-open span{font-size:11px;color:var(--text-2);margin-top:3px;}.recent-view-remove{border:0;background:transparent;color:var(--danger);font-size:17px;padding:6px;cursor:pointer;}
   .procedure-heading-actions{display:flex;gap:7px;align-items:center;}
   .procedure-heading-actions button{min-height:34px;padding:6px 10px;font-size:12px;}
   .notice-grid{display:grid;grid-template-columns:1fr;gap:8px;}
@@ -276,7 +281,7 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="ridership"><span class="icon">▥</span>車站運量</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v4.1 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v4.3.1 · 資料僅存本機</div>
   </div>
 </div>
 
@@ -635,7 +640,7 @@ function renderSop(){
           <span class="search-page-badge">${r.source==='sop'?`PDF第${r.absolutePage}頁${r.clauseMarker?`・${r.clauseMarker}`:''}`:'通告'}</span>
           ${r.source==='sop'?`<button class="favorite-btn" data-fav-type="sop" data-fav-id="${r.docId}" data-fav-page="${r.absolutePage||''}" data-fav-title="${escapeHtml(r.docName)}">${isFav?'★':'☆'}</button>`:''}
         </div>
-        ${r.titleMatched?`<p class="tiny-muted" style="margin:6px 0 0;">✓ 文件名稱符合</p>`:''}
+        <div style="margin:6px 0 2px"><span class="match-label ${r.matchType==='synonym'?'synonym':r.matchType==='notice'?'notice':''}">${r.matchType==='notice'?'通告符合':r.matchType==='synonym'?'同義詞符合':'原文符合'}</span>${r.titleMatched?'<span class="tiny-muted">文件名稱符合</span>':''}</div>
         ${r.snippetsHtml.map(s=>`<p class="search-snippet">${s}</p>`).join('')}
         <button class="mini-action" data-teach-query="${escapeHtml(sopKeyword)}" style="margin-top:8px;">＋新增口語說法</button>
       </div>`;
@@ -861,6 +866,8 @@ function searchUnified(keyword){
   let out=[];
   if(searchSource!=='notice') out=out.concat(searchSop(keyword,plan));
   if(searchSource!=='sop') out=out.concat(searchNotices(keyword,plan));
+  const rawTerms=parseSearchTerms(keyword.replace(QUESTION_WORDS,' ').replace(/[，。？！、；：]/g,' ')).filter(t=>t.length>1);
+  out.forEach(r=>{if(r.source==='notice'){r.matchType='notice';return;}const doc=cache.sopDocs.find(d=>d.id===Number(r.docId)),page=doc?.pages?.find(p=>Number(p.absolutePage)===Number(r.absolutePage));const originalText=`${r.docName} ${page?.formattedText||page?.text||''}`;r.matchType=rawTerms.length&&rawTerms.every(term=>searchComparable(originalText).includes(searchComparable(term)))?'original':'synonym';});
   return out.sort((a,b)=>(b.score||0)-(a.score||0));
 }
 async function recordUnmatchedQuery(query){
@@ -1009,32 +1016,30 @@ function openProcedureNameDialog(item,existing=null){
     });
   });
 }
-async function addRecentView(item){
-  const key=savedKey(item);
-  const old=cache.recentViews.find(r=>savedKey(r)===key);
-  if(old) await dbDelete('recentViews',old.id);
-  await dbAdd('recentViews',{...item,viewedAt:new Date().toISOString()});
-  const rows=await dbGetAll('recentViews');
-  const excess=rows.sort((a,b)=>(b.viewedAt||'').localeCompare(a.viewedAt||'')).slice(5);
-  for(const row of excess) await dbDelete('recentViews',row.id);
-  cache.recentViews=await dbGetAll('recentViews');
-}
 function openSavedItem(item){
   if(item.type==='notice') openNoticeReader(item.noticeId);
-  else openSopPdfReader(item.docId,item.startPage||item.absolutePage,{startPage:item.startPage,endPage:item.endPage,favoriteId:item.id});
+  else openSopPdfReader(item.docId,item.startPage||item.absolutePage,{startPage:item.startPage,endPage:item.endPage,favoriteId:cache.favorites.includes(item)?item.id:undefined});
+}
+function documentVersionSummary(doc){
+  if(!doc)return '';
+  const cover=(doc.pages||[]).filter(p=>p.type==='cover').map(p=>readablePdfText(p.formattedText||p.text)).join(' ');
+  const version=cover.match(/最新版別\s*[:：]?\s*([^\s]{1,12})/)?.[1]||'';
+  const date=cover.match(/(?:首次|初次)發行日期\s*[:：]?\s*([0-9./年月日-]{6,14})/)?.[1]||'';
+  return [version&&`版別 ${version}`,date&&`首次發行 ${date}`].filter(Boolean).join('｜');
 }
 function renderShortcutSection(){
   const rows=sortedProcedures();
-  let html=`<div class="procedure-heading"><div><h2>常用程序</h2><span class="tiny-muted">${rows.length?`${rows.length} 個項目`:'尚未建立'}</span></div><div class="procedure-heading-actions"><button class="secondary" id="procedure-export">匯出</button><button class="secondary" id="procedure-import">匯入</button><input type="file" id="procedure-import-file" accept="application/json,.json" style="display:none"></div></div>`;
-  if(!rows.length) return html+`<div class="card"><p class="muted" style="margin:0;">在搜尋結果或 PDF 閱讀器點選「加入常用」，程序會直接顯示在這裡。</p></div>`;
-  html+='<div class="procedure-card-grid">';
+  let html=`<div class="procedure-heading"><div><h2>常用程序</h2><span class="tiny-muted">${rows.length?`${rows.length} 個項目`:'尚未建立'}</span></div><div class="procedure-heading-actions"><button class="secondary" id="procedure-export">整合匯出</button><button class="secondary" id="procedure-import">整合匯入</button><input type="file" id="procedure-import-file" accept="application/json,.json" style="display:none"></div></div>`;
+  if(!rows.length) html+=`<div class="card"><p class="muted" style="margin:0;">在搜尋結果或 PDF 閱讀器點選「加入常用」，程序會直接顯示在這裡。</p></div>`;
+  else html+='<div class="procedure-card-grid">';
   rows.forEach(f=>{
     html+=`<article class="procedure-card procedure-${PROCEDURE_COLORS.includes(f.color)?f.color:'blue'}" data-procedure-card="${f.id}" draggable="true" title="拖曳可調整順序">
       <button class="procedure-card-menu" data-procedure-menu="${f.id}" aria-label="設定">⋯</button>
       <p class="procedure-card-name">${escapeHtml(f.title)}</p>
     </article>`;
   });
-  return html+'</div>';
+  if(rows.length)html+='</div>';
+  return html;
 }
 
 function procedurePortableRecord(f){
@@ -1076,7 +1081,7 @@ async function chooseImportMode(fileData){
     overlay.querySelector('#pi-replace').onclick=()=>{overlay.remove();resolve('replace')};
   });
 }
-async function importProceduresFile(file){
+async function importProceduresFileLegacy(file){
   let data;try{data=JSON.parse(await file.text())}catch{return alert('無法讀取備份檔，請選擇由本程式匯出的 JSON 檔。')}
   if(data?.format!=='station-assistant-procedures'||!Array.isArray(data.procedures)) return alert('這不是常用程序備份檔。');
   const mode=await chooseImportMode(data);if(!mode)return;
@@ -1093,6 +1098,45 @@ async function importProceduresFile(file){
   }
   for(const a of data.annotations||[]){const newFavoriteId=idMap.get(Number(a.favoriteId));if(newFavoriteId)await dbAdd('annotations',{...a,id:undefined,favoriteId:newFavoriteId});}
   await reloadCache();render();alert(`匯入完成：新增 ${added} 張、略過重複 ${skipped} 張、找不到對應文件 ${unmatched} 張。`);
+}
+
+/* v4：書籤式輕量移轉；SOP 僅帶識別資訊，不夾帶 PDF 或全文。 */
+function transferText(value){return String(value||'').trim().toLowerCase();}
+function transferBufferFingerprint(data){if(!data)return '0-0';const bytes=new Uint8Array(data),step=Math.max(1,Math.floor(bytes.length/64));let hash=2166136261;for(let i=0;i<bytes.length;i+=step){hash^=bytes[i];hash=Math.imul(hash,16777619);}return `${bytes.length}-${(hash>>>0).toString(16)}`;}
+function transferDocumentKey(doc,pdf){return `${transferText(resolvedDocName(doc))}|${transferText(pdf?.fileName)}|${transferBufferFingerprint(pdf?.data)}`;}
+function transferNoticeKey(n){return n.number?`no:${transferText(n.number)}`:`title:${transferText(n.title)}|${n.date||''}`;}
+function transferProcedureKey(p){return `${p.type||'sop'}|${p.sourceDocumentKey||p.sourceNoticeKey||''}|${transferText(p.title)}|${p.startPage||p.absolutePage||''}|${p.endPage||''}`;}
+function transferAnnotationKey(a,favoriteId){return [favoriteId,a.pageNum||a.page||a.pdfPage||'',a.type||a.tool||'',a.x||'',a.y||'',a.width||a.w||'',a.height||a.h||'',a.color||'',a.thickness||''].join('|');}
+function portableProcedureV3(f){
+  const doc=f.type==='sop'?cache.sopDocs.find(d=>d.id===Number(f.docId)):null;
+  const pdf=doc?cache.pdfFiles.find(p=>p.id===Number(doc.pdfFileId)):null;
+  const notice=f.type==='notice'?cache.announcements.find(n=>n.id===Number(f.noticeId)):null;
+  const copy={...f,portableId:f.id,sourceDocumentKey:doc?transferDocumentKey(doc,pdf):'',sourceNoticeKey:notice?transferNoticeKey(notice):''};
+  delete copy.id;delete copy.docId;delete copy.noticeId;return copy;
+}
+async function exportProcedures(){
+  const procedures=sortedProcedures();
+  if(!procedures.length&&!cache.announcements.length)return alert('目前沒有常用程序或通告可匯出。');
+  const docIds=new Set(procedures.filter(p=>p.type==='sop').map(p=>Number(p.docId)));
+  cache.announcements.forEach(n=>(n.relations||[]).forEach(r=>docIds.add(Number(r.docId))));
+  const documents=cache.sopDocs.filter(d=>docIds.has(Number(d.id))).map(doc=>{const pdf=cache.pdfFiles.find(p=>p.id===Number(doc.pdfFileId));return {portableId:doc.id,documentKey:transferDocumentKey(doc,pdf),documentName:resolvedDocName(doc),pdfFileName:pdf?.fileName||'',pdfFingerprint:transferBufferFingerprint(pdf?.data)};});
+  const procedureIds=new Set(procedures.map(p=>Number(p.id)));
+  const annotations=cache.annotations.filter(a=>procedureIds.has(Number(a.favoriteId))).map(a=>{const copy={...a,portableFavoriteId:a.favoriteId};delete copy.id;delete copy.favoriteId;return copy;});
+  const announcements=cache.announcements.map(n=>{const copy={...n,portableId:n.id,noticeKey:transferNoticeKey(n),pdfData:n.pdfData?bufToBase64(n.pdfData):null,relationDocumentKeys:(n.relations||[]).map(r=>{const d=cache.sopDocs.find(x=>x.id===Number(r.docId)),p=d?cache.pdfFiles.find(x=>x.id===Number(d.pdfFileId)):null;return d?{documentKey:transferDocumentKey(d,p),startPage:r.startPage||null,endPage:r.endPage||r.startPage||null}:null;}).filter(Boolean),procedurePortableIds:(n.procedureIds||[]).map(id=>Number(id))};delete copy.id;delete copy.relations;delete copy.procedureIds;return copy;});
+  downloadJson({format:'station-assistant-transfer',version:4,mode:'lightweight',exportedAt:new Date().toISOString(),source:'mobile',documents,procedures:procedures.map(portableProcedureV3),annotations,announcements},`常用程序與通告輕量移轉-${new Date().toISOString().slice(0,10)}.json`);
+}
+async function transferSnapshot(){const out={};for(const name of ['pdfFiles','sopDocs','favorites','annotations','announcements'])out[name]=await dbGetAll(name);return out;}
+async function restoreTransferSnapshot(snapshot){for(const name of Object.keys(snapshot)){await dbClear(name);for(const row of snapshot[name])await dbAdd(name,row);}await reloadCache();}
+function chooseImportMode(fileData,stats){return new Promise(resolve=>{const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='95';overlay.innerHTML=`<div class="modal-sheet" style="height:auto;max-width:540px"><div class="modal-header"><b>匯入常用程序與通告</b><button id="pi-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body"><p style="line-height:1.75;margin-top:0">常用程序 <b>${stats.procedures}</b> 筆｜SOP 識別 <b>${stats.documents}</b> 份｜通告 <b>${stats.notices}</b> 筆｜通告 PDF <b>${stats.noticePdfs}</b> 份｜標註 <b>${stats.annotations}</b> 筆｜關聯 <b>${stats.relations}</b> 組</p><div class="import-report">輕量移轉不包含 SOP PDF 與正文。${stats.missingDocs.length?`<br><b style="color:var(--danger)">找不到相同 SOP：${stats.missingDocs.map(escapeHtml).join('、')}</b><br>相關常用程序、標註與 SOP 關聯將安全略過。`:'<br>所有 SOP 均可與本機文件配對。'}<br>匯入前會建立暫存快照；如發生錯誤，將自動回復。</div><button class="primary" id="pi-merge" style="width:100%;margin:12px 0 9px">合併匯入（建議）</button><button class="secondary" id="pi-replace" style="width:100%;color:var(--danger)">取代移轉資料</button></div></div>`;(document.getElementById('phone')||document.body).appendChild(overlay);overlay.querySelector('#pi-close').onclick=()=>{overlay.remove();resolve(null)};overlay.querySelector('#pi-merge').onclick=()=>{overlay.remove();resolve('merge')};overlay.querySelector('#pi-replace').onclick=()=>{overlay.remove();resolve('replace')};});}
+async function importProceduresFile(file){
+  let data;try{data=JSON.parse(await file.text())}catch{return alert('無法讀取移轉檔，請選擇由本程式匯出的 JSON 檔。')}
+  if(data?.format==='station-assistant-procedures')return importProceduresFileLegacy(file);
+  if(data?.format!=='station-assistant-transfer'||![3,4].includes(Number(data.version))||!Array.isArray(data.procedures)||!Array.isArray(data.announcements))return alert('這不是相容的「常用程序與通告移轉」檔。');
+  const localDocumentKeys=new Set(cache.sopDocs.map(d=>{const p=cache.pdfFiles.find(x=>x.id===Number(d.pdfFileId));return transferDocumentKey(d,p);}));
+  const missingDocs=(data.documents||[]).filter(d=>!localDocumentKeys.has(d.documentKey)&&!(Number(data.version)===3&&(data.pdfFiles||[]).some(p=>Number(p.portableId)===Number(d.portablePdfId)))).map(d=>d.documentName||d.name||d.pdfFileName||'未命名 SOP');
+  const stats={procedures:data.procedures.length,documents:(data.documents||[]).length,notices:data.announcements.length,noticePdfs:data.announcements.filter(n=>n.pdfData).length,annotations:(data.annotations||[]).length,relations:data.announcements.reduce((s,n)=>s+(n.relationDocumentKeys||[]).length+(n.procedurePortableIds||[]).length,0),missingDocs};
+  const mode=await chooseImportMode(data,stats);if(!mode)return;const snapshot=await transferSnapshot();const result={pdfAdded:0,docAdded:0,procedureAdded:0,procedureUpdated:0,annotationAdded:0,noticeAdded:0,noticeUpdated:0,unmatched:0};
+  try{if(mode==='replace'){await dbClear('favorites');await dbClear('annotations');await dbClear('announcements');await reloadCache();}const pdfIdMap=new Map();for(const source of data.pdfFiles||[]){const sourceData=base64ToBuf(source.data);let current=cache.pdfFiles.find(p=>transferText(p.fileName)===transferText(source.fileName)&&transferBufferFingerprint(p.data)===transferBufferFingerprint(sourceData));if(!current){const copy={...source,data:sourceData};delete copy.portableId;current={...copy,id:await dbAdd('pdfFiles',copy)};cache.pdfFiles.push(current);result.pdfAdded++;}pdfIdMap.set(Number(source.portableId),current.id);}const documentIdMap=new Map();for(const source of data.documents||[]){let current=cache.sopDocs.find(d=>{const p=cache.pdfFiles.find(x=>x.id===Number(d.pdfFileId));return transferDocumentKey(d,p)===source.documentKey;});if(!current){const copy={...source,pdfFileId:pdfIdMap.get(Number(source.portablePdfId))};delete copy.portableId;delete copy.portablePdfId;delete copy.documentKey;if(!copy.pdfFileId){result.unmatched++;continue;}current={...copy,id:await dbAdd('sopDocs',copy)};cache.sopDocs.push(current);result.docAdded++;}documentIdMap.set(source.documentKey,current.id);}const procedureIdMap=new Map(),existingProcedureKeys=new Map(cache.favorites.map(f=>{const d=f.type==='sop'?cache.sopDocs.find(x=>x.id===Number(f.docId)):null,p=d?cache.pdfFiles.find(x=>x.id===Number(d.pdfFileId)):null,n=f.type==='notice'?cache.announcements.find(x=>x.id===Number(f.noticeId)):null;return [transferProcedureKey({...f,sourceDocumentKey:d?transferDocumentKey(d,p):'',sourceNoticeKey:n?transferNoticeKey(n):''}),f];}));for(const source of data.procedures){const copy={...source};delete copy.portableId;const key=transferProcedureKey(source);let current=existingProcedureKeys.get(key);if(source.type==='sop')copy.docId=documentIdMap.get(source.sourceDocumentKey);delete copy.sourceDocumentKey;delete copy.sourceNoticeKey;if(source.type==='sop'&&!copy.docId){result.unmatched++;continue;}if(current){procedureIdMap.set(Number(source.portableId),current.id);result.procedureUpdated++;continue;}copy.sortOrder=cache.favorites.length+result.procedureAdded+1;const id=await dbAdd('favorites',copy);current={...copy,id};cache.favorites.push(current);existingProcedureKeys.set(key,current);procedureIdMap.set(Number(source.portableId),id);result.procedureAdded++;}const existingAnnotationKeys=new Set(cache.annotations.map(a=>transferAnnotationKey(a,a.favoriteId)));for(const source of data.annotations||[]){const favoriteId=procedureIdMap.get(Number(source.portableFavoriteId));if(!favoriteId){result.unmatched++;continue;}const copy={...source,favoriteId};delete copy.portableFavoriteId;const key=transferAnnotationKey(copy,favoriteId);if(existingAnnotationKeys.has(key))continue;await dbAdd('annotations',copy);existingAnnotationKeys.add(key);result.annotationAdded++;}const noticeIdMap=new Map(),existingNotices=new Map(cache.announcements.map(n=>[transferNoticeKey(n),n]));for(const source of data.announcements){const key=source.noticeKey||transferNoticeKey(source),copy={...source,pdfData:source.pdfData?base64ToBuf(source.pdfData):null};delete copy.portableId;delete copy.noticeKey;delete copy.relationDocumentKeys;delete copy.procedurePortableIds;copy.relations=(source.relationDocumentKeys||[]).map(r=>documentIdMap.has(r.documentKey)?{docId:documentIdMap.get(r.documentKey),startPage:r.startPage||null,endPage:r.endPage||r.startPage||null}:null).filter(Boolean);copy.procedureIds=(source.procedurePortableIds||[]).map(id=>procedureIdMap.get(Number(id))).filter(Boolean);let current=existingNotices.get(key);if(current){Object.assign(current,copy,{id:current.id,updatedAt:new Date().toISOString()});await dbPut('announcements',current);result.noticeUpdated++;}else{current={...copy,id:await dbAdd('announcements',copy)};cache.announcements.push(current);existingNotices.set(key,current);result.noticeAdded++;}noticeIdMap.set(Number(source.portableId),current.id);}for(const source of data.procedures.filter(p=>p.type==='notice')){const favoriteId=procedureIdMap.get(Number(source.portableId)),noticeId=noticeIdMap.get(Number((data.announcements.find(n=>(n.noticeKey||transferNoticeKey(n))===source.sourceNoticeKey)||{}).portableId));if(favoriteId&&noticeId){const f=cache.favorites.find(x=>x.id===favoriteId);f.noticeId=noticeId;await dbPut('favorites',f);}}await reloadCache();render();alert(`匯入完成：常用程序新增 ${result.procedureAdded}、沿用 ${result.procedureUpdated}；標註新增 ${result.annotationAdded}；通告新增 ${result.noticeAdded}、更新 ${result.noticeUpdated}；SOP PDF 新增 ${result.pdfAdded}。${result.unmatched?`\n未能配對 ${result.unmatched} 項，已安全略過。`:''}`);}catch(error){await restoreTransferSnapshot(snapshot);render();alert(`匯入失敗，已回復匯入前資料。\n${error.message||error}`);}
 }
 let procedureDragEndedAt=0;
 function bindProcedureCardSorting(){
@@ -1196,11 +1240,12 @@ function openCommonProcedures(){
     }else{
       html+='<div class="procedure-list">';
       rows.forEach((f,i)=>{
+        const sourceDoc=cache.sopDocs.find(d=>d.id===Number(f.docId)),sourceMeta=documentVersionSummary(sourceDoc);
         html+=`<div class="procedure-row" data-procedure-open="${f.id}">
           <div class="ios-entry-icon" style="width:32px;height:32px;font-size:15px;">${f.type==='notice'?'📣':'📄'}</div>
           <div class="ios-entry-main">
             <p class="ios-entry-title">${escapeHtml(f.title)}</p>
-            <p class="ios-entry-subtitle">${escapeHtml(f.sourceTitle||f.title)}${f.type==='sop'?`｜PDF第${f.startPage||f.absolutePage}～${f.endPage||f.absolutePage}頁`:'｜通告'}</p>
+            <p class="ios-entry-subtitle">${escapeHtml(f.sourceTitle||resolvedDocName(sourceDoc)||f.title)}${f.type==='sop'?`｜PDF第${f.startPage||f.absolutePage}～${f.endPage||f.absolutePage}頁${sourceMeta?`｜${escapeHtml(sourceMeta)}`:''}`:'｜通告'}</p>
           </div>
           ${procedureEditMode?`<div class="procedure-actions">
             <button class="mini-action" data-procedure-rename="${f.id}">設定</button>
@@ -1599,7 +1644,6 @@ async function openTextReader(docId,absolutePage,targetClause=null){
   if(!doc) return alert('找不到這份文件，請重新整理後再試。');
   await ensureDocumentLayoutText(doc);
   const displayName=resolvedDocName(doc);
-  await addRecentView({type:'sop',docId:doc.id,absolutePage,title:displayName});
   const eligible=doc.pages.filter(p=>p.type!=='cover' && !(sopFilter==='content' && p.type==='revision'));
   let currentIndex=eligible.findIndex(p=>p.absolutePage===absolutePage);
   if(currentIndex<0) currentIndex=0;
@@ -1831,7 +1875,7 @@ async function openSopPdfReader(docId,absolutePage,options={}){
       stage.querySelector(`[data-pdf-page="${currentPage}"]`)?.scrollIntoView({behavior:'smooth',block:'start'});
     }
   }
-  overlay.querySelector('#sop-pdf-close').addEventListener('click',()=>{closed=true;renderToken++;overlay.remove();});
+  overlay.querySelector('#sop-pdf-close').addEventListener('click',()=>{closed=true;renderToken++;overlay.remove();options.onClose?.();});
   overlay.querySelector('#sop-pdf-prev').addEventListener('click',()=>goToPage(currentPage-1));
   overlay.querySelector('#sop-pdf-next').addEventListener('click',()=>goToPage(currentPage+1));
   overlay.querySelector('#sop-pdf-jump').addEventListener('change',e=>goToPage(e.target.value));
@@ -1916,7 +1960,6 @@ function openRelatedNoticeList(docId,favoriteId=0){
 async function openNoticeReader(id){
   const notice=cache.announcements.find(n=>n.id===id);
   if(!notice) return;
-  await addRecentView({type:'notice',noticeId:notice.id,title:notice.title});
   const terms=parseSearchTerms(sopKeyword);
   const relations=(notice.relations||[]).map(r=>({...r,doc:cache.sopDocs.find(d=>d.id===Number(r.docId))})).filter(r=>r.doc);
   const linkedProcedures=(notice.procedureIds||[]).map(procedureId=>cache.favorites.find(f=>f.id===Number(procedureId)&&f.type==='sop')).filter(Boolean);
@@ -1939,8 +1982,8 @@ async function openNoticeReader(id){
   });
   document.getElementById('notice-open-pdf')?.addEventListener('click',()=>openRawPdfData(notice.pdfData,notice.title));
   const readerOverlay=document.getElementById('notice-reader');
-  readerOverlay.querySelectorAll('[data-notice-procedure]').forEach(btn=>btn.addEventListener('click',()=>{const f=cache.favorites.find(row=>row.id===Number(btn.dataset.noticeProcedure));if(f)openSopPdfReader(f.docId,f.startPage||f.absolutePage,{startPage:f.startPage,endPage:f.endPage,favoriteId:f.id});}));
-  readerOverlay.querySelectorAll('[data-notice-rel]').forEach(btn=>btn.addEventListener('click',()=>{const r=relations[Number(btn.dataset.noticeRel)];openSopPdfReader(r.doc.id,r.startPage||getSopPageBounds({type:'sop',docId:r.doc.id}).min,{startPage:r.startPage||undefined,endPage:r.endPage||undefined});}));
+  readerOverlay.querySelectorAll('[data-notice-procedure]').forEach(btn=>btn.addEventListener('click',()=>{const f=cache.favorites.find(row=>row.id===Number(btn.dataset.noticeProcedure));if(f){readerOverlay.style.display='none';openSopPdfReader(f.docId,f.startPage||f.absolutePage,{startPage:f.startPage,endPage:f.endPage,favoriteId:f.id,onClose:()=>{if(readerOverlay.isConnected)readerOverlay.style.display='flex';}});}}));
+  readerOverlay.querySelectorAll('[data-notice-rel]').forEach(btn=>btn.addEventListener('click',()=>{const r=relations[Number(btn.dataset.noticeRel)];readerOverlay.style.display='none';openSopPdfReader(r.doc.id,r.startPage||getSopPageBounds({type:'sop',docId:r.doc.id}).min,{startPage:r.startPage||undefined,endPage:r.endPage||undefined,onClose:()=>{if(readerOverlay.isConnected)readerOverlay.style.display='flex';}});}));
 }
 
 /* --- Document library tab --- */
@@ -2571,15 +2614,22 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.1・2026.08.10</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.3.1・2026.08.10</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
-      <button class="primary" id="dm-export" style="width:100%;margin-bottom:10px;">匯出資料備份</button>
-      <button class="secondary" id="dm-import" style="width:100%;">匯入資料備份</button>
+      <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
+      <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>
+      <input type="file" id="dm-transfer-input" accept="application/json,.json" style="display:none">
+      <p class="tiny-muted">裝置復原用</p>
+      <button class="secondary" id="dm-export" style="width:100%;margin-bottom:10px;">匯出完整資料備份</button>
+      <button class="secondary" id="dm-import" style="width:100%;">匯入完整資料備份</button>
       <input type="file" id="dm-import-input" accept="application/json" style="display:none">
     </div>
   </div></div>`;
   contentEl.insertAdjacentHTML('beforeend', html);
   document.getElementById('dm-close').addEventListener('click', ()=>document.getElementById('dm-overlay').remove());
+  document.getElementById('dm-transfer-export').addEventListener('click', exportProcedures);
+  document.getElementById('dm-transfer-import').addEventListener('click', ()=>document.getElementById('dm-transfer-input').click());
+  document.getElementById('dm-transfer-input').addEventListener('change', async e=>{const file=e.target.files?.[0];if(file)await importProceduresFile(file);e.target.value='';});
   document.getElementById('dm-export').addEventListener('click', exportData);
   document.getElementById('dm-import').addEventListener('click', ()=>document.getElementById('dm-import-input').click());
   document.getElementById('dm-import-input').addEventListener('change', async (e)=>{

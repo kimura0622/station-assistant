@@ -177,9 +177,10 @@
   .settings-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
   .settings-card{margin:0;cursor:pointer;}
   .annotation-layer{position:absolute;inset:0;z-index:3;pointer-events:none;}
-  .annotation-layer.active{pointer-events:auto;cursor:crosshair;touch-action:none;}
+  .annotation-layer.tools-open{pointer-events:auto;touch-action:pan-x pan-y pinch-zoom;}
+  .annotation-layer.drawing{cursor:crosshair;touch-action:none;}
   .annotation-mark{position:absolute;pointer-events:none;border-radius:2px;}
-  .annotation-layer.active .annotation-mark{pointer-events:auto;cursor:pointer;}
+  .annotation-layer.tools-open .annotation-mark{pointer-events:auto;cursor:pointer;}
   .annotation-mark.selected{outline:2px solid #007aff;outline-offset:2px;}
   .annotation-mark.highlight{background:rgba(255,220,0,.38);}
   .annotation-mark.underline{border-bottom:4px solid rgba(220,35,35,.9);}
@@ -281,7 +282,7 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="ridership"><span class="icon">▥</span>車站運量</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v4.4 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v4.5 · 資料僅存本機</div>
   </div>
 </div>
 
@@ -1798,12 +1799,12 @@ async function openSopPdfReader(docId,absolutePage,options={}){
       </div>
       <span class="pdf-reader-status" id="sop-pdf-status">PDF第 ${rangeStart}～${rangeEnd} 頁</span>
     </div>
-    <div class="annotation-tools" id="annotation-tools"><b style="font-size:12px">手動標註</b><button class="secondary active" data-annotation-tool="highlight">黃色螢光筆</button><button class="secondary" data-annotation-tool="underline">紅色底線</button><button class="secondary" id="annotation-delete" disabled>刪除所選</button><button class="secondary" id="annotation-undo">復原</button><button class="secondary" id="annotation-clear">清除此頁</button><span class="tiny-muted">螢光筆拖曳框選；底線由左向右畫，放開後自動水平。點既有標註可刪除。</span></div>
+    <div class="annotation-tools" id="annotation-tools"><b style="font-size:12px">手動標註</b><button class="secondary" data-annotation-tool="highlight" data-label="黃色螢光筆">黃色螢光筆</button><button class="secondary" data-annotation-tool="underline" data-label="紅色底線">紅色底線</button><button class="secondary" id="annotation-delete" disabled>刪除所選</button><button class="secondary" id="annotation-undo">復原</button><button class="secondary" id="annotation-clear">清除此頁</button><span class="tiny-muted" id="annotation-status">目前為移動頁面；點選工具後可連續標註，再按一次同一工具即可關閉。</span></div>
     <div class="pdf-reader-stage" id="sop-pdf-stage"><p style="color:#fff;text-align:center;padding:30px;">正在載入PDF…</p></div>
   </div>`;
   document.getElementById('phone').appendChild(overlay);
   const stage=overlay.querySelector('#sop-pdf-stage');
-  let pdf=null,zoom=1,renderToken=0,closed=false,annotationMode=false,annotationTool='highlight',draft=null,selectedAnnotationId=0;
+  let pdf=null,zoom=1,renderToken=0,closed=false,annotationMode=false,annotationTool=null,draft=null,selectedAnnotationId=0;
   const relatedNotices=cache.announcements.filter(n=>Number(options.favoriteId)
     ?(n.procedureIds||[]).some(id=>Number(id)===Number(options.favoriteId))
     :(n.relations||[]).some(r=>Number(r.docId)===doc.id));
@@ -1861,7 +1862,7 @@ async function openSopPdfReader(docId,absolutePage,options={}){
           await pdfjsLib.renderTextLayer({textContentSource:textContent,container:textLayer,viewport:cssViewport,textDivs:[]}).promise;
         }
       }catch(textError){console.warn('PDF文字圖層無法建立',textError);}
-      const annotationLayer=document.createElement('div');annotationLayer.className=`annotation-layer${annotationMode?' active':''}`;annotationLayer.dataset.annotationPage=pageNum;frame.appendChild(annotationLayer);renderAnnotationMarks(annotationLayer,pageNum);
+      const annotationLayer=document.createElement('div');annotationLayer.className='annotation-layer';annotationLayer.dataset.annotationPage=pageNum;frame.appendChild(annotationLayer);renderAnnotationMarks(annotationLayer,pageNum);updateAnnotationState();
     }
     if(scrollToCurrent&&!closed){
       requestAnimationFrame(()=>stage.querySelector(`[data-pdf-page="${currentPage}"]`)?.scrollIntoView({block:'start'}));
@@ -1881,7 +1882,7 @@ async function openSopPdfReader(docId,absolutePage,options={}){
       stage.querySelector(`[data-pdf-page="${currentPage}"]`)?.scrollIntoView({behavior:'smooth',block:'start'});
     }
   }
-  overlay.querySelector('#sop-pdf-close').addEventListener('click',()=>{closed=true;renderToken++;overlay.remove();options.onClose?.();});
+  overlay.querySelector('#sop-pdf-close').addEventListener('click',()=>{annotationMode=false;annotationTool=null;draft=null;closed=true;renderToken++;overlay.remove();options.onClose?.();});
   overlay.querySelector('#sop-pdf-prev').addEventListener('click',()=>goToPage(currentPage-1));
   overlay.querySelector('#sop-pdf-next').addEventListener('click',()=>goToPage(currentPage+1));
   overlay.querySelector('#sop-pdf-jump').addEventListener('change',e=>goToPage(e.target.value));
@@ -1892,10 +1893,9 @@ async function openSopPdfReader(docId,absolutePage,options={}){
   overlay.querySelector('#sop-pdf-related').addEventListener('click',()=>openRelatedNoticeList(doc.id,options.favoriteId));
   overlay.querySelector('#sop-pdf-annotate').addEventListener('click',()=>{
     const favoriteId=activeAnnotationFavoriteId();if(!favoriteId)return alert('請先將這段頁面加入常用程序，再進行標註。');
-    annotationMode=!annotationMode;overlay.querySelector('#annotation-tools').classList.toggle('active',annotationMode);overlay.querySelector('#sop-pdf-annotate').classList.toggle('active',annotationMode);
-    stage.querySelectorAll('.annotation-layer').forEach(x=>x.classList.toggle('active',annotationMode));
+    annotationMode=!annotationMode;if(!annotationMode){annotationTool=null;selectedAnnotationId=0;cancelDraft();}updateAnnotationState();
   });
-  overlay.querySelectorAll('[data-annotation-tool]').forEach(btn=>btn.addEventListener('click',()=>{annotationTool=btn.dataset.annotationTool;overlay.querySelectorAll('[data-annotation-tool]').forEach(x=>x.classList.toggle('active',x===btn));}));
+  overlay.querySelectorAll('[data-annotation-tool]').forEach(btn=>btn.addEventListener('click',()=>{const next=btn.dataset.annotationTool;annotationTool=annotationTool===next?null:next;selectedAnnotationId=0;cancelDraft();updateAnnotationState();}));
   overlay.querySelector('#annotation-undo').addEventListener('click',()=>removeLastAnnotation());
   overlay.querySelector('#annotation-delete').addEventListener('click',()=>deleteSelectedAnnotation());
   overlay.querySelector('#annotation-clear').addEventListener('click',()=>clearPageAnnotations());
@@ -1905,12 +1905,20 @@ async function openSopPdfReader(docId,absolutePage,options={}){
     if(await openProcedureNameDialog(item,existing||null)){options.favoriteId=(favoriteFor(item)||existing)?.id;updateControls();}
   });
   function activeAnnotationFavoriteId(){return Number(options.favoriteId)||Number(cache.favorites.find(f=>f.type==='sop'&&Number(f.docId)===doc.id&&currentPage>=Number(f.startPage||f.absolutePage)&&currentPage<=Number(f.endPage||f.absolutePage))?.id)||0;}
+  function updateAnnotationState(){
+    overlay.querySelector('#annotation-tools').classList.toggle('active',annotationMode);overlay.querySelector('#sop-pdf-annotate').classList.toggle('active',annotationMode);
+    overlay.querySelectorAll('[data-annotation-tool]').forEach(btn=>{const active=annotationMode&&annotationTool===btn.dataset.annotationTool;btn.classList.toggle('active',active);btn.textContent=active?`● ${btn.dataset.label}（使用中）`:btn.dataset.label;});
+    const status=overlay.querySelector('#annotation-status');if(status)status.textContent=annotationTool?`${annotationTool==='highlight'?'黃色螢光筆':'紅色底線'}使用中，可連續標註；再按一次同一工具可回到移動頁面。`:'目前為移動頁面；點選工具後可連續標註。';
+    stage.querySelectorAll('.annotation-layer').forEach(layer=>{layer.classList.toggle('tools-open',annotationMode);layer.classList.toggle('drawing',annotationMode&&!!annotationTool);});
+  }
+  function cancelDraft(){if(draft?.el?.isConnected)draft.el.remove();draft=null;}
   function pageAnnotations(pageNum){const favoriteId=activeAnnotationFavoriteId();return cache.annotations.filter(a=>Number(a.favoriteId)===favoriteId&&Number(a.page)===Number(pageNum));}
   function renderAnnotationMarks(layer,pageNum){layer.innerHTML='';pageAnnotations(pageNum).forEach(a=>{const mark=document.createElement('div');mark.className=`annotation-mark ${a.tool}${Number(a.id)===selectedAnnotationId?' selected':''}`;mark.dataset.annotationId=a.id;mark.style.left=`${a.x*100}%`;mark.style.top=`${a.y*100}%`;mark.style.width=`${a.w*100}%`;mark.style.height=`${Math.max(a.h*100,a.tool==='underline'?1.2:.8)}%`;layer.appendChild(mark);});overlay.querySelector('#annotation-delete').disabled=!selectedAnnotationId;}
   async function saveAnnotation(pageNum,rect,layer){const favoriteId=activeAnnotationFavoriteId();if(!favoriteId)return;await dbAdd('annotations',{favoriteId,page:pageNum,tool:annotationTool,...rect,createdAt:new Date().toISOString()});await reloadCache();renderAnnotationMarks(layer,pageNum);}
-  stage.addEventListener('pointerdown',e=>{if(!annotationMode)return;const mark=e.target.closest('.annotation-mark');if(mark){e.preventDefault();selectedAnnotationId=Number(mark.dataset.annotationId);stage.querySelectorAll('.annotation-layer').forEach(l=>renderAnnotationMarks(l,Number(l.dataset.annotationPage)));return;}const layer=e.target.closest('.annotation-layer');if(!layer)return;e.preventDefault();selectedAnnotationId=0;const r=layer.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;draft={layer,page:Number(layer.dataset.annotationPage),x,y};const el=document.createElement('div');el.className=`annotation-draft ${annotationTool}`;layer.appendChild(el);draft.el=el;layer.setPointerCapture?.(e.pointerId);});
+  stage.addEventListener('pointerdown',e=>{if(!annotationMode)return;const mark=e.target.closest('.annotation-mark');if(mark&&!annotationTool){e.preventDefault();selectedAnnotationId=Number(mark.dataset.annotationId);stage.querySelectorAll('.annotation-layer').forEach(l=>renderAnnotationMarks(l,Number(l.dataset.annotationPage)));return;}if(!annotationTool)return;const layer=e.target.closest('.annotation-layer');if(!layer)return;e.preventDefault();selectedAnnotationId=0;const r=layer.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;draft={layer,page:Number(layer.dataset.annotationPage),x,y,tool:annotationTool};const el=document.createElement('div');el.className=`annotation-draft ${annotationTool}`;layer.appendChild(el);draft.el=el;layer.setPointerCapture?.(e.pointerId);});
   stage.addEventListener('pointermove',e=>{if(!draft)return;e.preventDefault();const r=draft.layer.getBoundingClientRect(),x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));const left=Math.min(draft.x,x),w=Math.abs(x-draft.x),top=annotationTool==='underline'?draft.y:Math.min(draft.y,y),h=annotationTool==='underline'?.012:Math.abs(y-draft.y);Object.assign(draft.el.style,{left:`${left*100}%`,top:`${top*100}%`,width:`${w*100}%`,height:`${h*100}%`});});
-  stage.addEventListener('pointerup',async e=>{if(!draft)return;e.preventDefault();const r=draft.layer.getBoundingClientRect(),x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));const rect=annotationTool==='underline'?{x:Math.min(draft.x,x),y:draft.y,w:Math.abs(x-draft.x),h:.012}:{x:Math.min(draft.x,x),y:Math.min(draft.y,y),w:Math.abs(x-draft.x),h:Math.abs(y-draft.y)};draft.el.remove();const layer=draft.layer,page=draft.page;draft=null;if(rect.w>.008&&(annotationTool==='underline'||rect.h>.002))await saveAnnotation(page,rect,layer);});
+  stage.addEventListener('pointerup',async e=>{if(!draft)return;e.preventDefault();const r=draft.layer.getBoundingClientRect(),x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height)),tool=draft.tool;const rect=tool==='underline'?{x:Math.min(draft.x,x),y:draft.y,w:Math.abs(x-draft.x),h:.012}:{x:Math.min(draft.x,x),y:Math.min(draft.y,y),w:Math.abs(x-draft.x),h:Math.abs(y-draft.y)};draft.el.remove();const layer=draft.layer,page=draft.page;draft=null;if(rect.w>.008&&(tool==='underline'||rect.h>.002)){const activeTool=annotationTool;annotationTool=tool;await saveAnnotation(page,rect,layer);annotationTool=activeTool;}});
+  stage.addEventListener('pointercancel',()=>cancelDraft());
   async function deleteSelectedAnnotation(){if(!selectedAnnotationId)return;await dbDelete('annotations',selectedAnnotationId);selectedAnnotationId=0;await reloadCache();stage.querySelectorAll('.annotation-layer').forEach(l=>renderAnnotationMarks(l,Number(l.dataset.annotationPage)));}
   async function removeLastAnnotation(){const rows=pageAnnotations(currentPage).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));if(!rows.length)return;await dbDelete('annotations',rows[0].id);await reloadCache();const layer=stage.querySelector(`[data-annotation-page="${currentPage}"]`);if(layer)renderAnnotationMarks(layer,currentPage);}
   async function clearPageAnnotations(){const rows=pageAnnotations(currentPage);if(!rows.length)return;if(!confirm(`確定清除 PDF 第 ${currentPage} 頁的全部標註嗎？`))return;for(const row of rows)await dbDelete('annotations',row.id);await reloadCache();const layer=stage.querySelector(`[data-annotation-page="${currentPage}"]`);if(layer)renderAnnotationMarks(layer,currentPage);}
@@ -2622,7 +2630,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.4・2026.08.11</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.5・2026.08.11</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

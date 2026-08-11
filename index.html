@@ -160,9 +160,6 @@
   .recent-search-use{padding:6px 4px 6px 11px;font-size:12px;}.recent-search-remove{padding:4px 9px 4px 5px;color:var(--text-muted);font-size:15px;}
   .match-label{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:650;margin-right:5px;background:#eaf2ff;color:#1d5fa7;}
   .match-label.synonym{background:#f1ebff;color:#6842a6;}.match-label.notice{background:#fff1df;color:#92540a;}
-  .recent-view-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px;}
-  .recent-view-card{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;min-width:0;padding:10px 12px;background:#fff;border:.5px solid var(--border);border-radius:12px;}
-  .recent-view-open{border:0;background:transparent;text-align:left;min-width:0;flex:1;padding:0;color:var(--text);cursor:pointer;}.recent-view-open b,.recent-view-open span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.recent-view-open span{font-size:11px;color:var(--text-2);margin-top:3px;}.recent-view-remove{border:0;background:transparent;color:var(--danger);font-size:17px;padding:6px;cursor:pointer;}
   .procedure-heading-actions{display:flex;gap:7px;align-items:center;}
   .procedure-heading-actions button{min-height:34px;padding:6px 10px;font-size:12px;}
   .notice-grid{display:grid;grid-template-columns:1fr;gap:8px;}
@@ -180,11 +177,14 @@
   .settings-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
   .settings-card{margin:0;cursor:pointer;}
   .annotation-layer{position:absolute;inset:0;z-index:3;pointer-events:none;}
-  .annotation-layer.active{pointer-events:auto;cursor:crosshair;}
+  .annotation-layer.active{pointer-events:auto;cursor:crosshair;touch-action:none;}
   .annotation-mark{position:absolute;pointer-events:none;border-radius:2px;}
+  .annotation-layer.active .annotation-mark{pointer-events:auto;cursor:pointer;}
+  .annotation-mark.selected{outline:2px solid #007aff;outline-offset:2px;}
   .annotation-mark.highlight{background:rgba(255,220,0,.38);}
   .annotation-mark.underline{border-bottom:4px solid rgba(220,35,35,.9);}
   .annotation-draft{position:absolute;border:2px dashed #ff9f0a;background:rgba(255,220,0,.24);pointer-events:none;}
+  .annotation-draft.underline{border:0;border-bottom:4px solid rgba(220,35,35,.9);background:transparent;}
   .annotation-tools{display:none;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 12px;background:#fff8e8;border-bottom:.5px solid #ead7aa;}
   .annotation-tools.active{display:flex;}
 
@@ -281,7 +281,7 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="ridership"><span class="icon">▥</span>車站運量</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v4.3.1 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v4.4 · 資料僅存本機</div>
   </div>
 </div>
 
@@ -451,17 +451,15 @@ async function parsePdfArrayBuffer(buf,onProgress=()=>{}){
   const pages = [];
   onProgress(0,pdf.numPages);
   for(let i=1;i<=pdf.numPages;i++){
-    const page = await pdf.getPage(i);
-    const tc = await page.getTextContent();
-    const text = tc.items.map(it=>it.str).join(' ');
-    const viewport = page.getViewport({scale:1});
-    const formattedText=extractFormattedText(tc,viewport.height);
-    const positionedText = tc.items.map(it=>({
-      text:(it.str || '').trim(),
-      x:it.transform ? it.transform[4] : 0,
-      y:it.transform ? it.transform[5] : 0
-    })).filter(it=>it.text);
-    pages.push({absolutePage:i, text, formattedText, positionedText, pageWidth:viewport.width, pageHeight:viewport.height});
+    try{
+      const page = await pdf.getPage(i), tc = await page.getTextContent(), viewport = page.getViewport({scale:1});
+      const text = tc.items.map(it=>it.str).join(' '), formattedText=extractFormattedText(tc,viewport.height);
+      const positionedText = tc.items.map(it=>({text:(it.str||'').trim(),x:it.transform?it.transform[4]:0,y:it.transform?it.transform[5]:0})).filter(it=>it.text);
+      pages.push({absolutePage:i,text,formattedText,positionedText,pageWidth:viewport.width,pageHeight:viewport.height});
+    }catch(error){
+      console.warn(`PDF 第 ${i} 頁文字解析失敗`,error);
+      pages.push({absolutePage:i,text:'',formattedText:'',positionedText:[],pageWidth:0,pageHeight:0,parseError:String(error?.message||error)});
+    }
     onProgress(i,pdf.numPages);
   }
   return pages;
@@ -1245,7 +1243,6 @@ function openCommonProcedures(){
           <div class="ios-entry-icon" style="width:32px;height:32px;font-size:15px;">${f.type==='notice'?'📣':'📄'}</div>
           <div class="ios-entry-main">
             <p class="ios-entry-title">${escapeHtml(f.title)}</p>
-            <p class="ios-entry-subtitle">${escapeHtml(f.sourceTitle||resolvedDocName(sourceDoc)||f.title)}${f.type==='sop'?`｜PDF第${f.startPage||f.absolutePage}～${f.endPage||f.absolutePage}頁${sourceMeta?`｜${escapeHtml(sourceMeta)}`:''}`:'｜通告'}</p>
           </div>
           ${procedureEditMode?`<div class="procedure-actions">
             <button class="mini-action" data-procedure-rename="${f.id}">設定</button>
@@ -1362,6 +1359,13 @@ async function handlePdfImport(file){
   }
 }
 function typeLabel(t){ return t==='cover'?'封面':(t==='revision'?'修訂紀錄':'正文'); }
+function buildPdfQualityReport(docs){
+  const pages=docs.flatMap(d=>d.pages||[]), compact=p=>String(p.formattedText||p.text||'').replace(/\s+/g,'');
+  const cover=pages.filter(p=>p.type==='cover').length, revision=pages.filter(p=>p.type==='revision').length;
+  const failed=pages.filter(p=>p.parseError).length, noText=pages.filter(p=>!p.parseError&&!compact(p)).length, suspectedScan=pages.filter(p=>{const n=compact(p).length;return !p.parseError&&n>0&&n<12;}).length, content=pages.length-cover-revision;
+  return {total:pages.length,content,cover,revision,noText,suspectedScan,failed,searchable:noText===0&&suspectedScan===0&&failed===0};
+}
+function qualityReportHtml(docs){const q=buildPdfQualityReport(docs);return `<div class="import-report" style="margin-bottom:12px"><b>PDF 品質報告</b><br>總頁數 ${q.total}｜正文 ${q.content}｜封面／修訂 ${q.cover+q.revision}<br>無文字頁 ${q.noText}｜疑似掃描頁 ${q.suspectedScan}｜無法解析頁 ${q.failed}<br><b style="color:${q.searchable?'#198754':'var(--danger)'}">${q.searchable?'可全文搜尋':'部分頁面僅能查看 PDF'}</b>${q.suspectedScan?'（疑似掃描頁仍可能無法搜尋）':''}</div>`;}
 function labelDisplay(lab){
   if(!lab || lab.type==='none') return '未偵測到頁碼';
   if(lab.type==='roman') return `羅馬數字 (值=${lab.value})`;
@@ -1400,7 +1404,7 @@ function showImportReview(docs, pdfFileId){
   const html = `<div class="modal-overlay"><div class="modal-sheet">
     <div class="modal-header"><span style="font-weight:500;">確認匯入結果（共${docs.length}份）</span>
     <button id="review-cancel" style="background:none;border:none;font-size:18px;">✕</button></div>
-    <div class="modal-body" id="review-body">${renderReviewBody(docs)}</div>
+    <div class="modal-body"><div id="quality-report">${qualityReportHtml(docs)}</div><div id="review-body">${renderReviewBody(docs)}</div></div>
     <div style="padding:12px 16px;border-top:0.5px solid var(--border);background:var(--card);">
       <button class="primary" id="review-confirm" style="width:100%;">確認匯入</button>
     </div>
@@ -1431,6 +1435,7 @@ function showImportReview(docs, pdfFileId){
         merging.pages.forEach((p,idx)=>{ if(idx===0) p.type='content'; });
         docs[i-1].pages = docs[i-1].pages.concat(merging.pages);
         docs.splice(i,1);
+        document.getElementById('quality-report').innerHTML = qualityReportHtml(docs);
         document.getElementById('review-body').innerHTML = renderReviewBody(docs);
         bindReviewEvents();
       });
@@ -1453,6 +1458,7 @@ function showImportReview(docs, pdfFileId){
     if(pdfRec){
       pdfRec.documentCount=docs.length;
       pdfRec.status='已完成';
+      pdfRec.qualityReport=buildPdfQualityReport(docs);
       await dbPut('pdfFiles',pdfRec);
     }
     await reloadCache();
@@ -1792,12 +1798,12 @@ async function openSopPdfReader(docId,absolutePage,options={}){
       </div>
       <span class="pdf-reader-status" id="sop-pdf-status">PDF第 ${rangeStart}～${rangeEnd} 頁</span>
     </div>
-    <div class="annotation-tools" id="annotation-tools"><b style="font-size:12px">手動標註</b><button class="secondary active" data-annotation-tool="highlight">黃色螢光筆</button><button class="secondary" data-annotation-tool="underline">紅色底線</button><button class="secondary" id="annotation-undo">復原</button><button class="secondary" id="annotation-clear">清除此頁</button><span class="tiny-muted">在頁面拖曳框選；標註不會改寫原 PDF</span></div>
+    <div class="annotation-tools" id="annotation-tools"><b style="font-size:12px">手動標註</b><button class="secondary active" data-annotation-tool="highlight">黃色螢光筆</button><button class="secondary" data-annotation-tool="underline">紅色底線</button><button class="secondary" id="annotation-delete" disabled>刪除所選</button><button class="secondary" id="annotation-undo">復原</button><button class="secondary" id="annotation-clear">清除此頁</button><span class="tiny-muted">螢光筆拖曳框選；底線由左向右畫，放開後自動水平。點既有標註可刪除。</span></div>
     <div class="pdf-reader-stage" id="sop-pdf-stage"><p style="color:#fff;text-align:center;padding:30px;">正在載入PDF…</p></div>
   </div>`;
   document.getElementById('phone').appendChild(overlay);
   const stage=overlay.querySelector('#sop-pdf-stage');
-  let pdf=null,zoom=1,renderToken=0,closed=false,annotationMode=false,annotationTool='highlight',draft=null;
+  let pdf=null,zoom=1,renderToken=0,closed=false,annotationMode=false,annotationTool='highlight',draft=null,selectedAnnotationId=0;
   const relatedNotices=cache.announcements.filter(n=>Number(options.favoriteId)
     ?(n.procedureIds||[]).some(id=>Number(id)===Number(options.favoriteId))
     :(n.relations||[]).some(r=>Number(r.docId)===doc.id));
@@ -1891,6 +1897,7 @@ async function openSopPdfReader(docId,absolutePage,options={}){
   });
   overlay.querySelectorAll('[data-annotation-tool]').forEach(btn=>btn.addEventListener('click',()=>{annotationTool=btn.dataset.annotationTool;overlay.querySelectorAll('[data-annotation-tool]').forEach(x=>x.classList.toggle('active',x===btn));}));
   overlay.querySelector('#annotation-undo').addEventListener('click',()=>removeLastAnnotation());
+  overlay.querySelector('#annotation-delete').addEventListener('click',()=>deleteSelectedAnnotation());
   overlay.querySelector('#annotation-clear').addEventListener('click',()=>clearPageAnnotations());
   overlay.querySelector('#sop-pdf-favorite').addEventListener('click',async()=>{
     const item={type:'sop',docId:doc.id,absolutePage:currentPage,startPage:rangeStart,endPage:rangeEnd,title:displayName,sourceTitle:displayName};
@@ -1899,11 +1906,12 @@ async function openSopPdfReader(docId,absolutePage,options={}){
   });
   function activeAnnotationFavoriteId(){return Number(options.favoriteId)||Number(cache.favorites.find(f=>f.type==='sop'&&Number(f.docId)===doc.id&&currentPage>=Number(f.startPage||f.absolutePage)&&currentPage<=Number(f.endPage||f.absolutePage))?.id)||0;}
   function pageAnnotations(pageNum){const favoriteId=activeAnnotationFavoriteId();return cache.annotations.filter(a=>Number(a.favoriteId)===favoriteId&&Number(a.page)===Number(pageNum));}
-  function renderAnnotationMarks(layer,pageNum){layer.innerHTML='';pageAnnotations(pageNum).forEach(a=>{const mark=document.createElement('div');mark.className=`annotation-mark ${a.tool}`;mark.style.left=`${a.x*100}%`;mark.style.top=`${a.y*100}%`;mark.style.width=`${a.w*100}%`;mark.style.height=`${Math.max(a.h*100,a.tool==='underline'?1.2:.8)}%`;layer.appendChild(mark);});}
+  function renderAnnotationMarks(layer,pageNum){layer.innerHTML='';pageAnnotations(pageNum).forEach(a=>{const mark=document.createElement('div');mark.className=`annotation-mark ${a.tool}${Number(a.id)===selectedAnnotationId?' selected':''}`;mark.dataset.annotationId=a.id;mark.style.left=`${a.x*100}%`;mark.style.top=`${a.y*100}%`;mark.style.width=`${a.w*100}%`;mark.style.height=`${Math.max(a.h*100,a.tool==='underline'?1.2:.8)}%`;layer.appendChild(mark);});overlay.querySelector('#annotation-delete').disabled=!selectedAnnotationId;}
   async function saveAnnotation(pageNum,rect,layer){const favoriteId=activeAnnotationFavoriteId();if(!favoriteId)return;await dbAdd('annotations',{favoriteId,page:pageNum,tool:annotationTool,...rect,createdAt:new Date().toISOString()});await reloadCache();renderAnnotationMarks(layer,pageNum);}
-  stage.addEventListener('pointerdown',e=>{if(!annotationMode)return;const layer=e.target.closest('.annotation-layer');if(!layer)return;e.preventDefault();const r=layer.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;draft={layer,page:Number(layer.dataset.annotationPage),x,y,startX:e.clientX,startY:e.clientY};const el=document.createElement('div');el.className='annotation-draft';layer.appendChild(el);draft.el=el;layer.setPointerCapture?.(e.pointerId);});
-  stage.addEventListener('pointermove',e=>{if(!draft)return;const r=draft.layer.getBoundingClientRect(),x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));const left=Math.min(draft.x,x),top=Math.min(draft.y,y),w=Math.abs(x-draft.x),h=Math.abs(y-draft.y);Object.assign(draft.el.style,{left:`${left*100}%`,top:`${top*100}%`,width:`${w*100}%`,height:`${h*100}%`});});
-  stage.addEventListener('pointerup',async e=>{if(!draft)return;const r=draft.layer.getBoundingClientRect(),x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height)),rect={x:Math.min(draft.x,x),y:Math.min(draft.y,y),w:Math.abs(x-draft.x),h:Math.abs(y-draft.y)};draft.el.remove();const layer=draft.layer,page=draft.page;draft=null;if(rect.w>.005&&rect.h>.002)await saveAnnotation(page,rect,layer);});
+  stage.addEventListener('pointerdown',e=>{if(!annotationMode)return;const mark=e.target.closest('.annotation-mark');if(mark){e.preventDefault();selectedAnnotationId=Number(mark.dataset.annotationId);stage.querySelectorAll('.annotation-layer').forEach(l=>renderAnnotationMarks(l,Number(l.dataset.annotationPage)));return;}const layer=e.target.closest('.annotation-layer');if(!layer)return;e.preventDefault();selectedAnnotationId=0;const r=layer.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;draft={layer,page:Number(layer.dataset.annotationPage),x,y};const el=document.createElement('div');el.className=`annotation-draft ${annotationTool}`;layer.appendChild(el);draft.el=el;layer.setPointerCapture?.(e.pointerId);});
+  stage.addEventListener('pointermove',e=>{if(!draft)return;e.preventDefault();const r=draft.layer.getBoundingClientRect(),x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));const left=Math.min(draft.x,x),w=Math.abs(x-draft.x),top=annotationTool==='underline'?draft.y:Math.min(draft.y,y),h=annotationTool==='underline'?.012:Math.abs(y-draft.y);Object.assign(draft.el.style,{left:`${left*100}%`,top:`${top*100}%`,width:`${w*100}%`,height:`${h*100}%`});});
+  stage.addEventListener('pointerup',async e=>{if(!draft)return;e.preventDefault();const r=draft.layer.getBoundingClientRect(),x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));const rect=annotationTool==='underline'?{x:Math.min(draft.x,x),y:draft.y,w:Math.abs(x-draft.x),h:.012}:{x:Math.min(draft.x,x),y:Math.min(draft.y,y),w:Math.abs(x-draft.x),h:Math.abs(y-draft.y)};draft.el.remove();const layer=draft.layer,page=draft.page;draft=null;if(rect.w>.008&&(annotationTool==='underline'||rect.h>.002))await saveAnnotation(page,rect,layer);});
+  async function deleteSelectedAnnotation(){if(!selectedAnnotationId)return;await dbDelete('annotations',selectedAnnotationId);selectedAnnotationId=0;await reloadCache();stage.querySelectorAll('.annotation-layer').forEach(l=>renderAnnotationMarks(l,Number(l.dataset.annotationPage)));}
   async function removeLastAnnotation(){const rows=pageAnnotations(currentPage).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));if(!rows.length)return;await dbDelete('annotations',rows[0].id);await reloadCache();const layer=stage.querySelector(`[data-annotation-page="${currentPage}"]`);if(layer)renderAnnotationMarks(layer,currentPage);}
   async function clearPageAnnotations(){const rows=pageAnnotations(currentPage);if(!rows.length)return;if(!confirm(`確定清除 PDF 第 ${currentPage} 頁的全部標註嗎？`))return;for(const row of rows)await dbDelete('annotations',row.id);await reloadCache();const layer=stage.querySelector(`[data-annotation-page="${currentPage}"]`);if(layer)renderAnnotationMarks(layer,currentPage);}
   stage.addEventListener('click',e=>{
@@ -2614,7 +2622,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.3.1・2026.08.10</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.4・2026.08.11</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=4.6.2"></script>
-<script src="./vendor/xlsx.full.min.js?v=4.6.2"></script>
+<script src="./vendor/pdf.min.js?v=4.6.3"></script>
+<script src="./vendor/xlsx.full.min.js?v=4.6.3"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -285,12 +285,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="ridership"><span class="icon">▥</span>車站運量</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v4.6.2 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v4.6.3 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=4.6.2';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=4.6.3';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -2317,10 +2317,13 @@ const RIDERSHIP_LINES = {
 const MONTH_LABELS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 function parseRidershipStation(raw){
   const source = String(raw||'').replace(/\s+/g,' ').trim();
-  const match = source.match(/^(.*?)\s*[（(]\s*((?:BR|BL|R|G|O|Y)\s*\d*)\s*[)）]\s*$/i);
+  const match = source.match(/^(.*?)\s*[（(]\s*((?:BR|BL|B|R|G|O|Y)\s*\d+[A-Z]?)\s*[)）]\s*$/i);
   if(!match) return {station:source, code:'', lineCode:'', lineName:'未識別線別', stationKey:source};
   const station = match[1].trim();
-  const code = match[2].replace(/\s+/g,'').toUpperCase();
+  let code = match[2].replace(/\s+/g,'').toUpperCase();
+  const legacyB=code.match(/^B(\d{1,2})$/);
+  if(legacyB&&Number(legacyB[1])>=1&&Number(legacyB[1])<=11) code=`BR${Number(legacyB[1])+13}`;
+  if(code==='G01A') code='G03A';
   const prefix = (code.match(/^(BR|BL|R|G|O|Y)/)||[])[1] || '';
   return {station, code, lineCode:prefix, lineName:RIDERSHIP_LINES[prefix]||'未識別線別', stationKey:code||source};
 }
@@ -2431,7 +2434,7 @@ async function importRidershipEvents(file){
   const validCodes=new Set(['BR','R','G','O','BL']),rows=[],warnings=[];
   for(let r=header+1;r<grid.length;r++){
     const name=String(grid[r]?.[cols.name]??'').trim(),startDate=excelDateText(grid[r]?.[cols.start]);if(!name&&!startDate)continue;
-    const stationCodes=String(grid[r]?.[cols.stations]??'').toUpperCase().split(/[、,，;；\s]+/).map(s=>s.trim()).filter(Boolean).filter(code=>validCodes.has((code.match(/^(BR|BL|R|G|O)/)||[])[1]));
+    const stationCodes=String(grid[r]?.[cols.stations]??'').toUpperCase().split(/[、,，;；\s]+/).map(s=>parseRidershipStation(`活動站（${s.trim()}）`).code).filter(Boolean).filter(code=>validCodes.has((code.match(/^(BR|BL|R|G|O)/)||[])[1]));
     if(!name||!startDate||!stationCodes.length){warnings.push(`第${r+1}列資料不完整或沒有公司權管車站代號`);continue;}
     rows.push({id:`${startDate}-${name}-${stationCodes.join('-')}`,name,startDate,endDate:cols.end>=0?excelDateText(grid[r]?.[cols.end]):'',stationCodes,venue:cols.venue>=0?String(grid[r]?.[cols.venue]??'').trim():'',type:cols.type>=0?String(grid[r]?.[cols.type]??'').trim():'',attendance:cols.attendance>=0?String(grid[r]?.[cols.attendance]??'').trim():'',note:cols.note>=0?String(grid[r]?.[cols.note]??'').trim():'',sourceFile:file.name});
   }
@@ -2619,7 +2622,7 @@ function renderRidershipLegacy(){
   });
 }
 
-/* v4.6.2：手機運量精簡介面；月份、摘要、排名與活動使用同一選定月份。 */
+/* v4.6.3：相容舊 B1～B11 與 G01A 代號，正規化為現行工程代號。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -2746,7 +2749,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.6.2・2026.08.13</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.6.3・2026.08.13</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

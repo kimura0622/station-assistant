@@ -1,11 +1,11 @@
-const CACHE_NAME = 'station-assistant-mobile-github-v4.5';
+const CACHE_NAME = 'station-assistant-mobile-github-v4.6';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './vendor/pdf.min.js',
-  './vendor/pdf.worker.min.js',
-  './vendor/xlsx.full.min.js',
+  './vendor/pdf.min.js?v=4.6',
+  './vendor/pdf.worker.min.js?v=4.6',
+  './vendor/xlsx.full.min.js?v=4.6',
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png'
@@ -31,6 +31,10 @@ self.addEventListener('fetch', event => {
   if(event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if(url.origin !== self.location.origin) return;
+  if(event.request.mode === 'navigate'){
+    event.respondWith(fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put('./index.html',copy));return response;}).catch(()=>caches.match('./index.html')));
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then(cached =>
       cached || fetch(event.request).then(response => {

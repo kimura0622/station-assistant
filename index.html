@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js"></script>
-<script src="./vendor/xlsx.full.min.js"></script>
+<script src="./vendor/pdf.min.js?v=4.6"></script>
+<script src="./vendor/xlsx.full.min.js?v=4.6"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -131,7 +131,7 @@
   .pdf-reader-toolbar button{min-height:36px;padding:6px 10px;}
   .pdf-reader-page-input{width:74px;min-height:36px;padding:6px 8px;font-size:14px;text-align:center;}
   .pdf-reader-status{font-size:12px;color:var(--text-2);margin-left:auto;white-space:nowrap;}
-  .pdf-reader-stage{background:#30343b;overflow:auto;flex:1;padding:18px 12px;scroll-behavior:smooth;}
+  .pdf-reader-stage{background:#30343b;overflow:auto;flex:1;padding:18px 12px;scroll-behavior:smooth;touch-action:pan-x pan-y;overscroll-behavior:contain;}
   .pdf-page-frame{width:fit-content;max-width:100%;margin:0 auto 18px;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.28);position:relative;}
   .pdf-page-frame.current{outline:3px solid var(--accent);outline-offset:3px;}
   .pdf-page-label{position:sticky;top:4px;z-index:2;width:max-content;margin:0 0 -30px 8px;padding:5px 9px;border-radius:999px;background:rgba(28,28,30,.78);color:#fff;font-size:11px;backdrop-filter:blur(8px);}
@@ -282,12 +282,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="ridership"><span class="icon">▥</span>車站運量</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v4.5 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v4.6 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=4.6';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -357,8 +357,9 @@ let sopKeyword = '';
 let noticeKeyword = '';
 let personnelKeyword = '';
 let ridershipKeyword = '';
-let ridershipView = {year:'', stationKey:'', metric:'averageDaily', rankMonth:'01', section:'query'};
+let ridershipView = {year:'', stationKey:'', metric:'averageDaily', rankMonth:'01', rankScope:'all', section:'query'};
 let lastRidershipImportReport = '';
+const RIDERSHIP_EVENTS_KEY='stationAssistantRidershipEventsV1';
 let procedureKeyword = '';
 let procedureEditMode = false;
 let librarySection = 'sop';
@@ -1889,6 +1890,12 @@ async function openSopPdfReader(docId,absolutePage,options={}){
   overlay.querySelector('#sop-pdf-zoom-out').addEventListener('click',()=>{zoom=Math.max(.6,zoom-.15);renderPages(false);});
   overlay.querySelector('#sop-pdf-zoom-in').addEventListener('click',()=>{zoom=Math.min(2,zoom+.15);renderPages(false);});
   overlay.querySelector('#sop-pdf-fit').addEventListener('click',()=>{zoom=1;renderPages(false);});
+  let pinch=null;
+  const touchDistance=touches=>Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);
+  stage.addEventListener('touchstart',e=>{if(e.touches.length!==2)return;cancelDraft();pinch={startDistance:touchDistance(e.touches),startZoom:zoom,nextZoom:zoom};e.preventDefault();},{passive:false});
+  stage.addEventListener('touchmove',e=>{if(!pinch||e.touches.length!==2)return;pinch.nextZoom=Math.max(.6,Math.min(2,pinch.startZoom*touchDistance(e.touches)/Math.max(1,pinch.startDistance)));overlay.querySelector('#sop-pdf-status').textContent=`PDF第 ${rangeStart}～${rangeEnd} 頁｜目前第 ${currentPage} 頁｜${Math.round(pinch.nextZoom*100)}%`;e.preventDefault();},{passive:false});
+  stage.addEventListener('touchend',e=>{if(!pinch||e.touches.length>1)return;zoom=pinch.nextZoom;pinch=null;renderPages(false);e.preventDefault();},{passive:false});
+  stage.addEventListener('touchcancel',()=>{pinch=null;});
   overlay.querySelector('#sop-pdf-text').addEventListener('click',()=>{closed=true;renderToken++;overlay.remove();openTextReader(doc.id,currentPage);});
   overlay.querySelector('#sop-pdf-related').addEventListener('click',()=>openRelatedNoticeList(doc.id,options.favoriteId));
   overlay.querySelector('#sop-pdf-annotate').addEventListener('click',()=>{
@@ -2388,6 +2395,50 @@ function makeYoyChart(current, previous){
 function rankRows(records, metric){
   return [...records].filter(r=>Number.isFinite(Number(r[metric]))).sort((a,b)=>Number(b[metric])-Number(a[metric]));
 }
+function readFileAsArrayBuffer(file){
+  if(file?.arrayBuffer) return file.arrayBuffer().catch(()=>readFileWithReader(file));
+  return readFileWithReader(file);
+}
+function readFileWithReader(file){
+  return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error||new Error('手機無法讀取這個檔案'));reader.readAsArrayBuffer(file);});
+}
+function ridershipEvents(){
+  try{const rows=JSON.parse(localStorage.getItem(RIDERSHIP_EVENTS_KEY)||'[]');return Array.isArray(rows)?rows:[];}catch{return [];}
+}
+function saveRidershipEvents(rows){localStorage.setItem(RIDERSHIP_EVENTS_KEY,JSON.stringify(rows));}
+function excelDateText(value){
+  if(value instanceof Date&&!Number.isNaN(value.getTime()))return value.toISOString().slice(0,10);
+  if(typeof value==='number'&&typeof XLSX!=='undefined'){const d=XLSX.SSF.parse_date_code(value);if(d)return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;}
+  const source=String(value??'').trim().replace(/[./]/g,'-');
+  const roc=source.match(/^(\d{3})-(\d{1,2})-(\d{1,2})$/);if(roc)return `${Number(roc[1])+1911}-${String(roc[2]).padStart(2,'0')}-${String(roc[3]).padStart(2,'0')}`;
+  const d=new Date(source);return Number.isNaN(d.getTime())?'':d.toISOString().slice(0,10);
+}
+async function importRidershipEvents(file){
+  if(typeof XLSX==='undefined')throw new Error('Excel 解析元件未載入，請更新程式後重新開啟。');
+  const workbook=XLSX.read(await readFileAsArrayBuffer(file),{type:'array',cellDates:true});
+  const sheetName=workbook.SheetNames.find(n=>/大型活動|活動資訊|活動/.test(n))||workbook.SheetNames[0];
+  const grid=XLSX.utils.sheet_to_json(workbook.Sheets[sheetName],{header:1,defval:null,raw:true});
+  let header=-1,cols={};
+  for(let r=0;r<Math.min(grid.length,15);r++){
+    const hs=(grid[r]||[]).map(normalizeHeader),find=names=>hs.findIndex(h=>names.some(n=>h.includes(n)));
+    const name=find(['活動名稱','活動']),start=find(['開始日期','活動日期','日期']),stations=find(['影響車站代號','車站代號','影響車站']);
+    if(name>=0&&start>=0&&stations>=0){header=r;cols={name,start,stations,end:find(['結束日期']),venue:find(['場地','地點']),type:find(['活動類型','類型']),attendance:find(['預估人數','參與人數','人數']),note:find(['備註'])};break;}
+  }
+  if(header<0)throw new Error('找不到「活動名稱、開始日期、影響車站代號」欄位。');
+  const validCodes=new Set(['BR','R','G','O','BL']),rows=[],warnings=[];
+  for(let r=header+1;r<grid.length;r++){
+    const name=String(grid[r]?.[cols.name]??'').trim(),startDate=excelDateText(grid[r]?.[cols.start]);if(!name&&!startDate)continue;
+    const stationCodes=String(grid[r]?.[cols.stations]??'').toUpperCase().split(/[、,，;；\s]+/).map(s=>s.trim()).filter(Boolean).filter(code=>validCodes.has((code.match(/^(BR|BL|R|G|O)/)||[])[1]));
+    if(!name||!startDate||!stationCodes.length){warnings.push(`第${r+1}列資料不完整或沒有公司權管車站代號`);continue;}
+    rows.push({id:`${startDate}-${name}-${stationCodes.join('-')}`,name,startDate,endDate:cols.end>=0?excelDateText(grid[r]?.[cols.end]):'',stationCodes,venue:cols.venue>=0?String(grid[r]?.[cols.venue]??'').trim():'',type:cols.type>=0?String(grid[r]?.[cols.type]??'').trim():'',attendance:cols.attendance>=0?String(grid[r]?.[cols.attendance]??'').trim():'',note:cols.note>=0?String(grid[r]?.[cols.note]??'').trim():'',sourceFile:file.name});
+  }
+  if(!rows.length)throw new Error('沒有找到可匯入的大型活動資料。');
+  const existing=new Map(ridershipEvents().map(x=>[x.id,x]));rows.forEach(x=>existing.set(x.id,x));saveRidershipEvents([...existing.values()]);
+  alert(`大型活動匯入完成：${rows.length} 筆${warnings.length?`，略過 ${warnings.length} 筆`:''}。`);renderRidership();
+}
+function eventsForStationMonth(stationKey,year,month){
+  const ym=`${year}-${String(month).padStart(2,'0')}`;return ridershipEvents().filter(e=>(e.stationCodes||[]).includes(stationKey)&&String(e.startDate||'').slice(0,7)<=ym&&String(e.endDate||e.startDate||'').slice(0,7)>=ym);
+}
 async function importRidershipWorkbook(file){
   if(typeof XLSX==='undefined') throw new Error('Excel 解析元件未載入，請確認程式檔與必要元件完整後重新開啟。');
   const guessedYear=detectWorkbookYear(file.name);
@@ -2395,11 +2446,11 @@ async function importRidershipWorkbook(file){
   if(input===null) return;
   const year=Number(input);
   if(!Number.isInteger(year)||year<2000||year>2200) throw new Error('年度格式錯誤，請輸入例如 2025。');
-  const workbook=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:false});
+  const workbook=XLSX.read(await readFileAsArrayBuffer(file),{type:'array',cellDates:false});
   const accepted=workbook.SheetNames.filter(n=>/^(0[1-9]|1[0-2])$/.test(n));
   const ignored=workbook.SheetNames.filter(n=>!accepted.includes(n));
   const missing=Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0')).filter(n=>!accepted.includes(n));
-  const rows=[], warnings=[];
+  const rows=[], warnings=[];let excludedY=0,unknownCode=0;
   accepted.forEach(month=>{
     const grid=XLSX.utils.sheet_to_json(workbook.Sheets[month],{header:1,defval:null,raw:true});
     let headerRow=-1, stationCol=-1, averageCol=-1;
@@ -2417,6 +2468,8 @@ async function importRidershipWorkbook(file){
       const average=Number(String(rawAverage??'').replace(/,/g,'').trim());
       if(!Number.isFinite(average)){warnings.push(`${month} 第${r+1}列：平均日運量不是數字`);continue;}
       const parsed=parseRidershipStation(rawStation);
+      if(parsed.lineCode==='Y'){excludedY++;continue;}
+      if(!['BR','R','G','O','BL'].includes(parsed.lineCode)){unknownCode++;warnings.push(`${month} 第${r+1}列：無法識別公司權管路線代號`);continue;}
       const days=daysInMonth(year,Number(month));
       rows.push({
         recordType:'monthlyAverage', year, month, ...parsed,
@@ -2427,7 +2480,7 @@ async function importRidershipWorkbook(file){
     }
   });
   if(!rows.length) throw new Error('12個月份分頁中沒有找到可匯入的運量資料。');
-  const summary=`檔案：${file.name}\n年度：${year}\n讀取月份：${accepted.join('、')||'無'}\n忽略分頁：${ignored.join('、')||'無'}\n缺少月份：${missing.join('、')||'無'}\n可匯入：${rows.length.toLocaleString()} 筆\n警告：${warnings.length} 項`;
+  const summary=`檔案：${file.name}\n年度：${year}\n讀取月份：${accepted.join('、')||'無'}\n忽略分頁：${ignored.join('、')||'無'}\n缺少月份：${missing.join('、')||'無'}\n可匯入：${rows.length.toLocaleString()} 筆\n排除環狀線：${excludedY} 筆\n無法識別代號：${unknownCode} 筆\n警告：${warnings.length} 項`;
   if(!confirm(`${summary}\n\n確定寫入本機資料庫嗎？相同年度、月份及工程代號將更新原資料。`)) return;
   const existing=new Map(monthlyRidershipRecords().map(r=>[r.importKey||`${r.year}-${r.month}-${r.stationKey||r.code||r.station}`,r]));
   let added=0,updated=0;
@@ -2436,7 +2489,7 @@ async function importRidershipWorkbook(file){
     if(old){await dbPut('ridership',{...old,...row,id:old.id});updated++;}
     else{await dbAdd('ridership',row);added++;}
   }
-  lastRidershipImportReport=`成功匯入 ${year} 年：新增 ${added.toLocaleString()} 筆、更新 ${updated.toLocaleString()} 筆。${ignored.length?` 已忽略 ${ignored.length} 個非月份分頁。`:''}${missing.length?` 缺少 ${missing.join('、')} 月。`:''}`;
+  lastRidershipImportReport=`成功匯入 ${year} 年：新增 ${added.toLocaleString()} 筆、更新 ${updated.toLocaleString()} 筆；排除環狀線 ${excludedY} 筆。${unknownCode?` 無法識別代號 ${unknownCode} 筆。`:''}${ignored.length?` 已忽略 ${ignored.length} 個非月份分頁。`:''}${missing.length?` 缺少 ${missing.join('、')} 月。`:''}`;
   await reloadCache();
   ridershipView.year=String(year);
   renderRidership();
@@ -2448,12 +2501,15 @@ function renderRidership(){
   const year=Number(ridershipView.year||years[0]||new Date().getFullYear());
   if(ridershipView.section==='manage'){
     contentEl.innerHTML=`<div class="page-tabs"><button class="page-tab" data-ridership-section="query">運量查詢</button><button class="page-tab active" data-ridership-section="manage">資料管理</button></div>
-      <div class="card toolbar-card"><div><h2 class="section-title">運量資料管理</h2><p class="section-subtitle">匯入、更新或刪除年度資料；Excel 僅在本機解析。</p></div><div class="toolbar-actions"><button class="primary" id="ridership-import-btn">匯入年度 Excel</button><input id="ridership-file-input" type="file" accept=".xlsx,.xls" style="display:none"></div></div>
+      <div class="card toolbar-card"><div><h2 class="section-title">運量資料管理</h2><p class="section-subtitle">運量與大型活動 Excel 均只在本機解析。</p></div><div class="toolbar-actions"><button class="primary" id="ridership-import-btn">匯入年度 Excel</button><button class="secondary" id="ridership-event-import-btn">匯入大型活動</button><input id="ridership-file-input" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" style="display:none"><input id="ridership-event-file-input" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" style="display:none"></div></div>
       ${lastRidershipImportReport?`<div class="import-report">${escapeHtml(lastRidershipImportReport)}</div>`:''}
-      <div class="panel"><h3 class="panel-title">已匯入年度</h3><p class="panel-note">重新匯入相同年度、月份與工程代號時會更新原資料。</p>${years.length?years.map(y=>{const yearRows=records.filter(r=>Number(r.year)===y),lastImported=yearRows.map(r=>r.importedAt).filter(Boolean).sort().at(-1);return `<div class="row between" style="padding:10px 0;border-bottom:.5px solid var(--border)"><span><b>${y} 年</b>　<span class="tiny-muted">${yearRows.length.toLocaleString()} 筆｜匯入：${lastImported?formatUploadDate(lastImported):'舊版資料未記錄'}</span></span><button class="danger-text" data-delete-ridership-year="${y}">刪除年度</button></div>`;}).join(''):'<div class="empty" style="padding:35px">尚無年度運量資料</div>'}</div>`;
+      <div class="panel"><h3 class="panel-title">已匯入年度</h3><p class="panel-note">重新匯入相同年度、月份與工程代號時會更新原資料；Y 環狀線自動排除。</p>${years.length?years.map(y=>{const yearRows=records.filter(r=>Number(r.year)===y),lastImported=yearRows.map(r=>r.importedAt).filter(Boolean).sort().at(-1);return `<div class="row between" style="padding:10px 0;border-bottom:.5px solid var(--border)"><span><b>${y} 年</b>　<span class="tiny-muted">${yearRows.length.toLocaleString()} 筆｜匯入：${lastImported?formatUploadDate(lastImported):'舊版資料未記錄'}</span></span><button class="danger-text" data-delete-ridership-year="${y}">刪除年度</button></div>`;}).join(''):'<div class="empty" style="padding:35px">尚無年度運量資料</div>'}</div><div class="panel"><h3 class="panel-title">大型活動</h3><p class="panel-note">目前 ${ridershipEvents().length} 筆。必填欄位：活動名稱、開始日期、影響車站代號；可填多個代號。</p>${ridershipEvents().length?'<button class="danger-text" id="ridership-event-clear">清除全部活動</button>':''}</div>`;
     contentEl.querySelector('[data-ridership-section="query"]').onclick=()=>{ridershipView.section='query';renderRidership();};
-    document.getElementById('ridership-import-btn').onclick=()=>document.getElementById('ridership-file-input').click();
+    document.getElementById('ridership-import-btn').onclick=()=>{const input=document.getElementById('ridership-file-input');input.value='';input.click();};
+    document.getElementById('ridership-event-import-btn').onclick=()=>{const input=document.getElementById('ridership-event-file-input');input.value='';input.click();};
     document.getElementById('ridership-file-input').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await importRidershipWorkbook(file);}catch(error){alert(`Excel 匯入失敗：${error.message||error}`);}};
+    document.getElementById('ridership-event-file-input').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await importRidershipEvents(file);}catch(error){alert(`大型活動匯入失敗：${error.message||error}`);}};
+    document.getElementById('ridership-event-clear')?.addEventListener('click',()=>{if(confirm('確定清除全部大型活動資料嗎？')){saveRidershipEvents([]);renderRidership();}});
     contentEl.querySelectorAll('[data-delete-ridership-year]').forEach(btn=>btn.onclick=async()=>{const y=Number(btn.dataset.deleteRidershipYear),targets=records.filter(r=>Number(r.year)===y);if(!confirm(`確定刪除 ${y} 年的 ${targets.length.toLocaleString()} 筆運量資料嗎？此動作無法復原。`))return;for(const r of targets)await dbDelete('ridership',r.id);await reloadCache();ridershipView.year='';renderRidership();});
     return;
   }
@@ -2462,7 +2518,8 @@ function renderRidership(){
     const key=r.stationKey||r.code||r.station;
     if(!stationMap.has(key)) stationMap.set(key,r);
   });
-  const stations=[...stationMap.entries()].sort((a,b)=>stationDisplay(a[1]).localeCompare(stationDisplay(b[1]),'zh-Hant'));
+  const stationScope=ridershipView.rankScope==='all'?'all':ridershipView.rankScope;
+  const stations=[...stationMap.entries()].filter(([,r])=>stationScope==='all'||r.lineCode===stationScope).sort((a,b)=>stationDisplay(a[1]).localeCompare(stationDisplay(b[1]),'zh-Hant'));
   if(!ridershipView.stationKey&&stations.length) ridershipView.stationKey=stations[0][0];
   if(ridershipView.stationKey&&!stationMap.has(ridershipView.stationKey)&&stations.length) ridershipView.stationKey=stations[0][0];
   const metric=ridershipView.metric;
@@ -2481,12 +2538,13 @@ function renderRidership(){
   const previousComparable=comparableMonths.reduce((sum,i)=>sum+previous[i],0);
   const currentKpi=metric==='averageDaily'&&validMonths?currentTotal/validMonths:currentTotal;
   const yoy=previousComparable?((currentComparable-previousComparable)/previousComparable*100):null;
-  const currentYearMonth=records.filter(r=>Number(r.year)===year&&r.month===ridershipView.rankMonth);
+  const currentYearMonth=records.filter(r=>Number(r.year)===year&&r.month===ridershipView.rankMonth&&(stationScope==='all'||r.lineCode===stationScope));
   const ranked=rankRows(currentYearMonth,metric);
   const selectedRank=ranked.findIndex(r=>(r.stationKey||r.code||r.station)===stationKey)+1;
   const top=ranked.slice(0,10), bottom=ranked.length>10?ranked.slice(-10).reverse():[];
   const yearOptions=years.map(y=>`<option value="${y}" ${y===year?'selected':''}>${y} 年</option>`).join('');
   const stationOptions=stations.map(([key,r])=>`<option value="${escapeHtml(key)}" ${key===stationKey?'selected':''}>${escapeHtml(stationDisplay(r))}</option>`).join('');
+  const scopeOptions=[['all','全線'],['BR','BR 文湖線'],['R','R 淡水信義線'],['G','G 松山新店線'],['O','O 中和新蘆線'],['BL','BL 板南線']].map(([code,label])=>`<option value="${code}" ${stationScope===code?'selected':''}>${label}</option>`).join('');
   const rankList=(list,emptyText)=>list.length?`<ol class="rank-list">${list.map((r,i)=>{
     const actualRank=ranked.indexOf(r)+1;
     return `<li class="rank-item"><span class="rank-no">${actualRank}</span><div><div class="rank-station">${escapeHtml(r.station)}${r.code?` (${escapeHtml(r.code)})`:''}</div><div class="rank-line">${escapeHtml(r.lineName||'未識別線別')}</div></div><div class="rank-value">${formatRidershipValue(r[metric],metric)}</div></li>`;
@@ -2499,22 +2557,22 @@ function renderRidership(){
     <div class="panel">
       <div class="filter-grid">
         <div class="field" style="margin:0"><label>分析年度</label><select id="ridership-year">${yearOptions||`<option value="${year}">${year} 年</option>`}</select></div>
+        <div class="field" style="margin:0"><label>查詢及排名範圍</label><select id="ridership-scope">${scopeOptions}</select></div>
         <div class="field" style="margin:0"><label>車站（交會站依工程代號分開）</label><select id="ridership-station">${stationOptions||'<option value="">尚無資料</option>'}</select></div>
         <div class="field" style="margin:0"><label>排名月份</label><select id="ridership-rank-month">${MONTH_LABELS.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}" ${ridershipView.rankMonth===String(i+1).padStart(2,'0')?'selected':''}>${m}</option>`).join('')}</select></div>
-        <div class="segmented" aria-label="運量指標">
-          <button data-metric="averageDaily" class="${metric==='averageDaily'?'active':''}">平均日運量</button>
-          <button data-metric="estimatedMonthly" class="${metric==='estimatedMonthly'?'active':''}">推估月運量</button>
-        </div>
+        <div class="segmented" aria-label="運量指標"><button data-metric="averageDaily" class="active">平均日運量</button></div>
       </div>
     </div>`;
   if(!records.length){
     html+=`<div class="panel empty"><div class="icon">📈</div><p>尚無年度運量資料</p><p class="muted">請匯入含 01–12 分頁的 Excel 檔開始分析。</p></div>`;
   }else{
+    const latestIndex=current.map((v,i)=>Number.isFinite(v)?i:-1).filter(i=>i>=0).at(-1),latest=latestIndex>=0?current[latestIndex]:null,prior=latestIndex>0?current[latestIndex-1]:null,prevYear=latestIndex>=0?previous[latestIndex]:null;
+    const mom=Number.isFinite(latest)&&Number.isFinite(prior)&&prior!==0?(latest-prior)/prior*100:null,latestYoy=Number.isFinite(latest)&&Number.isFinite(prevYear)&&prevYear!==0?(latest-prevYear)/prevYear*100:null;
     html+=`<div class="stat-grid">
-      <div class="stat-card"><div class="stat-label">${year} 年資料月份</div><div class="stat-value">${validMonths}<small style="font-size:13px;color:var(--text-2)"> / 12</small></div><div class="stat-note">${selected?escapeHtml(stationDisplay(selected)):'—'}</div></div>
-      <div class="stat-card"><div class="stat-label">${metric==='averageDaily'?'月平均之平均':'年度推估總運量'}</div><div class="stat-value">${formatRidershipValue(currentKpi,metric)}</div><div class="stat-note">僅計入已有資料月份</div></div>
-      <div class="stat-card"><div class="stat-label">較 ${year-1} 年</div><div class="stat-value ${yoy===null?'neutral':yoy>=0?'positive':'negative'}">${yoy===null?'—':`${yoy>=0?'+':''}${yoy.toFixed(1)}%`}</div><div class="stat-note">${comparableMonths.length?`以 ${comparableMonths.length} 個相同月份比較`:'缺少前一年可比資料'}</div></div>
-      <div class="stat-card"><div class="stat-label">${Number(ridershipView.rankMonth)} 月排名</div><div class="stat-value">${selectedRank?`第 ${selectedRank} 名`:'—'}</div><div class="stat-note">${ranked.length?`共 ${ranked.length} 個站點代號`:'該月尚無資料'}</div></div>
+      <div class="stat-card"><div class="stat-label">${latestIndex>=0?`${latestIndex+1}月平均日運量`:'最新月份'}</div><div class="stat-value">${formatRidershipValue(latest,'averageDaily')}</div><div class="stat-note">${selected?escapeHtml(stationDisplay(selected)):'—'}</div></div>
+      <div class="stat-card"><div class="stat-label">較上月</div><div class="stat-value ${mom===null?'neutral':mom>=0?'positive':'negative'}">${mom===null?'—':`${mom>=0?'+':''}${mom.toFixed(1)}%`}</div><div class="stat-note">${mom===null?'尚無可比較資料':'平均日運量變化'}</div></div>
+      <div class="stat-card"><div class="stat-label">較去年同月</div><div class="stat-value ${latestYoy===null?'neutral':latestYoy>=0?'positive':'negative'}">${latestYoy===null?'—':`${latestYoy>=0?'+':''}${latestYoy.toFixed(1)}%`}</div><div class="stat-note">${latestYoy===null?'尚無可比較資料':`${year-1} 年 ${latestIndex+1} 月`}</div></div>
+      <div class="stat-card"><div class="stat-label">${Number(ridershipView.rankMonth)} 月排名</div><div class="stat-value">${selectedRank?`第 ${selectedRank} 名`:'—'}</div><div class="stat-note">${ranked.length?`${stationScope==='all'?'全線':RIDERSHIP_LINES[stationScope]}共 ${ranked.length} 個站點`:'該月尚無資料'}</div></div>
     </div>
     <div class="analysis-grid">
       <div>
@@ -2522,21 +2580,20 @@ function renderRidership(){
           <div class="chart-legend"><span><i class="legend-dot" style="background:#1677ff"></i>${year}</span><span><i class="legend-dot" style="background:#9aa3af"></i>${year-1}（虛線）</span></div>
           ${makeLineChart(current,previous,metric)}
         </div>
+        <div class="panel"><h3 class="panel-title">周邊大型活動</h3><p class="panel-note">活動為運量變化的參考背景，不代表因果關係。</p>${MONTH_LABELS.map((m,i)=>{const events=eventsForStationMonth(stationKey,year,i+1);return events.length?`<div style="padding:9px 0;border-bottom:.5px solid var(--border)"><b>${m}</b>${events.map(e=>`<div class="tiny-muted" style="margin-top:4px">◆ ${escapeHtml(e.name)}｜${escapeHtml(e.startDate)}${e.endDate&&e.endDate!==e.startDate?`～${escapeHtml(e.endDate)}`:''}${e.venue?`｜${escapeHtml(e.venue)}`:''}</div>`).join('')}</div>`:'';}).join('')||'<div class="empty" style="padding:24px">此站本年度尚無大型活動資料</div>'}</div>
         <div class="panel"><h3 class="panel-title">較前一年變化</h3><p class="panel-note">綠色為增加，紅色為減少；滑鼠停留可查看精確百分比。</p>${makeYoyChart(current,previous)}</div>
       </div>
       <div class="panel"><h3 class="panel-title">${year} 年每月明細</h3><p class="panel-note">缺少資料顯示「—」，不會當作 0。</p>
         <div class="data-table-wrap"><table class="data-table"><thead><tr><th>月份</th><th>${year}</th><th>${year-1}</th><th>年增率</th></tr></thead><tbody>
           ${MONTH_LABELS.map((m,i)=>{
             const change=Number.isFinite(current[i])&&Number.isFinite(previous[i])&&previous[i]!==0?(current[i]-previous[i])/previous[i]*100:null;
-            return `<tr><td>${m}</td><td>${formatRidershipValue(current[i],metric).replace(' 人次/日','').replace(' 人次','')}</td><td>${formatRidershipValue(previous[i],metric).replace(' 人次/日','').replace(' 人次','')}</td><td class="${change===null?'neutral':change>=0?'positive':'negative'}">${change===null?'—':`${change>=0?'+':''}${change.toFixed(1)}%`}</td></tr>`;
+            const eventCount=eventsForStationMonth(stationKey,year,i+1).length;
+            return `<tr><td>${m}${eventCount?` <span class="badge">活動 ${eventCount}</span>`:''}</td><td>${formatRidershipValue(current[i],metric).replace(' 人次/日','').replace(' 人次','')}</td><td>${formatRidershipValue(previous[i],metric).replace(' 人次/日','').replace(' 人次','')}</td><td class="${change===null?'neutral':change>=0?'positive':'negative'}">${change===null?'—':`${change>=0?'+':''}${change.toFixed(1)}%`}</td></tr>`;
           }).join('')}
         </tbody></table></div>
       </div>
     </div>
-    <div class="rank-columns">
-      <div class="panel"><h3 class="panel-title">${Number(ridershipView.rankMonth)} 月前 10 名</h3><p class="panel-note">交會站各線獨立排名。</p>${rankList(top,'該月尚無資料')}</div>
-      <div class="panel"><h3 class="panel-title">${Number(ridershipView.rankMonth)} 月後 10 名</h3><p class="panel-note">灰色中性呈現；真正的 0 仍保留參與排名。</p>${rankList(bottom,ranked.length&&ranked.length<=10?'資料未超過 10 筆':'該月尚無資料')}</div>
-    </div>`;
+    <div class="panel"><h3 class="panel-title">${Number(ridershipView.rankMonth)} 月前 10 名</h3><p class="panel-note">${stationScope==='all'?'全線':RIDERSHIP_LINES[stationScope]}排名；交會站各線獨立計算。選定車站目前為${selectedRank?`第 ${selectedRank} 名`:'無排名'}。</p>${rankList(top,'該月尚無資料')}</div>`;
   }
   contentEl.innerHTML=html;
   contentEl.querySelector('[data-ridership-section="manage"]').onclick=()=>{ridershipView.section='manage';renderRidership();};
@@ -2546,6 +2603,7 @@ function renderRidership(){
     try{await importRidershipWorkbook(file);}catch(error){alert(`Excel 匯入失敗：${error.message||error}`);}
   });
   document.getElementById('ridership-year').addEventListener('change',e=>{ridershipView.year=e.target.value;renderRidership();});
+  document.getElementById('ridership-scope').addEventListener('change',e=>{ridershipView.rankScope=e.target.value;ridershipView.stationKey='';renderRidership();});
   document.getElementById('ridership-station').addEventListener('change',e=>{ridershipView.stationKey=e.target.value;renderRidership();});
   document.getElementById('ridership-rank-month').addEventListener('change',e=>{ridershipView.rankMonth=e.target.value;renderRidership();});
   contentEl.querySelectorAll('[data-metric]').forEach(btn=>btn.addEventListener('click',()=>{ridershipView.metric=btn.dataset.metric;renderRidership();}));
@@ -2603,6 +2661,7 @@ async function exportData(){
       return r;
     });
   }
+  dump._localData={ridershipEvents:ridershipEvents()};
   const blob = new Blob([JSON.stringify(dump)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -2622,6 +2681,7 @@ async function importData(file){
       await dbAdd(name, copy);
     }
   }
+  if(Array.isArray(dump._localData?.ridershipEvents))saveRidershipEvents(dump._localData.ridershipEvents);
   await reloadCache();
   render();
 }
@@ -2630,7 +2690,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.5・2026.08.11</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.6・2026.08.13</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

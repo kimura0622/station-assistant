@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=4.6.3"></script>
-<script src="./vendor/xlsx.full.min.js?v=4.6.3"></script>
+<script src="./vendor/pdf.min.js?v=4.7"></script>
+<script src="./vendor/xlsx.full.min.js?v=4.7"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -217,6 +217,9 @@
   .rank-value{text-align:right;font-size:12px;font-variant-numeric:tabular-nums;}
   .chart-wrap{width:100%;overflow:hidden;}
   .chart-wrap svg{display:block;width:100%;height:auto;}
+  .chart-month-hit{cursor:pointer;fill:transparent;}
+  .chart-month-hit:focus{fill:rgba(255,210,0,.12);outline:none;}
+  .ridership-unit{font-size:.52em;font-weight:650;margin-left:3px;color:var(--text-2);}
   .chart-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text-2);margin:4px 0 10px;}
   .legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;}
   .data-table-wrap{overflow:auto;border:.5px solid var(--border);border-radius:12px;}
@@ -285,12 +288,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="ridership"><span class="icon">▥</span>車站運量</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v4.6.3 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v4.7 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=4.6.3';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=4.7';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -2347,6 +2350,13 @@ function formatRidershipValue(value, metric){
 function stationDisplay(row){
   return `${row.station}${row.code?`（${row.lineName}・${row.code}）`:''}`;
 }
+function stationShortDisplay(row){return `${row.station||''}${row.code?`（${row.code}）`:''}`;}
+function stationCodeParts(row){
+  const code=String(row?.code||'').toUpperCase(),match=code.match(/^(BR|BL|R|G|O)(\d+)([A-Z]?)$/),lineOrder={BR:1,R:2,G:3,O:4,BL:5};
+  return match?[lineOrder[match[1]]||99,Number(match[2]),match[3]||'',code]:[99,999,'',code];
+}
+function compareStationsByCode(a,b){const aa=stationCodeParts(a),bb=stationCodeParts(b);return aa[0]-bb[0]||aa[1]-bb[1]||aa[2].localeCompare(bb[2])||aa[3].localeCompare(bb[3]);}
+function formatRidershipKpi(value){return value===null||value===undefined||Number.isNaN(Number(value))?'—':`${Math.round(Number(value)).toLocaleString()}<small class="ridership-unit">人次/日</small>`;}
 function monthlyRidershipRecords(){
   return cache.ridership.filter(r=>r.recordType==='monthlyAverage' && r.year && r.month && Number(r.averageDaily)>0);
 }
@@ -2373,11 +2383,14 @@ function makeLineChart(current, previous, metric){
     labels+=`<text x="${left-8}" y="${gy+4}" text-anchor="end" font-size="10" fill="#8e8e93">${Math.round(val).toLocaleString()}</text>`;
   }
   MONTH_LABELS.forEach((m,i)=>labels+=`<text x="${x(i)}" y="${height-12}" text-anchor="middle" font-size="10" fill="#8e8e93">${m.replace('月','')}</text>`);
-  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="年度每月運量折線圖">
+  const previousBars=previous.map((v,i)=>Number.isFinite(v)?`<rect x="${x(i)-13}" y="${y(v)}" width="26" height="${Math.max(1,height-bottom-y(v))}" rx="4" fill="#d9dee7"><title>${MONTH_LABELS[i]} 去年 ${formatRidershipValue(v,metric)}</title></rect>`:'').join('');
+  const monthHits=MONTH_LABELS.map((m,i)=>`<rect class="chart-month-hit" data-chart-month="${i+1}" x="${x(i)-24}" y="${top}" width="48" height="${height-top-bottom}" tabindex="0" role="button" aria-label="查看${m}明細"><title>查看${m}明細</title></rect>`).join('');
+  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="每月運量趨勢圖；點選月份可查看明細">
     ${grid}${labels}
-    <path d="${path(previous)}" fill="none" stroke="#9aa3af" stroke-width="2.5" stroke-dasharray="7 6"/>
+    ${previousBars}
     <path d="${path(current)}" fill="none" stroke="#1677ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
     ${current.map((v,i)=>Number.isFinite(v)?`<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="#1467b8"><title>${MONTH_LABELS[i]} ${formatRidershipValue(v,metric)}</title></circle>`:'').join('')}
+    ${monthHits}
   </svg></div>`;
 }
 function makeYoyChart(current, previous){
@@ -2525,7 +2538,7 @@ function renderRidershipLegacy(){
     if(!stationMap.has(key)) stationMap.set(key,r);
   });
   const stationScope=ridershipView.rankScope==='all'?'all':ridershipView.rankScope;
-  const stations=[...stationMap.entries()].filter(([,r])=>stationScope==='all'||r.lineCode===stationScope).sort((a,b)=>stationDisplay(a[1]).localeCompare(stationDisplay(b[1]),'zh-Hant'));
+  const stations=[...stationMap.entries()].filter(([,r])=>stationScope==='all'||r.lineCode===stationScope).sort((a,b)=>compareStationsByCode(a[1],b[1]));
   if(!ridershipView.stationKey&&stations.length) ridershipView.stationKey=stations[0][0];
   if(ridershipView.stationKey&&!stationMap.has(ridershipView.stationKey)&&stations.length) ridershipView.stationKey=stations[0][0];
   const metric=ridershipView.metric;
@@ -2550,7 +2563,7 @@ function renderRidershipLegacy(){
   const top=ranked.slice(0,10), bottom=ranked.length>10?ranked.slice(-10).reverse():[];
   const yearOptions=years.map(y=>`<option value="${y}" ${y===year?'selected':''}>${y} 年</option>`).join('');
   const stationOptions=stations.map(([key,r])=>`<option value="${escapeHtml(key)}" ${key===stationKey?'selected':''}>${escapeHtml(stationDisplay(r))}</option>`).join('');
-  const scopeOptions=[['all','全線'],['BR','BR 文湖線'],['R','R 淡水信義線'],['G','G 松山新店線'],['O','O 中和新蘆線'],['BL','BL 板南線']].map(([code,label])=>`<option value="${code}" ${stationScope===code?'selected':''}>${label}</option>`).join('');
+  const scopeOptions=[['all','全線'],['BR','文湖線'],['R','淡水信義線'],['G','松山新店線'],['O','中和新蘆線'],['BL','板南線']].map(([code,label])=>`<option value="${code}" ${stationScope===code?'selected':''}>${label}</option>`).join('');
   const rankList=(list,emptyText)=>list.length?`<ol class="rank-list">${list.map((r,i)=>{
     const actualRank=ranked.indexOf(r)+1;
     return `<li class="rank-item"><span class="rank-no">${actualRank}</span><div><div class="rank-station">${escapeHtml(r.station)}${r.code?` (${escapeHtml(r.code)})`:''}</div><div class="rank-line">${escapeHtml(r.lineName||'未識別線別')}</div></div><div class="rank-value">${formatRidershipValue(r[metric],metric)}</div></li>`;
@@ -2622,7 +2635,7 @@ function renderRidershipLegacy(){
   });
 }
 
-/* v4.6.3：相容舊 B1～B11 與 G01A 代號，正規化為現行工程代號。 */
+/* v4.7：整合代號排序、精簡摘要、混合趨勢圖及點圖進入明細。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -2636,7 +2649,7 @@ function renderRidership(){
   const stationScope=ridershipView.rankScope||'all';
   const stationMap=new Map();
   records.forEach(r=>{const key=r.stationKey||r.code||r.station;if(!stationMap.has(key))stationMap.set(key,r);});
-  const stations=[...stationMap.entries()].filter(([,r])=>stationScope==='all'||r.lineCode===stationScope).sort((a,b)=>stationDisplay(a[1]).localeCompare(stationDisplay(b[1]),'zh-Hant'));
+  const stations=[...stationMap.entries()].filter(([,r])=>stationScope==='all'||r.lineCode===stationScope).sort((a,b)=>compareStationsByCode(a[1],b[1]));
   if(!ridershipView.stationKey||!stations.some(([key])=>key===ridershipView.stationKey))ridershipView.stationKey=stations[0]?.[0]||'';
   const stationKey=ridershipView.stationKey,selected=stationMap.get(stationKey),metric='averageDaily';
   const current=Array(12).fill(null),previous=Array(12).fill(null);
@@ -2647,7 +2660,7 @@ function renderRidership(){
   const scopeRows=records.filter(r=>Number(r.year)===year&&Number(r.month)===chosenMonth&&(stationScope==='all'||r.lineCode===stationScope));
   const ranked=rankRows(scopeRows,metric),selectedRank=ranked.findIndex(r=>(r.stationKey||r.code||r.station)===stationKey)+1,top=ranked.slice(0,10);
   const yearOptions=years.map(y=>`<option value="${y}" ${y===year?'selected':''}>${y} 年</option>`).join('');
-  const scopeOptions=[['all','全線'],['BR','BR 文湖線'],['R','R 淡水信義線'],['G','G 松山新店線'],['O','O 中和新蘆線'],['BL','BL 板南線']].map(([code,label])=>`<option value="${code}" ${stationScope===code?'selected':''}>${label}</option>`).join('');
+  const scopeOptions=[['all','全線'],['BR','文湖線'],['R','淡水信義線'],['G','松山新店線'],['O','中和新蘆線'],['BL','板南線']].map(([code,label])=>`<option value="${code}" ${stationScope===code?'selected':''}>${label}</option>`).join('');
   const stationOptions=stations.map(([key,r])=>`<option value="${escapeHtml(key)}" ${key===stationKey?'selected':''}>${escapeHtml(r.station)}（${escapeHtml(r.code)}）</option>`).join('');
   const monthOptions=availableMonths.map(m=>`<option value="${String(m).padStart(2,'0')}" ${m===chosenMonth?'selected':''}>${m}月</option>`).join('');
   const detail=ridershipView.detailSection||'trend';
@@ -2656,7 +2669,7 @@ function renderRidership(){
   if(!records.length){
     body='<div class="panel empty"><p>尚無年度運量資料</p><p class="muted">請至資料管理匯入年度 Excel。</p></div>';
   }else if(detail==='trend'){
-    body=`<div class="stat-grid"><div class="stat-card"><div class="stat-label">${chosenMonth}月平均日運量</div><div class="stat-value">${formatRidershipValue(chosen,metric)}</div><div class="stat-note">${selected?escapeHtml(stationDisplay(selected)):'—'}</div></div><div class="stat-card"><div class="stat-label">較上月</div><div class="stat-value ${mom===null?'neutral':mom>=0?'positive':'negative'}">${mom===null?'—':`${mom>=0?'+':''}${mom.toFixed(1)}%`}</div><div class="stat-note">${mom===null?'尚無可比較資料':'平均日運量變化'}</div></div><div class="stat-card"><div class="stat-label">較去年同月</div><div class="stat-value ${yoy===null?'neutral':yoy>=0?'positive':'negative'}">${yoy===null?'—':`${yoy>=0?'+':''}${yoy.toFixed(1)}%`}</div><div class="stat-note">${yoy===null?'尚無可比較資料':`${year-1}年${chosenMonth}月`}</div></div><div class="stat-card"><div class="stat-label">${chosenMonth}月排名</div><div class="stat-value">${selectedRank?`第 ${selectedRank} 名`:'—'}</div><div class="stat-note">${ranked.length?`${stationScope==='all'?'全線':RIDERSHIP_LINES[stationScope]}共 ${ranked.length} 個站點`:'尚無排名資料'}</div></div></div><div class="panel"><h3 class="panel-title">每月平均日運量趨勢</h3><p class="panel-note">${escapeHtml(stationDisplay(selected||{}))}｜本年度資料至${latestMonth}月</p><div class="chart-legend"><span><i class="legend-dot" style="background:#1677ff"></i>${year}</span><span><i class="legend-dot" style="background:#9aa3af"></i>${year-1}（虛線）</span></div>${makeLineChart(current,previous,metric)}</div>`;
+    body=`<div class="stat-grid"><div class="stat-card"><div class="stat-label">${chosenMonth}月平均日運量</div><div class="stat-value">${formatRidershipKpi(chosen)}</div><div class="stat-note">${selected?escapeHtml(stationShortDisplay(selected)):'—'}</div></div><div class="stat-card"><div class="stat-label">較上月</div><div class="stat-value ${mom===null?'neutral':mom>=0?'positive':'negative'}">${mom===null?'—':`${mom>=0?'+':''}${mom.toFixed(1)}%`}</div><div class="stat-note">${mom===null?'尚無可比較資料':'平均日運量變化'}</div></div><div class="stat-card"><div class="stat-label">較去年同月</div><div class="stat-value ${yoy===null?'neutral':yoy>=0?'positive':'negative'}">${yoy===null?'—':`${yoy>=0?'+':''}${yoy.toFixed(1)}%`}</div><div class="stat-note">${yoy===null?'尚無可比較資料':`${year-1}年${chosenMonth}月`}</div></div><div class="stat-card"><div class="stat-label">${chosenMonth}月排名</div><div class="stat-value">${selectedRank?`第 ${selectedRank} 名`:'—'}</div><div class="stat-note">${ranked.length?`${stationScope==='all'?'全線':RIDERSHIP_LINES[stationScope]}共 ${ranked.length} 個站點`:'尚無排名資料'}</div></div></div><div class="panel"><h3 class="panel-title">每月平均日運量趨勢</h3><p class="panel-note">${escapeHtml(stationShortDisplay(selected||{}))}｜本年度資料至${latestMonth}月</p><div class="chart-legend"><span><i class="legend-dot" style="background:#1677ff"></i>${year}（折線）</span><span><i class="legend-dot" style="background:#d9dee7;border-radius:2px"></i>${year-1}（長條）</span><span>點選月份可看明細</span></div>${makeLineChart(current,previous,metric)}</div>`;
   }else if(detail==='monthly'){
     body=`<div class="panel"><h3 class="panel-title">${year}年每月明細</h3><p class="panel-note">本年度資料至${latestMonth}月；後續月份不列入比較。</p><div class="data-table-wrap"><table class="data-table"><thead><tr><th>月份</th><th>${year}</th><th>${year-1}</th><th>年增率</th></tr></thead><tbody>${MONTH_LABELS.map((m,i)=>{const hasCurrent=Number.isFinite(current[i]),change=hasCurrent&&Number.isFinite(previous[i])&&previous[i]>0?(current[i]-previous[i])/previous[i]*100:null;return `<tr><td>${m}</td><td>${hasCurrent?Math.round(current[i]).toLocaleString():'—'}</td><td>${Number.isFinite(previous[i])?Math.round(previous[i]).toLocaleString():'—'}</td><td class="${change===null?'neutral':change>=0?'positive':'negative'}">${change===null?'—':`${change>=0?'+':''}${change.toFixed(1)}%`}</td></tr>`;}).join('')}</tbody></table></div></div>`;
   }else if(detail==='ranking'){
@@ -2673,6 +2686,7 @@ function renderRidership(){
   document.getElementById('ridership-scope').onchange=e=>{ridershipView.rankScope=e.target.value;ridershipView.stationKey='';renderRidership();};
   document.getElementById('ridership-station').onchange=e=>{ridershipView.stationKey=e.target.value;renderRidership();};
   document.getElementById('ridership-rank-month').onchange=e=>{ridershipView.rankMonth=e.target.value;renderRidership();};
+  contentEl.querySelectorAll('[data-chart-month]').forEach(hit=>{const open=()=>{ridershipView.rankMonth=String(hit.dataset.chartMonth).padStart(2,'0');ridershipView.detailSection='monthly';renderRidership();};hit.onclick=open;hit.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}};});
 }
 
 /* --- Settings and data overview --- */
@@ -2749,7 +2763,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.6.3・2026.08.13</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.7・2026.08.13</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

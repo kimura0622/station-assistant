@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.3"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.3"></script>
+<script src="./vendor/pdf.min.js?v=5.4"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.4"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -124,6 +124,13 @@
   }
   .modal-header{padding:12px 16px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--card);}
   .modal-body{padding:14px;overflow-y:auto;flex:1;}
+  .import-review-sheet{height:92dvh;max-height:92dvh;}
+  .import-review-header{display:grid;grid-template-columns:64px minmax(0,1fr) 64px;gap:8px;flex-shrink:0;}
+  .import-review-title{text-align:center;font-size:13px;font-weight:650;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .import-review-action{min-height:36px;padding:7px 8px;border:0;border-radius:8px;font-size:13px;font-weight:650;}
+  .import-review-cancel{background:transparent;color:var(--text-2);text-align:left;}
+  .import-review-confirm{background:var(--accent);color:#fff;text-align:center;}
+  .import-review-body{min-height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
   .doc-review-item{border:0.5px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;background:#fff;}
   #pdf-canvas-wrap{display:flex;justify-content:center;padding:8px;background:#3a3a38;}
   canvas{max-width:100%;height:auto;background:#fff;}
@@ -264,6 +271,7 @@
     .modal-overlay{position:fixed;align-items:center;justify-content:center;padding:30px;}
     .modal-sheet{width:min(960px,92vw);max-height:88vh;border-radius:18px;box-shadow:0 24px 70px rgba(13,25,45,.35);}
     .modal-header{padding:15px 20px}.modal-body{padding:20px;}
+    .import-review-sheet{height:min(760px,88vh);max-height:88vh;}
     .reader-text,.sop-block{font-size:15px;}
     .pdf-reader-shell{width:min(1180px,94vw);max-height:94vh;}
   }
@@ -298,12 +306,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 分段測試版 v5.3 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 分段測試版 v5.4 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.3';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.4';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -1415,13 +1423,13 @@ function renderReviewBody(docs){
   return html;
 }
 function showImportReview(docs, pdfFileId){
-  const html = `<div class="modal-overlay"><div class="modal-sheet">
-    <div class="modal-header"><span style="font-weight:500;">確認匯入結果（共${docs.length}份）</span>
-    <button id="review-cancel" style="background:none;border:none;font-size:18px;">✕</button></div>
-    <div class="modal-body"><div id="quality-report">${qualityReportHtml(docs)}</div><div id="review-body">${renderReviewBody(docs)}</div></div>
-    <div style="padding:12px 16px;border-top:0.5px solid var(--border);background:var(--card);">
-      <button class="primary" id="review-confirm" style="width:100%;">確認匯入</button>
+  const html = `<div class="modal-overlay"><div class="modal-sheet import-review-sheet">
+    <div class="modal-header import-review-header">
+      <button id="review-cancel" class="import-review-action import-review-cancel">取消</button>
+      <span class="import-review-title">確認匯入結果（共${docs.length}份）</span>
+      <button id="review-confirm" class="import-review-action import-review-confirm">確認</button>
     </div>
+    <div class="modal-body import-review-body"><div id="quality-report">${qualityReportHtml(docs)}</div><div id="review-body">${renderReviewBody(docs)}</div></div>
   </div></div>`;
   contentEl.insertAdjacentHTML('beforeend', html);
 
@@ -2696,7 +2704,7 @@ function renderRidershipLegacy(){
   });
 }
 
-/* v5.3：常用程序文字模式完整呈現設定的起訖頁。 */
+/* v5.4：PDF匯入確認操作固定於視窗頂部。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -2767,7 +2775,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本完整承接 GitHub v4.9，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.3 分段測試版</dd><dt>基準版本</dt><dd>GitHub v4.9</dd><dt>更新日期</dt><dd>2026-08-27</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.3</dd><dt>本次更新</dt><dd>完整顯示常用程序文字頁面範圍</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本完整承接 GitHub v4.9，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.4 分段測試版</dd><dt>基準版本</dt><dd>GitHub v4.9</dd><dt>更新日期</dt><dd>2026-08-27</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.4</dd><dt>本次更新</dt><dd>PDF匯入確認按鈕移至頂部</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -2827,7 +2835,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 分段測試版 v5.3・2026.08.27</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 分段測試版 v5.4・2026.08.27</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

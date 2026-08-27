@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=4.9"></script>
-<script src="./vendor/xlsx.full.min.js?v=4.9"></script>
+<script src="./vendor/pdf.min.js?v=5.0"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.0"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -87,11 +87,16 @@
   .reader-page-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;color:var(--text-2);}
   .reader-text{font-size:14px;line-height:1.85;white-space:pre-wrap;word-break:break-word;margin:0;color:var(--text);user-select:text;-webkit-user-select:text;}
   .reader-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-  .sop-block{font-size:14px;line-height:1.8;margin:0 0 10px;padding:0 2px;}
-  .sop-block.level-2{font-weight:700;font-size:15px;color:var(--accent-text);padding:9px 10px;background:var(--accent-bg);border-radius:10px;}
-  .sop-block.level-3{font-weight:650;padding:9px 10px;background:#f2f2f7;border-radius:10px;border-left:3px solid var(--accent);}
-  .sop-block.letter{padding:9px 10px;background:#f7f7f9;border-radius:10px;border-left:3px solid #aeaeb2;}
-  .sop-block.subitem{margin-left:12px;padding:7px 9px;background:#fafafa;border-radius:8px;}
+  .sop-block{font-size:14px;line-height:1.8;margin:0 0 10px;padding:8px 9px;display:grid;grid-template-columns:minmax(48px,68px) minmax(0,1fr);align-items:start;gap:8px;border-radius:10px;background:#fafafa;}
+  .sop-block.no-marker{display:block;padding:5px 7px;background:transparent;}
+  .sop-marker{font-weight:750;color:var(--accent-text);font-variant-numeric:tabular-nums;word-break:break-word;}
+  .sop-body{min-width:0;font-weight:450;color:var(--text);}
+  .sop-block.level-1,.sop-block.level-2{font-size:15px;background:var(--accent-bg);border-left:3px solid var(--accent);}
+  .sop-block.level-1 .sop-body,.sop-block.level-2 .sop-body{font-weight:650;}
+  .sop-block.level-3{background:#f2f2f7;border-left:3px solid var(--accent);}
+  .sop-block.level-3 .sop-body{font-weight:550;}
+  .sop-block.letter{background:#f7f7f9;border-left:3px solid #aeaeb2;}
+  .sop-block.subitem{margin-left:8px;background:#fafafa;}
   .scenario-tag{display:inline-block;font-size:11px;font-weight:600;color:#854f0b;background:#faeeda;padding:2px 7px;border-radius:999px;margin-right:5px;}
   .reference-chip{display:inline-block;color:#005bb5;background:#eaf4ff;border:0;border-radius:999px;padding:1px 6px;margin:0 2px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;}
   .shortcut-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
@@ -293,12 +298,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v4.9 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 分段測試版 v5.0 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=4.9';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.0';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -439,25 +444,20 @@ function guessTitle(coverText){
   return cleaned.slice(0,24) || '未命名文件';
 }
 function extractFormattedText(textContent,pageHeight){
-  const layoutLines=[];
-  let currentLine=[],lastY=null;
-  const flushLine=()=>{
-    if(currentLine.length) layoutLines.push(currentLine.join(' ').replace(/\s+/g,' ').trim());
-    currentLine=[];
-  };
-  textContent.items.forEach(it=>{
-    const str=(it.str||'').trim();
-    if(!str) return;
-    const y=it.transform ? it.transform[5] : lastY;
-    // 排除頁面最下方獨立的文件內部頁碼；APP另以PDF總檔頁碼顯示。
-    if(pageHeight && y<pageHeight*.075 && /^\d{1,4}$/.test(str)) return;
-    if(currentLine.length && lastY!==null && y!==null && Math.abs(y-lastY)>3) flushLine();
-    currentLine.push(str);
-    lastY=y;
-    if(it.hasEOL) flushLine();
+  // 先依PDF座標還原行，再由左至右組合；不能先把整頁串成一段，否則條號與續行結構會消失。
+  const items=textContent.items.map((it,index)=>({
+    text:(it.str||'').trim(),x:it.transform?it.transform[4]:0,y:it.transform?it.transform[5]:0,
+    height:Math.abs(it.height||it.transform?.[3]||10),index
+  })).filter(it=>it.text).filter(it=>!(pageHeight&&it.y<pageHeight*.075&&/^\d{1,4}$/.test(it.text)));
+  items.sort((a,b)=>Math.abs(a.y-b.y)>3?b.y-a.y:a.x-b.x||a.index-b.index);
+  const rows=[];
+  items.forEach(item=>{
+    let row=rows.find(r=>Math.abs(r.y-item.y)<=Math.max(2.5,Math.min(4,item.height*.35)));
+    if(!row){row={y:item.y,items:[]};rows.push(row);}
+    row.items.push(item);
   });
-  flushLine();
-  return layoutLines.filter(Boolean).join('\n');
+  return rows.sort((a,b)=>b.y-a.y).map(row=>row.items.sort((a,b)=>a.x-b.x||a.index-b.index)
+    .map(it=>it.text).join(' ').replace(/\s+/g,' ').trim()).filter(Boolean).join('\n');
 }
 async function parsePdfArrayBuffer(buf,onProgress=()=>{}){
   const pdf = await pdfjsLib.getDocument({data:buf.slice(0)}).promise;
@@ -1541,31 +1541,40 @@ function parenthesisDelta(text){
   for(const c of text){ if(c==='('||c==='（') delta++; if(c===')'||c==='）') delta--; }
   return delta;
 }
+function clauseMarkerResult(line,match,marker,className){
+  const raw=match[0],body=line.slice(raw.length).trim();
+  if(!body||/^(?:頁|面|項|次|版)$/.test(body)||/^QM[-－—]/i.test(line)) return null;
+  return {marker,markerLabel:raw.trim(),className,body};
+}
 function detectClauseMarker(line,insideParentheses){
   if(insideParentheses) return null;
-  let top=line.match(/^(\d{1,2})\.(?=\s*[\u3400-\u9fff【])/);
-  if(top) return {marker:top[1],className:'level-2'};
-  let m=line.match(/^(\d{1,2}(?:\.\d+){1,4})\.?(?=\s|[^\d.])/);
+  let m=line.match(/^(\d{1,2}(?:\.\d{1,2}){1,4})[.、]?\s*(?=\S)/);
   if(m){
-    const after=line.slice(m[0].length).trim();
-    if(/^(?:說明|規定|辦理|所述)/.test(after)) return null;
     const depth=m[1].split('.').length;
-    return {marker:m[1],className:depth===2?'level-2':'level-3'};
+    return clauseMarkerResult(line,m,m[1],depth===2?'level-2':'level-3');
   }
-  m=line.match(/^([A-Z](?:\.\d+)+|[A-Z]\.)(?=\s|[\u3400-\u9fff【（(])/);
-  if(m) return {marker:m[1].replace(/\.$/,''),className:'letter'};
-  m=line.match(/^[（(](\d+)[）)]/);
-  if(m) return {marker:`(${m[1]})`,className:'subitem'};
-  m=line.match(/^(步驟[一二三四五六七八九十]+)[、：:\s]/);
-  if(m) return {marker:m[1],className:'letter'};
+  m=line.match(/^([A-Z](?:\.\d{1,2}){1,3})[.、]?\s*(?=\S)/);
+  if(m) return clauseMarkerResult(line,m,m[1],'letter');
+  m=line.match(/^(\d{1,2})[.、]\s*(?=\S)/);
+  if(m) return clauseMarkerResult(line,m,m[1],'level-1');
+  m=line.match(/^([A-Z])(?:[.、]|\s+)(?=\s*[\u3400-\u9fff【（(])/);
+  if(m) return clauseMarkerResult(line,m,m[1],'letter');
+  m=line.match(/^([一二三四五六七八九十百]{1,4})、\s*(?=\S)/);
+  if(m) return clauseMarkerResult(line,m,m[1],'level-1');
+  m=line.match(/^([（(])([一二三四五六七八九十百]{1,4}|\d{1,2})[)）]\s*(?=\S)/);
+  if(m) return clauseMarkerResult(line,m,`(${m[2]})`,'subitem');
+  m=line.match(/^(步驟[一二三四五六七八九十]+)[、：:\s]+(?=\S)/);
+  if(m) return clauseMarkerResult(line,m,m[1],'letter');
   return null;
 }
 function splitInlineStructures(line){
   const candidates=[];
   const patterns=[
-    /\d{1,2}(?:\.\d+){1,4}\.?(?=\s*[\u3400-\u9fff【])/g,
-    /\d{1,2}\.(?=\s*[\u3400-\u9fff【])/g,
-    /[A-Z]\.(?:\d+)?(?=\s|[\u3400-\u9fff【])/g,
+    /\d{1,2}(?:\.\d{1,2}){1,4}[.、]?(?=\s*[\u3400-\u9fff【])/g,
+    /\d{1,2}[.、](?=\s*[\u3400-\u9fff【])/g,
+    /[A-Z](?:\.\d{1,2}){1,3}[.、]?(?=\s|[\u3400-\u9fff【])/g,
+    /[（(](?:[一二三四五六七八九十百]{1,4}|\d{1,2})[)）](?=\s*[\u3400-\u9fff【])/g,
+    /[一二三四五六七八九十百]{1,4}、(?=\s*[\u3400-\u9fff【])/g,
     /步驟[一二三四五六七八九十]+(?=[、：:\s])/g
   ];
   patterns.forEach(pattern=>{
@@ -1592,13 +1601,14 @@ function parseSopParagraphs(text){
     const marker=detectClauseMarker(line,parenDepth>0);
     if(marker){
       pushCurrent();
-      current={text:line,marker:marker.marker,className:marker.className};
+      current={text:line,body:marker.body,marker:marker.marker,markerLabel:marker.markerLabel,className:marker.className};
       parenDepth=Math.max(0,parenthesisDelta(line));
     }else if(current){
       current.text+=` ${line}`;
+      current.body=current.marker?`${current.body} ${line}`:current.text;
       parenDepth=Math.max(0,parenDepth+parenthesisDelta(line));
     }else{
-      current={text:line,marker:null,className:''};
+      current={text:line,body:line,marker:null,markerLabel:'',className:'no-marker'};
       parenDepth=Math.max(0,parenthesisDelta(line));
     }
   });
@@ -1607,11 +1617,12 @@ function parseSopParagraphs(text){
 }
 function formatStructuredSopText(text,terms){
   return parseSopParagraphs(text).map(paragraph=>{
-    let content=highlightReaderText(paragraph.text,terms);
+    let content=highlightReaderText(paragraph.body||paragraph.text,terms);
     content=content.replace(/(見|詳見|依照?|參照|比照)(?:第)?((?:\d+(?:\.\d+)+)|(?:[A-Z]\.\d+))/g,
       '$1<span class="reference-chip" data-clause-ref="$2">$2</span>');
     const clauseAttr=paragraph.marker?` data-clause="${escapeHtml(paragraph.marker)}"`:'';
-    return `<div class="sop-block ${paragraph.className}"${clauseAttr}>${content}</div>`;
+    if(!paragraph.marker) return `<div class="sop-block no-marker">${content}</div>`;
+    return `<div class="sop-block ${paragraph.className}"${clauseAttr}><span class="sop-marker">${escapeHtml(paragraph.markerLabel||paragraph.marker)}</span><span class="sop-body">${content}</span></div>`;
   }).join('');
 }
 function readablePageForCopy(page){
@@ -2642,7 +2653,7 @@ function renderRidershipLegacy(){
   });
 }
 
-/* v4.9：響應式清晰座標、漂亮整數刻度與導覽順序調整。 */
+/* v5.0：保留v4.9運量與導覽功能，新增SOP條文結構化分段。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -2772,7 +2783,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v4.9・2026.08.14</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 分段測試版 v5.0・2026.08.27</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

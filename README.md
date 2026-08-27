@@ -1,4 +1,4 @@
-# 站務工作助手：手機 GitHub Pages PWA 分段測試版 v5.0
+# 站務工作助手：手機 GitHub Pages PWA 分段測試版 v5.1
 
 這個版本供手機透過 GitHub Pages 安裝使用。手機採單欄及底部分頁操作；程式、PDF與Excel解析套件及介面資源都包含在本資料夾內，不使用外部CDN、雲端資料庫、分析服務或後端API。公司電腦請改用另外提供的電腦版HTML，不要直接雙擊本資料夾的 `index.html`。
 

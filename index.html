@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.1"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.1"></script>
+<script src="./vendor/pdf.min.js?v=5.2"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.2"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -87,7 +87,7 @@
   .reader-page-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;color:var(--text-2);}
   .reader-text{font-size:14px;line-height:1.85;white-space:pre-wrap;word-break:break-word;margin:0;color:var(--text);user-select:text;-webkit-user-select:text;}
   .reader-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-  .sop-block{--sop-depth:0;font-size:14px;line-height:1.8;margin:0 0 7px calc(var(--sop-depth) * 8px);padding:2px 0;display:grid;grid-template-columns:56px minmax(0,1fr);align-items:start;gap:7px;background:transparent;}
+  .sop-block{--sop-depth:0;font-size:14px;line-height:1.8;margin:0 0 7px calc(var(--sop-depth) * 16px);padding:2px 0;display:grid;grid-template-columns:56px minmax(0,1fr);align-items:start;gap:7px;background:transparent;}
   .sop-block.no-marker{display:block;margin-left:0;padding:3px 0 5px 63px;background:transparent;}
   .sop-block.depth-1,.sop-block.depth-2,.sop-block.depth-3{padding-left:7px;border-left:1px solid #d9e4ef;}
   .sop-marker{font-weight:650;color:#005bbb;font-variant-numeric:tabular-nums;word-break:break-word;text-align:right;padding-right:3px;}
@@ -298,12 +298,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 分段測試版 v5.1 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 分段測試版 v5.2 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.1';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.2';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -1592,8 +1592,29 @@ function splitInlineStructures(line){
   const points=[0,...new Set(candidates)].sort((a,b)=>a-b);
   return points.map((start,i)=>line.slice(start,points[i+1]??line.length).trim()).filter(Boolean);
 }
+function repairBrokenClauseLines(sourceLines){
+  const repaired=[];
+  for(let i=0;i<sourceLines.length;i++){
+    let line=String(sourceLines[i]||'').trim();
+    if(!line) continue;
+    // PDF可能把多層數字條號抽成「3.2. 1」或「15. 1」，先去除條號內的假空格。
+    line=line.replace(/^((?:\d{1,2}\s*\.\s*)+\d{1,2})(?=\s|[.、]|$)/,marker=>marker.replace(/\s+/g,''));
+    // 同一行被拆成「步驟 一、」時先修復，再交由條號判斷。
+    line=line.replace(/^步\s*驟\s*([一二三四五六七八九十百]+)[、：:]\s*/,(_,n)=>`步驟${n}、 `);
+    const stepHead=line.match(/^步\s*驟(?:\s+|$)(.*)$/);
+    const next=String(sourceLines[i+1]||'').trim().match(/^([一二三四五六七八九十百]+)[、：:]\s*(.*)$/);
+    if(stepHead&&next){
+      const firstBody=stepHead[1].trim(),secondBody=next[2].trim();
+      repaired.push(`步驟${next[1]}、 ${[firstBody,secondBody].filter(Boolean).join(' ')}`.trim());
+      i++;
+      continue;
+    }
+    repaired.push(line);
+  }
+  return repaired;
+}
 function parseSopParagraphs(text){
-  const lines=stripSopPageHeader(text).flatMap(splitInlineStructures);
+  const lines=repairBrokenClauseLines(stripSopPageHeader(text)).flatMap(splitInlineStructures);
   const paragraphs=[];
   let current=null,parenDepth=0;
   const pushCurrent=()=>{ if(current?.text) paragraphs.push(current); current=null; };
@@ -1618,7 +1639,7 @@ function parseSopParagraphs(text){
 function clauseHierarchyDepth(marker,className){
   const value=String(marker||'');
   if(!value) return 0;
-  if(/^\d+(?:\.\d+)+$/.test(value)) return Math.min(3,Math.max(0,value.split('.').length-2));
+  if(/^\d+(?:\.\d+)+$/.test(value)) return Math.min(3,Math.max(1,value.split('.').length-1));
   if(/^\d+$/.test(value)||/^[一二三四五六七八九十百]+$/.test(value)) return 0;
   if(/^[A-Z](?:\.\d+)*$/.test(value)) return Math.min(3,1+(value.split('.').length-1));
   if(/^\(/.test(value)) return 3;
@@ -1681,12 +1702,20 @@ async function ensureDocumentLayoutText(doc){
     loading.remove();
   }
 }
-async function openTextReader(docId,absolutePage,targetClause=null){
+function resolveTextReaderPages(doc,options={}){
+  const all=(doc.pages||[]).filter(p=>p.type!=='cover' && !(sopFilter==='content' && p.type==='revision'));
+  const rangeStart=Number(options.startPage),rangeEnd=Number(options.endPage);
+  const hasSavedRange=Number.isFinite(rangeStart)&&Number.isFinite(rangeEnd)&&rangeStart<=rangeEnd;
+  const eligible=hasSavedRange?all.filter(p=>Number(p.absolutePage)>=rangeStart&&Number(p.absolutePage)<=rangeEnd):all;
+  return {eligible,hasSavedRange,rangeStart,rangeEnd};
+}
+async function openTextReader(docId,absolutePage,targetClause=null,options={}){
   const doc=cache.sopDocs.find(d=>d.id===docId);
   if(!doc) return alert('找不到這份文件，請重新整理後再試。');
   await ensureDocumentLayoutText(doc);
   const displayName=resolvedDocName(doc);
-  const eligible=doc.pages.filter(p=>p.type!=='cover' && !(sopFilter==='content' && p.type==='revision'));
+  const {eligible,hasSavedRange,rangeStart,rangeEnd}=resolveTextReaderPages(doc,options);
+  if(!eligible.length) return alert('設定的常用程序頁面不在這份文件中，請重新設定起訖頁。');
   let currentIndex=eligible.findIndex(p=>p.absolutePage===absolutePage);
   if(currentIndex<0) currentIndex=0;
   const terms=parseSearchTerms(sopKeyword);
@@ -1775,14 +1804,14 @@ async function openTextReader(docId,absolutePage,targetClause=null){
   document.getElementById('reader-next').addEventListener('click',()=>{ if(currentIndex<eligible.length-1){currentIndex++;draw();} });
   document.getElementById('reader-favorite').addEventListener('click',async()=>{
     const p=eligible[currentIndex];
-    const item={type:'sop',docId:doc.id,absolutePage:p.absolutePage,startPage:Math.max(getSopPageBounds({docId:doc.id}).min,p.absolutePage-1),endPage:Math.min(getSopPageBounds({docId:doc.id}).max,p.absolutePage+1),title:displayName,sourceTitle:displayName};
+    const item={type:'sop',docId:doc.id,absolutePage:p.absolutePage,startPage:hasSavedRange?rangeStart:Math.max(getSopPageBounds({docId:doc.id}).min,p.absolutePage-1),endPage:hasSavedRange?rangeEnd:Math.min(getSopPageBounds({docId:doc.id}).max,p.absolutePage+1),title:displayName,sourceTitle:displayName};
     await openProcedureNameDialog(item,favoriteFor(item)||null);
     draw();
   });
   document.getElementById('reader-pdf').addEventListener('click',()=>{
     const p=eligible[currentIndex];
     overlay.remove();
-    openSopPdfReader(doc.id,p.absolutePage);
+    openSopPdfReader(doc.id,p.absolutePage,hasSavedRange?{startPage:rangeStart,endPage:rangeEnd,favoriteId:options.favoriteId}:{});
   });
   draw();
   if(targetClause){
@@ -1930,7 +1959,7 @@ async function openSopPdfReader(docId,absolutePage,options={}){
   stage.addEventListener('touchmove',e=>{if(!pinch||e.touches.length!==2)return;pinch.nextZoom=Math.max(.6,Math.min(2,pinch.startZoom*touchDistance(e.touches)/Math.max(1,pinch.startDistance)));overlay.querySelector('#sop-pdf-status').textContent=`PDF第 ${rangeStart}～${rangeEnd} 頁｜目前第 ${currentPage} 頁｜${Math.round(pinch.nextZoom*100)}%`;e.preventDefault();},{passive:false});
   stage.addEventListener('touchend',e=>{if(!pinch||e.touches.length>1)return;zoom=pinch.nextZoom;pinch=null;renderPages(false);e.preventDefault();},{passive:false});
   stage.addEventListener('touchcancel',()=>{pinch=null;});
-  overlay.querySelector('#sop-pdf-text').addEventListener('click',()=>{closed=true;renderToken++;overlay.remove();openTextReader(doc.id,currentPage);});
+  overlay.querySelector('#sop-pdf-text').addEventListener('click',()=>{closed=true;renderToken++;overlay.remove();openTextReader(doc.id,currentPage,null,hasSavedRange?{startPage:rangeStart,endPage:rangeEnd,favoriteId:options.favoriteId}:{});});
   overlay.querySelector('#sop-pdf-related').addEventListener('click',()=>openRelatedNoticeList(doc.id,options.favoriteId));
   overlay.querySelector('#sop-pdf-annotate').addEventListener('click',()=>{
     const favoriteId=activeAnnotationFavoriteId();if(!favoriteId)return alert('請先將這段頁面加入常用程序，再進行標註。');
@@ -2664,7 +2693,7 @@ function renderRidershipLegacy(){
   });
 }
 
-/* v5.1：文字模式改為平面階層排版，設定頁新增版本資訊。 */
+/* v5.2：修正條號斷字、階層方向與常用程序文字模式範圍。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -2735,7 +2764,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本完整承接 GitHub v4.9，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.1 分段測試版</dd><dt>基準版本</dt><dd>GitHub v4.9</dd><dt>更新日期</dt><dd>2026-08-27</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.1</dd><dt>本次更新</dt><dd>文字模式階層排版、版本資訊</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本完整承接 GitHub v4.9，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.2 分段測試版</dd><dt>基準版本</dt><dd>GitHub v4.9</dd><dt>更新日期</dt><dd>2026-08-27</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.2</dd><dt>本次更新</dt><dd>條號修復、階層縮排、文字模式範圍</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -2795,7 +2824,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 分段測試版 v5.1・2026.08.27</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 分段測試版 v5.2・2026.08.27</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

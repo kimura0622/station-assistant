@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.2"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.2"></script>
+<script src="./vendor/pdf.min.js?v=5.3"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.3"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -298,12 +298,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 分段測試版 v5.2 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 分段測試版 v5.3 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.2';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.3';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -1741,9 +1741,12 @@ async function openTextReader(docId,absolutePage,targetClause=null,options={}){
   </div>`;
   document.getElementById('phone').appendChild(overlay);
   function draw(){
-    const start=Math.max(0,currentIndex-1);
-    const end=Math.min(eligible.length-1,currentIndex+1);
-    let html=`<p class="tiny-muted" style="margin:0 0 10px;">顯示命中頁及相鄰頁；藍框為目前頁面。</p>`;
+    // 常用程序必須完整呈現儲存的起訖頁；一般搜尋仍只載入命中頁與相鄰頁，避免大型文件一次渲染過多文字。
+    const start=hasSavedRange?0:Math.max(0,currentIndex-1);
+    const end=hasSavedRange?eligible.length-1:Math.min(eligible.length-1,currentIndex+1);
+    let html=hasSavedRange
+      ?`<p class="tiny-muted" style="margin:0 0 10px;">常用程序範圍：PDF第 ${rangeStart}～${rangeEnd} 頁，共 ${eligible.length} 頁；藍框為目前頁面。</p>`
+      :`<p class="tiny-muted" style="margin:0 0 10px;">顯示命中頁及相鄰頁；藍框為目前頁面。</p>`;
     for(let i=start;i<=end;i++){
       const p=eligible[i];
       html+=`<section class="reader-page ${i===currentIndex?'current':''}" data-reader-index="${i}">
@@ -2693,7 +2696,7 @@ function renderRidershipLegacy(){
   });
 }
 
-/* v5.2：修正條號斷字、階層方向與常用程序文字模式範圍。 */
+/* v5.3：常用程序文字模式完整呈現設定的起訖頁。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -2764,7 +2767,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本完整承接 GitHub v4.9，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.2 分段測試版</dd><dt>基準版本</dt><dd>GitHub v4.9</dd><dt>更新日期</dt><dd>2026-08-27</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.2</dd><dt>本次更新</dt><dd>條號修復、階層縮排、文字模式範圍</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本完整承接 GitHub v4.9，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.3 分段測試版</dd><dt>基準版本</dt><dd>GitHub v4.9</dd><dt>更新日期</dt><dd>2026-08-27</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.3</dd><dt>本次更新</dt><dd>完整顯示常用程序文字頁面範圍</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -2824,7 +2827,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 分段測試版 v5.2・2026.08.27</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 分段測試版 v5.3・2026.08.27</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

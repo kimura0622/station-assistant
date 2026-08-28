@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.4"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.4"></script>
+<script src="./vendor/pdf.min.js?v=5.5.2"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.5.2"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -89,11 +89,19 @@
   .reader-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
   .sop-block{--sop-depth:0;font-size:14px;line-height:1.8;margin:0 0 7px calc(var(--sop-depth) * 16px);padding:2px 0;display:grid;grid-template-columns:56px minmax(0,1fr);align-items:start;gap:7px;background:transparent;}
   .sop-block.no-marker{display:block;margin-left:0;padding:3px 0 5px 63px;background:transparent;}
-  .sop-block.depth-1,.sop-block.depth-2,.sop-block.depth-3{padding-left:7px;border-left:1px solid #d9e4ef;}
+  .sop-block.depth-1,.sop-block.depth-2,.sop-block.depth-3{padding-left:0;border-left:0;}
   .sop-marker{font-weight:650;color:#005bbb;font-variant-numeric:tabular-nums;word-break:break-word;text-align:right;padding-right:3px;}
   .sop-body{min-width:0;font-weight:400;color:var(--text);}
   .sop-block.level-1 .sop-marker,.sop-block.level-2 .sop-marker{font-weight:750;}
   .reader-text .highlight{background:#fff0a6;color:inherit;font-weight:500;padding:0 1px;border-radius:2px;}
+  .pdf-table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:8px 0 12px;border:1px solid #9aa8b8;border-radius:8px;background:#fff;}
+  .pdf-text-table{width:100%;min-width:720px;border-collapse:collapse;table-layout:fixed;font-size:13px;line-height:1.55;color:var(--text);}
+  .pdf-text-table th,.pdf-text-table td{border:1px solid #9aa8b8;padding:8px 9px;vertical-align:top;white-space:normal;word-break:break-word;background:#fff;}
+  .pdf-text-table th{background:#fff4a8;color:#172235;font-weight:700;text-align:center;}
+  .pdf-text-table td:first-child{font-weight:650;background:#f3f7fb;text-align:center;vertical-align:middle;}
+  .pdf-table-red{color:#d93025;font-weight:500;}
+  .pdf-table-intro{font-size:13px;line-height:1.65;margin:0 0 8px;color:var(--text-2);white-space:pre-wrap;}
+  .pdf-table-hint{font-size:11px;color:var(--text-muted);margin:0 0 6px;}
   .scenario-tag{display:inline-block;font-size:11px;font-weight:600;color:#854f0b;background:#faeeda;padding:2px 7px;border-radius:999px;margin-right:5px;}
   .reference-chip{display:inline-block;color:#005bb5;background:#eaf4ff;border:0;border-radius:999px;padding:1px 6px;margin:0 2px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;}
   .shortcut-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
@@ -306,12 +314,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 分段測試版 v5.4 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 分段測試版 v5.5.2 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.4';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.5.2';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -451,6 +459,131 @@ function guessTitle(coverText){
   });
   return cleaned.slice(0,24) || '未命名文件';
 }
+function textItemColorRecords(operatorList){
+  const records=[];
+  let fill=[0,0,0];
+  for(let i=0;i<(operatorList?.fnArray||[]).length;i++){
+    const fn=operatorList.fnArray[i],args=operatorList.argsArray[i];
+    if(fn===pdfjsLib.OPS.setFillRGBColor) fill=Array.from(args||[0,0,0]);
+    if(fn===pdfjsLib.OPS.showText){
+      const text=(args?.[0]||[]).map(g=>typeof g==='object'?(g.unicode||''):' ').join('');
+      records.push({text,color:fill[0]>180&&fill[1]<100&&fill[2]<100?'red':'black'});
+    }
+  }
+  return records;
+}
+function positionedPdfItems(textContent,colorRecords=[]){
+  let colorIndex=0;
+  return textContent.items.map(it=>{
+    const target=String(it.str||'').replace(/\s+/g,'');
+    let record={color:'black'},matched=-1;
+    if(target){
+      for(let j=colorIndex;j<Math.min(colorRecords.length,colorIndex+40);j++){
+        if(String(colorRecords[j].text||'').replace(/\s+/g,'')===target){matched=j;break;}
+      }
+    }
+    if(matched>=0){record=colorRecords[matched];colorIndex=matched+1;}
+    return {text:(it.str||'').trim(),x:it.transform?it.transform[4]:0,y:it.transform?it.transform[5]:0,
+      width:Math.abs(it.width||0),height:Math.abs(it.height||it.transform?.[3]||10),color:record.color};
+  }).filter(it=>it.text);
+}
+function pdfCellRuns(items,rect){
+  const [x,y,w,h]=rect,inside=items.filter(it=>{
+    const cx=it.x+Math.max(1,it.width)/2,cy=it.y+Math.max(1,it.height)/2;
+    return cx>=x-2&&cx<=x+w+2&&cy>=y-3&&cy<=y+h+3;
+  }).sort((a,b)=>Math.abs(a.y-b.y)>3?b.y-a.y:a.x-b.x);
+  const lines=[];
+  inside.forEach(item=>{
+    let line=lines.find(row=>Math.abs(row.y-item.y)<=3);
+    if(!line){line={y:item.y,items:[]};lines.push(line);}
+    line.items.push(item);
+  });
+  return lines.sort((a,b)=>b.y-a.y).map(line=>line.items.sort((a,b)=>a.x-b.x).map(item=>({text:item.text,color:item.color})));
+}
+function mergeOverlappingTableRects(rects){
+  const merged=[];
+  rects.sort((a,b)=>b[2]*b[3]-a[2]*a[3]).forEach(rect=>{
+    const [x,y,w,h]=rect,area=w*h;
+    const duplicate=merged.some(other=>{
+      const ix=Math.max(0,Math.min(x+w,other[0]+other[2])-Math.max(x,other[0]));
+      const iy=Math.max(0,Math.min(y+h,other[1]+other[3])-Math.max(y,other[1]));
+      const overlap=ix*iy;
+      return overlap/Math.min(area,other[2]*other[3])>=.82;
+    });
+    if(!duplicate) merged.push(rect);
+  });
+  return merged;
+}
+function positionedItemsToText(items){
+  const lines=[];
+  [...items].sort((a,b)=>Math.abs(a.y-b.y)>3?b.y-a.y:a.x-b.x).forEach(item=>{
+    let line=lines.find(row=>Math.abs(row.y-item.y)<=3);
+    if(!line){line={y:item.y,items:[]};lines.push(line);}
+    line.items.push(item);
+  });
+  return lines.sort((a,b)=>b.y-a.y).map(line=>line.items.sort((a,b)=>a.x-b.x).map(item=>item.text).join(' ').replace(/\s+/g,' ').trim()).filter(Boolean).join('\n');
+}
+async function extractPdfTableLayout(pdfPage,textContent,viewport){
+  let operatorList;
+  try{operatorList=await pdfPage.getOperatorList();}catch(_){return null;}
+  const colors=textItemColorRecords(operatorList),items=positionedPdfItems(textContent,colors);
+  const raw=[];
+  for(let i=0;i<operatorList.fnArray.length;i++){
+    if(operatorList.fnArray[i]!==pdfjsLib.OPS.constructPath) continue;
+    const args=operatorList.argsArray[i];
+    if(args?.[0]?.length!==1||args[0][0]!==pdfjsLib.OPS.rectangle) continue;
+    const [x,y,w,h]=args[1]||[];
+    if(![x,y,w,h].every(Number.isFinite)||w<28||h<20||w>viewport.width*.92||h>viewport.height*.9) continue;
+    raw.push([x,y,w,h]);
+  }
+  const unique=mergeOverlappingTableRects([...new Map(raw.map(r=>{
+    const key=[r[0],r[1],r[0]+r[2],r[1]+r[3]].map(v=>Math.round(v)).join(':');
+    return [key,r];
+  })).values()]);
+  const rowGroups=new Map();
+  unique.forEach(rect=>{
+    const key=`${Math.round(rect[1]/2)*2}:${Math.round((rect[1]+rect[3])/2)*2}`;
+    if(!rowGroups.has(key)) rowGroups.set(key,[]);
+    rowGroups.get(key).push(rect);
+  });
+  const rows=[...rowGroups.values()].filter(group=>group.length>=3).map(group=>group.sort((a,b)=>a[0]-b[0]))
+    .sort((a,b)=>(b[0][1]+b[0][3])-(a[0][1]+a[0][3]));
+  if(rows.length<2||Math.max(...rows.map(r=>r.length))<4) return null;
+  const used=new Set();
+  const tableRows=rows.map((row,rowIndex)=>({cells:row.map(rect=>{
+    const runs=pdfCellRuns(items,rect);
+    items.forEach((item,itemIndex)=>{
+      const cx=item.x+Math.max(1,item.width)/2,cy=item.y+Math.max(1,item.height)/2;
+      if(cx>=rect[0]-2&&cx<=rect[0]+rect[2]+2&&cy>=rect[1]-3&&cy<=rect[1]+rect[3]+3) used.add(itemIndex);
+    });
+    return {runs,header:rowIndex===0};
+  })}));
+  const allRects=rows.flat(),minY=Math.min(...allRects.map(r=>r[1])),maxY=Math.max(...allRects.map(r=>r[1]+r[3]));
+  const tableZoneIndexes=items.map((item,index)=>({item,index})).filter(x=>x.item.y>=minY-3&&x.item.y<=maxY+3).map(x=>x.index);
+  const assignmentRate=tableZoneIndexes.length?tableZoneIndexes.filter(index=>used.has(index)).length/tableZoneIndexes.length:0;
+  const columnCount=Math.max(...tableRows.map(r=>r.cells.length));
+  const completeRows=tableRows.filter(r=>r.cells.length===columnCount).length;
+  if(assignmentRate<.68||columnCount<3||columnCount>8||completeRows<2) return null;
+  const beforeText=positionedItemsToText(items.filter(item=>item.y>maxY+3));
+  const afterText=positionedItemsToText(items.filter(item=>item.y<minY-3&&item.y>viewport.height*.075));
+  const headerKey=(tableRows[0]?.cells?.[0]?.runs||[]).flat().map(run=>run.text).join('').replace(/\s+/g,'');
+  return {version:3,beforeText,afterText,rows:tableRows,columnCount,assignmentRate,minY,maxY,pageHeight:viewport.height,headerKey};
+}
+function markCrossPageTables(pages){
+  for(let i=0;i<pages.length-1;i++){
+    const current=pages[i],next=pages[i+1],a=current.tableLayout,b=next.tableLayout;
+    if(!a?.rows?.length||!b?.rows?.length) continue;
+    const currentTouchesBottom=a.minY<=a.pageHeight*.14;
+    const nextTouchesTop=b.maxY>=b.pageHeight*.78;
+    const sameColumns=a.columnCount===b.columnCount;
+    const relatedHeaders=!!a.headerKey&&!!b.headerKey&&(a.headerKey.includes(b.headerKey)||b.headerKey.includes(a.headerKey));
+    if(currentTouchesBottom&&nextTouchesTop&&sameColumns&&relatedHeaders){
+      current.tableLayout=null;next.tableLayout=null;
+      current.tableFallbackReason='cross-page';next.tableFallbackReason='cross-page';
+    }
+  }
+  return pages;
+}
 function extractFormattedText(textContent,pageHeight){
   // 先依PDF座標還原行，再由左至右組合；不能先把整頁串成一段，否則條號與續行結構會消失。
   const items=textContent.items.map((it,index)=>({
@@ -475,15 +608,16 @@ async function parsePdfArrayBuffer(buf,onProgress=()=>{}){
     try{
       const page = await pdf.getPage(i), tc = await page.getTextContent(), viewport = page.getViewport({scale:1});
       const text = tc.items.map(it=>it.str).join(' '), formattedText=extractFormattedText(tc,viewport.height);
-      const positionedText = tc.items.map(it=>({text:(it.str||'').trim(),x:it.transform?it.transform[4]:0,y:it.transform?it.transform[5]:0})).filter(it=>it.text);
-      pages.push({absolutePage:i,text,formattedText,positionedText,pageWidth:viewport.width,pageHeight:viewport.height});
+      const tableLayout=await extractPdfTableLayout(page,tc,viewport);
+      const positionedText = positionedPdfItems(tc);
+      pages.push({absolutePage:i,text,formattedText,positionedText,pageWidth:viewport.width,pageHeight:viewport.height,tableLayout,tableLayoutVersion:3});
     }catch(error){
       console.warn(`PDF 第 ${i} 頁文字解析失敗`,error);
       pages.push({absolutePage:i,text:'',formattedText:'',positionedText:[],pageWidth:0,pageHeight:0,parseError:String(error?.message||error)});
     }
     onProgress(i,pdf.numPages);
   }
-  return pages;
+  return markCrossPageTables(pages);
 }
 function romanToInt(s){
   const vals={i:1,v:5,x:10,l:50,c:100,d:500,m:1000};
@@ -1580,6 +1714,7 @@ function splitInlineStructures(line){
   const patterns=[
     /\d{1,2}(?:\.\d{1,2}){1,4}[.、]?(?=\s*[\u3400-\u9fff【])/g,
     /\d{1,2}[.、](?=\s*[\u3400-\u9fff【])/g,
+    /[A-Z][.、](?=\s*[\u3400-\u9fff【（(])/g,
     /[A-Z](?:\.\d{1,2}){1,3}[.、]?(?=\s|[\u3400-\u9fff【])/g,
     /[（(](?:[一二三四五六七八九十百]{1,4}|\d{1,2})[)）](?=\s*[\u3400-\u9fff【])/g,
     /[一二三四五六七八九十百]{1,4}、(?=\s*[\u3400-\u9fff【])/g,
@@ -1591,7 +1726,9 @@ function splitInlineStructures(line){
       const before=line.slice(0,m.index);
       const prev=before.slice(-4);
       if((before.match(/[（(]/g)||[]).length>(before.match(/[）)]/g)||[]).length) continue;
-      if(/(?:見|詳見|參照|依照|比照)\s*$/.test(prev)) continue;
+      if(/(?:見|有關|依據|詳見|參照|依照|比照)\s*$/.test(before)) continue;
+      const sentence=before.split(/[。；;！？!?]/).pop()||'';
+      if(/(?:有關|依據|依照|詳見|參照|比照)/.test(sentence)&&/\d{1,2}(?:\.\d{1,2})+/.test(sentence)) continue;
       const preceding=line[m.index-1]||'';
       if(!/[\s。；;：:，,）)]/.test(preceding)) continue;
       candidates.push(m.index);
@@ -1665,7 +1802,30 @@ function formatStructuredSopText(text,terms){
     return `<div class="sop-block ${paragraph.className} depth-${depth}" style="--sop-depth:${depth}"${clauseAttr}><span class="sop-marker">${escapeHtml(paragraph.markerLabel||paragraph.marker)}</span><span class="sop-body">${content}</span></div>`;
   }).join('');
 }
+function formatPdfTableCell(cell,terms){
+  return (cell.runs||[]).map(line=>line.map(run=>{
+    const content=highlightReaderText(run.text,terms);
+    return run.color==='red'?`<span class="pdf-table-red">${content}</span>`:content;
+  }).join(' ')).join('<br>');
+}
+function formatPdfTableLayout(layout,terms){
+  if(!layout?.rows?.length) return '';
+  const before=layout.beforeText?formatStructuredSopText(layout.beforeText,terms):'';
+  const after=layout.afterText?formatStructuredSopText(layout.afterText,terms):'';
+  const rows=layout.rows.map((row,rowIndex)=>`<tr>${row.cells.map(cell=>{
+    const tag=rowIndex===0||cell.header?'th':'td';
+    return `<${tag}>${formatPdfTableCell(cell,terms)}</${tag}>`;
+  }).join('')}</tr>`).join('');
+  return `${before}<p class="pdf-table-hint">表格可左右滑動查看完整欄位</p><div class="pdf-table-wrap"><table class="pdf-text-table"><tbody>${rows}</tbody></table></div>${after}`;
+}
+function formatReaderPageText(page,terms){
+  return page.tableLayout?.rows?.length?formatPdfTableLayout(page.tableLayout,terms):formatStructuredSopText(page.formattedText||page.text,terms);
+}
 function readablePageForCopy(page){
+  if(page.tableLayout?.rows?.length){
+    const rows=page.tableLayout.rows.map(row=>row.cells.map(cell=>(cell.runs||[]).map(line=>line.map(run=>run.text).join(' ')).join(' ')).join('\t'));
+    return [page.tableLayout.beforeText,...rows,page.tableLayout.afterText].filter(Boolean).join('\n');
+  }
   return parseSopParagraphs(page.formattedText||page.text).map(p=>p.text).join('\n\n');
 }
 async function copyTextToClipboard(text){
@@ -1686,7 +1846,7 @@ async function copyTextToClipboard(text){
   return ok;
 }
 async function ensureDocumentLayoutText(doc){
-  if(doc.pages.every(p=>p.formattedText)) return;
+  if(doc.pages.every(p=>p.formattedText&&p.tableLayoutVersion===3)) return;
   const rec=cache.pdfFiles.find(f=>f.id===doc.pdfFileId);
   if(!rec?.data) return;
   const loading=document.createElement('div');
@@ -1699,12 +1859,14 @@ async function ensureDocumentLayoutText(doc){
   try{
     const pdf=await pdfjsLib.getDocument({data:rec.data.slice(0)}).promise;
     for(const p of doc.pages){
-      if(p.formattedText) continue;
       const pdfPage=await pdf.getPage(p.absolutePage);
       const tc=await pdfPage.getTextContent();
       const viewport=pdfPage.getViewport({scale:1});
       p.formattedText=extractFormattedText(tc,viewport.height);
+      p.tableLayout=await extractPdfTableLayout(pdfPage,tc,viewport);
+      p.tableLayoutVersion=3;
     }
+    markCrossPageTables(doc.pages);
     await dbPut('sopDocs',doc);
   }finally{
     loading.remove();
@@ -1763,7 +1925,7 @@ async function openTextReader(docId,absolutePage,targetClause=null,options={}){
           <div class="row"><span>PDF第${p.absolutePage}頁</span>
             <button class="mini-action" data-copy-reader-page="${i}">複製</button></div>
         </div>
-        <div class="reader-text">${formatStructuredSopText(p.formattedText||p.text,terms)}</div>
+        <div class="reader-text">${formatReaderPageText(p,terms)}</div>
       </section>`;
     }
     document.getElementById('reader-body').innerHTML=html;
@@ -2704,7 +2866,7 @@ function renderRidershipLegacy(){
   });
 }
 
-/* v5.4：PDF匯入確認操作固定於視窗頂部。 */
+/* v5.5.2：保留表格前後正文、跨頁回退、引用判斷及階層線移除。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -2775,7 +2937,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本完整承接 GitHub v4.9，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.4 分段測試版</dd><dt>基準版本</dt><dd>GitHub v4.9</dd><dt>更新日期</dt><dd>2026-08-27</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.4</dd><dt>本次更新</dt><dd>PDF匯入確認按鈕移至頂部</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.5.1 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.5.2 分段測試版</dd><dt>基準版本</dt><dd>手機版 v5.5.1</dd><dt>更新日期</dt><dd>2026-08-28</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.5.2</dd><dt>本次更新</dt><dd>表格前後正文、跨頁回退、引用分段及移除階層線</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -2835,7 +2997,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 分段測試版 v5.4・2026.08.27</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 分段測試版 v5.5.2・2026.08.28</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

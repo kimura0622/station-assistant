@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.6"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.6"></script>
+<script src="./vendor/pdf.min.js?v=5.7"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.7"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -252,6 +252,11 @@
   .data-table th{position:sticky;top:0;background:#f7f7fa;color:var(--text-2);font-weight:650;text-align:right;padding:9px;border-bottom:.5px solid var(--border);}
   .data-table th:first-child,.data-table td:first-child{text-align:left;}
   .data-table td{text-align:right;padding:9px;border-bottom:.5px solid var(--border);font-variant-numeric:tabular-nums;}
+  .distribution-list{display:grid;gap:10px;margin-top:14px;}
+  .distribution-row{display:grid;grid-template-columns:94px minmax(0,1fr) 92px;align-items:center;gap:9px;font-size:12px;}
+  .distribution-track{height:12px;background:#e7edf5;border-radius:999px;overflow:hidden;}
+  .distribution-fill{height:100%;min-width:2px;background:linear-gradient(90deg,#0b5cab,#1688e8);border-radius:inherit;}
+  .distribution-value{text-align:right;font-variant-numeric:tabular-nums;color:var(--text-2);}
   .positive{color:#218739}.negative{color:#c43b32}.neutral{color:var(--text-2)}
   .import-report{background:#f7f7fa;border-radius:12px;padding:11px 12px;font-size:12px;line-height:1.7;color:var(--text-2);margin-top:10px;}
   .segmented{display:flex;background:#eeeeF3;border-radius:9px;padding:2px;}
@@ -314,12 +319,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.6 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.7 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.6';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.7';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -2239,7 +2244,7 @@ async function openNoticeReader(id){
       ${notice.pdfData?'<button class="primary" id="notice-open-pdf" style="margin-bottom:10px">查看通告 PDF 原版</button>':''}
       ${linkedProcedures.length?`<div class="card"><b style="font-size:13px">關聯常用程序</b>${linkedProcedures.map(f=>`<button class="secondary" data-notice-procedure="${f.id}" style="display:block;width:100%;text-align:left;margin-top:8px">${escapeHtml(f.title)}</button>`).join('')}</div>`:''}
       ${relations.length?`<div class="card"><b style="font-size:13px">關聯 SOP</b>${relations.map((r,i)=>`<button class="secondary" data-notice-rel="${i}" style="display:block;width:100%;text-align:left;margin-top:8px">${escapeHtml(resolvedDocName(r.doc))}${r.startPage?`｜PDF 第 ${r.startPage}${r.endPage&&r.endPage!==r.startPage?`～${r.endPage}`:''} 頁`:''}</button>`).join('')}</div>`:''}
-      <div class="reader-page current"><p class="reader-text">${highlightReaderText(notice.content||'',terms)}</p></div>
+      <div class="reader-page current"><div class="reader-text">${formatStructuredSopText(notice.content||'',terms)}</div></div>
     </div>
   </div></div>`;
   document.getElementById('phone').insertAdjacentHTML('beforeend',html);
@@ -2599,10 +2604,10 @@ function monthlyRidershipRecords(){
   return cache.ridership.filter(r=>r.recordType==='monthlyAverage' && r.year && r.month && Number(r.averageDaily)>0 && ['BR','R','G','O','BL'].includes(r.lineCode));
 }
 function makeLineChart(current, previous, metric, selectedMonth=0){
-  const compact=window.innerWidth<600,width=compact?390:Math.max(760,Math.min(window.innerWidth-320,1440)),height=compact?260:292,left=compact?64:76,right=compact?10:18,top=20,bottom=40;
+  const compact=window.innerWidth<600,width=compact?390:Math.max(760,Math.min(window.innerWidth-320,1440)),height=compact?260:292,right=compact?10:18,top=24,bottom=40;
   const values=[...current,...previous].filter(v=>Number.isFinite(v));
   if(!values.length) return '<div class="empty" style="padding:55px 10px;">尚無可繪製資料</div>';
-  const dataMax=Math.max(...values,1),rawStep=dataMax/5,magnitude=10**Math.floor(Math.log10(rawStep)),normalized=rawStep/magnitude,niceFactor=[1,2,2.5,3,5,10].find(n=>n>=normalized)||10,step=niceFactor*magnitude,axisMax=Math.ceil(dataMax/step)*step,tickCount=Math.round(axisMax/step),plotWidth=width-left-right,monthWidth=plotWidth/12;
+  const dataMax=Math.max(...values,1),axisScale=dataMax>=100000000?{divisor:100000000,label:'億人次',digits:2}:dataMax>=100000?{divisor:10000,label:'萬人次',digits:1}:{divisor:1,label:'人次',digits:0},left=compact?(axisScale.divisor===1?72:58):(axisScale.divisor===1?84:76),rawStep=dataMax/5,magnitude=10**Math.floor(Math.log10(rawStep)),normalized=rawStep/magnitude,niceFactor=[1,2,2.5,3,5,10].find(n=>n>=normalized)||10,step=niceFactor*magnitude,axisMax=Math.ceil(dataMax/step)*step,tickCount=Math.round(axisMax/step),plotWidth=width-left-right,monthWidth=plotWidth/12;
   const x=i=>left+(i+.5)*monthWidth;
   const y=v=>top+(axisMax-v)*(height-top-bottom)/axisMax;
   const path=arr=>{
@@ -2617,8 +2622,10 @@ function makeLineChart(current, previous, metric, selectedMonth=0){
   for(let i=0;i<=tickCount;i++){
     const val=i*step,gy=y(val);
     grid+=`<line x1="${left}" y1="${gy}" x2="${width-right}" y2="${gy}" stroke="#e5e8ef" stroke-width="1"/>`;
-    labels+=`<text x="${left-10}" y="${gy+5}" text-anchor="end" font-size="${compact?14:12}" font-weight="650" fill="#566579">${Math.round(val).toLocaleString()}</text>`;
+    const scaled=val/axisScale.divisor,label=axisScale.divisor===1?Math.round(scaled).toLocaleString():scaled.toLocaleString('zh-TW',{maximumFractionDigits:axisScale.digits});
+    labels+=`<text x="${left-9}" y="${gy+5}" text-anchor="end" font-size="${compact?13:12}" font-weight="650" fill="#566579">${label}</text>`;
   }
+  labels+=`<text x="${left}" y="14" text-anchor="start" font-size="${compact?11:11}" font-weight="650" fill="#6b7788">單位：${axisScale.label}</text>`;
   MONTH_LABELS.forEach((m,i)=>labels+=`<text x="${x(i)}" y="${height-12}" text-anchor="middle" font-size="${compact?13:11}" font-weight="650" fill="#566579">${m.replace('月','')}</text>`);
   const selectedMark=selectedMonth>=1&&selectedMonth<=12?`<rect x="${x(selectedMonth-1)-monthWidth*.4}" y="${top-5}" width="${monthWidth*.8}" height="${height-top-bottom+10}" rx="7" fill="#fff8d8" stroke="#e2b900" stroke-width="2"/>`:'';
   const barWidth=monthWidth*(compact?.5:.46),previousBars=previous.map((v,i)=>Number.isFinite(v)?`<rect x="${x(i)-barWidth/2}" y="${y(v)}" width="${barWidth}" height="${Math.max(1,height-bottom-y(v))}" rx="4" fill="#d9dee7"><title>${MONTH_LABELS[i]} 去年 ${formatRidershipValue(v,metric)}</title></rect>`:'').join('');
@@ -2644,7 +2651,7 @@ function makeYoyChart(current, previous){
     return `<rect x="${left+i*(width-left-right)/12+((width-left-right)/12-barW)/2}" y="${yy}" width="${barW}" height="${Math.max(1,h)}" rx="3" fill="${color}"><title>${MONTH_LABELS[i]} ${v>=0?'+':''}${v.toFixed(1)}%</title></rect>
       <text x="${left+(i+.5)*(width-left-right)/12}" y="${height-12}" text-anchor="middle" font-size="10" fill="#8e8e93">${i+1}</text>`;
   }).join('');
-  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="年增率長條圖">
+  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="同期增減長條圖">
     <line x1="${left}" y1="${zero}" x2="${width-right}" y2="${zero}" stroke="#b8c0cc"/>
     ${bars}
   </svg></div>`;
@@ -2761,13 +2768,14 @@ function renderRidershipLegacy(){
     contentEl.innerHTML=`<div class="page-tabs"><button class="page-tab" data-ridership-section="query">運量查詢</button><button class="page-tab active" data-ridership-section="manage">資料管理</button></div>
       <div class="card toolbar-card"><div><h2 class="section-title">運量資料管理</h2><p class="section-subtitle">運量與大型活動 Excel 均只在本機解析。</p></div><div class="toolbar-actions"><button class="primary" id="ridership-import-btn">匯入年度 Excel</button><button class="secondary" id="ridership-event-import-btn">匯入大型活動</button><input id="ridership-file-input" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" style="display:none"><input id="ridership-event-file-input" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" style="display:none"></div></div>
       ${lastRidershipImportReport?`<div class="import-report">${escapeHtml(lastRidershipImportReport)}</div>`:''}
-      <div class="panel"><h3 class="panel-title">已匯入年度</h3><p class="panel-note">重新匯入相同年度、月份與工程代號時會更新原資料；Y 環狀線自動排除。</p>${years.length?years.map(y=>{const yearRows=records.filter(r=>Number(r.year)===y),lastImported=yearRows.map(r=>r.importedAt).filter(Boolean).sort().at(-1);return `<div class="row between" style="padding:10px 0;border-bottom:.5px solid var(--border)"><span><b>${y} 年</b>　<span class="tiny-muted">${yearRows.length.toLocaleString()} 筆｜匯入：${lastImported?formatUploadDate(lastImported):'舊版資料未記錄'}</span></span><button class="danger-text" data-delete-ridership-year="${y}">刪除年度</button></div>`;}).join(''):'<div class="empty" style="padding:35px">尚無年度運量資料</div>'}</div><div class="panel"><h3 class="panel-title">大型活動</h3><p class="panel-note">目前 ${ridershipEvents().length} 筆。必填欄位：活動名稱、開始日期、影響車站代號；可填多個代號。</p>${ridershipEvents().length?'<button class="danger-text" id="ridership-event-clear">清除全部活動</button>':''}</div>`;
+      <div class="panel"><h3 class="panel-title">已匯入年度</h3><p class="panel-note">重新匯入相同年度、月份與工程代號時會更新原資料；Y 環狀線自動排除。</p>${years.length?years.map(y=>{const yearRows=records.filter(r=>Number(r.year)===y),lastImported=yearRows.map(r=>r.importedAt).filter(Boolean).sort().at(-1);return `<div class="row between" style="padding:10px 0;border-bottom:.5px solid var(--border)"><span><b>${y} 年</b>　<span class="tiny-muted">${yearRows.length.toLocaleString()} 筆｜匯入：${lastImported?formatUploadDate(lastImported):'舊版資料未記錄'}</span></span><button class="danger-text" data-delete-ridership-year="${y}">刪除年度</button></div>`;}).join(''):'<div class="empty" style="padding:35px">尚無年度運量資料</div>'}</div><div class="panel"><h3 class="panel-title">大型活動</h3><p class="panel-note">可單筆新增或匯入 Excel；活動資料只保存在本機。</p>${ridershipEventAdminHtml()}</div>`;
     contentEl.querySelector('[data-ridership-section="query"]').onclick=()=>{ridershipView.section='query';renderRidership();};
     document.getElementById('ridership-import-btn').onclick=()=>{const input=document.getElementById('ridership-file-input');input.value='';input.click();};
     document.getElementById('ridership-event-import-btn').onclick=()=>{const input=document.getElementById('ridership-event-file-input');input.value='';input.click();};
     document.getElementById('ridership-file-input').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await importRidershipWorkbook(file);}catch(error){alert(`Excel 匯入失敗：${error.message||error}`);}};
     document.getElementById('ridership-event-file-input').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await importRidershipEvents(file);}catch(error){alert(`大型活動匯入失敗：${error.message||error}`);}};
     document.getElementById('ridership-event-clear')?.addEventListener('click',()=>{if(confirm('確定清除全部大型活動資料嗎？')){saveRidershipEvents([]);renderRidership();}});
+    bindRidershipEventAdmin();
     contentEl.querySelectorAll('[data-delete-ridership-year]').forEach(btn=>btn.onclick=async()=>{const y=Number(btn.dataset.deleteRidershipYear),targets=records.filter(r=>Number(r.year)===y);if(!confirm(`確定刪除 ${y} 年的 ${targets.length.toLocaleString()} 筆運量資料嗎？此動作無法復原。`))return;for(const r of targets)await dbDelete('ridership',r.id);await reloadCache();ridershipView.year='';renderRidership();});
     return;
   }
@@ -2842,7 +2850,7 @@ function renderRidershipLegacy(){
         <div class="panel"><h3 class="panel-title">較前一年變化</h3><p class="panel-note">綠色為增加，紅色為減少；滑鼠停留可查看精確百分比。</p>${makeYoyChart(current,previous)}</div>
       </div>
       <div class="panel"><h3 class="panel-title">${year} 年每月明細</h3><p class="panel-note">缺少資料顯示「—」，不會當作 0。</p>
-        <div class="data-table-wrap"><table class="data-table"><thead><tr><th>月份</th><th>${year}</th><th>${year-1}</th><th>年增率</th></tr></thead><tbody>
+        <div class="data-table-wrap"><table class="data-table"><thead><tr><th>月份</th><th>${year}</th><th>${year-1}</th><th>同期增減</th></tr></thead><tbody>
           ${MONTH_LABELS.map((m,i)=>{
             const change=Number.isFinite(current[i])&&Number.isFinite(previous[i])&&previous[i]!==0?(current[i]-previous[i])/previous[i]*100:null;
             const eventCount=eventsForStationMonth(stationKey,year,i+1).length;
@@ -2895,7 +2903,37 @@ function eventsForRidershipSelection(stations,stationKey,year,month){
   });
   return [...unique.values()].sort((a,b)=>String(a.startDate||'').localeCompare(String(b.startDate||'')));
 }
-/* v5.6：新增全部車站彙總運量，並修正短項次後引用條號。 */
+function ridershipPeriodSummary(current,previous,year){
+  const comparable=current.map((v,i)=>Number.isFinite(v)&&Number.isFinite(previous[i])?i:-1).filter(i=>i>=0),latest=comparable.length?Math.max(...comparable)+1:0;
+  const currentTotal=comparable.reduce((sum,i)=>sum+current[i]*daysInMonth(year,i+1),0),previousTotal=comparable.reduce((sum,i)=>sum+previous[i]*daysInMonth(year-1,i+1),0);
+  return {months:comparable.length,latest,currentTotal,previousTotal,growth:previousTotal>0?(currentTotal-previousTotal)/previousTotal*100:null,complete:comparable.length===12};
+}
+function ridershipYearTotal(records,scope,stationKey,year,monthCount=12){
+  const series=buildRidershipSeries(records,scope,stationKey,year).current,values=series.slice(0,monthCount);if(values.length!==monthCount||values.some(v=>!Number.isFinite(v)))return null;
+  return values.reduce((sum,v,i)=>sum+v*daysInMonth(year,i+1),0);
+}
+function ridershipThreeYearHtml(records,scope,stationKey,year,latestMonth){
+  const monthCount=latestMonth===12?12:latestMonth,title=monthCount===12?'近3年年度比較':`近3年同期比較（1～${monthCount}月）`;
+  const rows=[year,year-1,year-2].map(y=>{const total=ridershipYearTotal(records,scope,stationKey,y,monthCount),prior=ridershipYearTotal(records,scope,stationKey,y-1,monthCount),growth=Number.isFinite(total)&&Number.isFinite(prior)&&prior>0?(total-prior)/prior*100:null;return {year:y,total,growth};});
+  return `<div class="panel"><h3 class="panel-title">${title}</h3><p class="panel-note">總運量由每月平均日運量乘以當月天數計算；億人次顯示至小數點後2位。</p><div class="data-table-wrap"><table class="data-table"><thead><tr><th>年度</th><th>${monthCount===12?'全年總運量':'同期總運量'}</th><th>年度增減</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${row.year}</td><td>${Number.isFinite(row.total)?`${(row.total/100000000).toFixed(2)}億`:'—'}</td><td class="${row.growth===null?'neutral':row.growth>=0?'positive':'negative'}">${row.growth===null?'—':`${row.growth>=0?'+':''}${row.growth.toFixed(1)}%`}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+function ridershipDistributionHtml(rows){
+  const bins=[{label:'5,000以下',min:-Infinity,max:5000},{label:'5,001～10,000',min:5000,max:10000},{label:'10,001～20,000',min:10000,max:20000},{label:'20,001～30,000',min:20000,max:30000},{label:'30,001～50,000',min:30000,max:50000},{label:'50,001以上',min:50000,max:Infinity}],valid=rows.filter(r=>Number.isFinite(Number(r.averageDaily))),total=valid.length;
+  const counts=bins.map(bin=>valid.filter(r=>Number(r.averageDaily)>bin.min&&Number(r.averageDaily)<=bin.max).length),max=Math.max(1,...counts);
+  return `<div class="panel"><h3 class="panel-title">平均日運量分布</h3><p class="panel-note">本月資料共${total}站；比例以目前選擇範圍內有資料的站數計算。</p><div class="distribution-list">${bins.map((bin,i)=>{const pct=total?counts[i]/total*100:0;return `<div class="distribution-row"><span>${bin.label}</span><div class="distribution-track"><div class="distribution-fill" style="width:${counts[i]/max*100}%"></div></div><span class="distribution-value">${counts[i]}站｜${pct.toFixed(1)}%</span></div>`;}).join('')}</div></div>`;
+}
+function ridershipEventAdminHtml(){
+  const rows=[...ridershipEvents()].sort((a,b)=>String(b.startDate||'').localeCompare(String(a.startDate||'')));
+  return `<div class="row between" style="margin-top:12px"><button class="primary" id="ridership-event-add">＋新增單筆活動</button>${rows.length?'<button class="danger-text" id="ridership-event-clear">清除全部活動</button>':''}</div><div style="margin-top:10px">${rows.length?rows.map(e=>`<div class="row between" style="padding:10px 0;border-bottom:.5px solid var(--border);gap:10px"><span><b>${escapeHtml(e.name)}</b><br><span class="tiny-muted">${escapeHtml(e.startDate)}${e.endDate?`～${escapeHtml(e.endDate)}`:''}｜${escapeHtml((e.stationCodes||[]).join('、'))}</span></span><span class="row"><button class="secondary" data-edit-ridership-event="${escapeHtml(e.id)}">修改</button><button class="danger-text" data-delete-ridership-event="${escapeHtml(e.id)}">刪除</button></span></div>`).join(''):'<div class="empty" style="padding:24px">尚無大型活動資料</div>'}</div>`;
+}
+function parseRidershipEventCodes(value){return [...new Set(String(value||'').toUpperCase().split(/[、,，;；\s]+/).map(s=>parseRidershipStation(`活動站（${s.trim()}）`).code).filter(code=>/^(BR|R|G|O|BL)\d+[A-Z]?$/.test(code)))];}
+function openRidershipEventEditor(eventId=''){
+  const existing=ridershipEvents(),event=existing.find(e=>String(e.id)===String(eventId))||{},overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='98';
+  overlay.innerHTML=`<div class="modal-sheet" style="height:auto;max-width:680px"><div class="modal-header"><b>${event.id?'修改':'新增'}大型活動</b><button id="ree-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body"><div class="field"><label>活動名稱（必填）</label><input id="ree-name" value="${escapeHtml(event.name||'')}"></div><div class="row" style="align-items:flex-start"><div class="field" style="flex:1"><label>開始日期（必填）</label><input type="date" id="ree-start" value="${escapeHtml(event.startDate||'')}"></div><div class="field" style="flex:1"><label>結束日期</label><input type="date" id="ree-end" value="${escapeHtml(event.endDate||'')}"></div></div><div class="field"><label>影響車站代號（必填，可多站）</label><input id="ree-stations" value="${escapeHtml((event.stationCodes||[]).join('、'))}" placeholder="例如：R10、R11、BL12"><span class="tiny-muted">轉乘站請依工程代號分別輸入。</span></div><div class="field"><label>活動地點</label><input id="ree-venue" value="${escapeHtml(event.venue||'')}"></div><div class="row" style="align-items:flex-start"><div class="field" style="flex:1"><label>活動類型</label><input id="ree-type" value="${escapeHtml(event.type||'')}"></div><div class="field" style="flex:1"><label>預估人數</label><input id="ree-attendance" value="${escapeHtml(event.attendance||'')}"></div></div><div class="field"><label>備註</label><textarea id="ree-note">${escapeHtml(event.note||'')}</textarea></div><button class="primary" id="ree-save" style="width:100%">儲存活動</button></div></div>`;
+  document.getElementById('phone').appendChild(overlay);overlay.querySelector('#ree-close').onclick=()=>overlay.remove();overlay.querySelector('#ree-save').onclick=()=>{const name=overlay.querySelector('#ree-name').value.trim(),startDate=overlay.querySelector('#ree-start').value,endDate=overlay.querySelector('#ree-end').value,stationCodes=parseRidershipEventCodes(overlay.querySelector('#ree-stations').value);if(!name||!startDate||!stationCodes.length)return alert('請填寫活動名稱、開始日期及有效的車站代號。');if(endDate&&endDate<startDate)return alert('結束日期不可早於開始日期。');const duplicate=existing.some(e=>String(e.id)!==String(event.id)&&e.name.trim()===name&&e.startDate===startDate&&[...(e.stationCodes||[])].sort().join('|')===[...stationCodes].sort().join('|'));if(duplicate&&!confirm('已有相同名稱、日期及車站的活動，仍要儲存嗎？'))return;const row={...event,id:event.id||`manual-${Date.now()}`,name,startDate,endDate,stationCodes,venue:overlay.querySelector('#ree-venue').value.trim(),type:overlay.querySelector('#ree-type').value.trim(),attendance:overlay.querySelector('#ree-attendance').value.trim(),note:overlay.querySelector('#ree-note').value.trim(),sourceFile:event.sourceFile||'單筆建立',updatedAt:new Date().toISOString()};saveRidershipEvents(event.id?existing.map(e=>String(e.id)===String(event.id)?row:e):[...existing,row]);overlay.remove();renderRidership();};
+}
+function bindRidershipEventAdmin(){document.getElementById('ridership-event-add')?.addEventListener('click',()=>openRidershipEventEditor());document.querySelectorAll('[data-edit-ridership-event]').forEach(btn=>btn.onclick=()=>openRidershipEventEditor(btn.dataset.editRidershipEvent));document.querySelectorAll('[data-delete-ridership-event]').forEach(btn=>btn.onclick=()=>{const rows=ridershipEvents(),event=rows.find(e=>String(e.id)===String(btn.dataset.deleteRidershipEvent));if(event&&confirm(`確定刪除「${event.name}」嗎？`)){saveRidershipEvents(rows.filter(e=>String(e.id)!==String(event.id)));renderRidership();}});}
+/* v5.7：運量年度分析、級距分布、單筆活動及通告階層顯示。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -2917,6 +2955,7 @@ function renderRidership(){
   const chosen=current[chosenIndex],prior=chosenIndex>0?current[chosenIndex-1]:null,previousSame=previous[chosenIndex];
   const mom=Number.isFinite(chosen)&&Number.isFinite(prior)&&prior>0?(chosen-prior)/prior*100:null;
   const yoy=Number.isFinite(chosen)&&Number.isFinite(previousSame)&&previousSame>0?(chosen-previousSame)/previousSame*100:null;
+  const period=ridershipPeriodSummary(current,previous,year);
   const scopeRows=records.filter(r=>Number(r.year)===year&&Number(r.month)===chosenMonth&&(stationScope==='all'||r.lineCode===stationScope));
   const ranked=rankRows(scopeRows,metric),rankIndex=isAllStations?-1:ranked.findIndex(r=>(r.stationKey||r.code||r.station)===stationKey),selectedRank=rankIndex>=0?rankIndex+1:0,top=ranked.slice(0,10),bottom=ranked.length>10?ranked.slice(-10):[];
   const yearOptions=years.map(y=>`<option value="${y}" ${y===year?'selected':''}>${y} 年</option>`).join('');
@@ -2931,11 +2970,12 @@ function renderRidership(){
   }else if(detail==='trend'){
     body=`<div class="stat-grid"><div class="stat-card"><div class="stat-label">${chosenMonth}月平均日運量</div><div class="stat-value">${formatRidershipKpi(chosen)}</div><div class="stat-note">${escapeHtml(selectionLabel)}</div></div><div class="stat-card"><div class="stat-label">較上月</div><div class="stat-value ${mom===null?'neutral':mom>=0?'positive':'negative'}">${mom===null?'—':`${mom>=0?'+':''}${mom.toFixed(1)}%`}</div><div class="stat-note">${Number.isFinite(chosen)?(mom===null?'尚無可比較資料':'彙總後平均日運量變化'):'尚無今年資料'}</div></div><div class="stat-card"><div class="stat-label">較去年同月</div><div class="stat-value ${yoy===null?'neutral':yoy>=0?'positive':'negative'}">${yoy===null?'—':`${yoy>=0?'+':''}${yoy.toFixed(1)}%`}</div><div class="stat-note">${Number.isFinite(chosen)?(yoy===null?'尚無可比較資料':`${year-1}年${chosenMonth}月`):'尚無今年資料'}</div></div><div class="stat-card"><div class="stat-label">${chosenMonth}月排名</div><div class="stat-value">${isAllStations?'不適用':`${selectedRank||'—'} / ${ranked.length||'—'}`}</div><div class="stat-note">${isAllStations?'全部車站為彙總模式':stationScope==='all'?'全線':RIDERSHIP_LINES[stationScope]}</div></div></div><div class="panel"><h3 class="panel-title">每月平均日運量趨勢</h3><p class="panel-note">${escapeHtml(selectionLabel)}｜本年度資料至${latestMonth}月</p><div class="chart-legend"><span><i class="legend-dot" style="background:#1677ff"></i>${year}（折線）</span><span><i class="legend-dot" style="background:#d9dee7;border-radius:2px"></i>${year-1}（長條）</span><span>點選月份可看明細</span></div>${makeLineChart(current,previous,metric,chosenMonth)}</div>`;
   }else if(detail==='monthly'){
-    body=`<div class="panel"><h3 class="panel-title">${year}年每月明細</h3><p class="panel-note">本年度資料至${latestMonth}月；尚未匯入月份仍保留去年資料供查看。</p><div class="data-table-wrap"><table class="data-table"><thead><tr><th>月份</th><th>${year}</th><th>${year-1}</th><th>年增率</th></tr></thead><tbody>${MONTH_LABELS.map((m,i)=>{const hasCurrent=Number.isFinite(current[i]),change=hasCurrent&&Number.isFinite(previous[i])&&previous[i]>0?(current[i]-previous[i])/previous[i]*100:null;return `<tr class="${i+1===chosenMonth?'selected-month-row':''}"><td>${m}</td><td>${hasCurrent?Math.round(current[i]).toLocaleString():'—'}</td><td>${Number.isFinite(previous[i])?Math.round(previous[i]).toLocaleString():'—'}</td><td class="${change===null?'neutral':change>=0?'positive':'negative'}">${change===null?'—':`${change>=0?'+':''}${change.toFixed(1)}%`}</td></tr>`;}).join('')}</tbody></table></div></div>`;
+    const periodLabel=period.complete?'全年合計':period.latest?`累計至${period.latest}月`:'尚無同期',periodGrowth=period.growth;
+    body=`<div class="panel"><h3 class="panel-title">${year}年每月明細</h3><p class="panel-note">同期增減：與去年同月比較。本年度資料至${latestMonth}月。</p><div class="data-table-wrap"><table class="data-table"><thead><tr><th>月份</th><th>${year}</th><th>${year-1}</th><th>同期增減</th></tr></thead><tbody>${MONTH_LABELS.map((m,i)=>{const hasCurrent=Number.isFinite(current[i]),change=hasCurrent&&Number.isFinite(previous[i])&&previous[i]>0?(current[i]-previous[i])/previous[i]*100:null;return `<tr class="${i+1===chosenMonth?'selected-month-row':''}"><td>${m}</td><td>${hasCurrent?Math.round(current[i]).toLocaleString():'—'}</td><td>${Number.isFinite(previous[i])?Math.round(previous[i]).toLocaleString():'—'}</td><td class="${change===null?'neutral':change>=0?'positive':'negative'}">${change===null?'—':`${change>=0?'+':''}${change.toFixed(1)}%`}</td></tr>`;}).join('')}</tbody><tfoot><tr><th>${periodLabel}</th><th>${period.months?`${(period.currentTotal/100000000).toFixed(2)}億`:'—'}</th><th>${period.months?`${(period.previousTotal/100000000).toFixed(2)}億`:'—'}</th><th class="${periodGrowth===null?'neutral':periodGrowth>=0?'positive':'negative'}">${periodGrowth===null?'—':`${periodGrowth>=0?'+':''}${periodGrowth.toFixed(1)}%`}</th></tr></tfoot></table></div></div>${ridershipThreeYearHtml(records,stationScope,stationKey,year,latestMonth)}`;
   }else if(detail==='ranking'){
     const rankBand=ridershipView.rankBand==='bottom'?'bottom':'top',rankItems=rankBand==='bottom'?bottom:top;
     const rankListHtml=rankItems.length?`<ol class="rank-list">${rankItems.map(r=>{const key=r.stationKey||r.code||r.station;return `<li class="rank-item ${!isAllStations&&key===stationKey?'selected-rank-item':''}"><span class="rank-no">${ranked.indexOf(r)+1}</span><div><div class="rank-station">${escapeHtml(stationShortDisplay(r))}</div></div><div class="rank-value">${formatRidershipValue(r.averageDaily,metric)}</div></li>`;}).join('')}</ol>`:`<div class="empty" style="padding:30px">${ranked.length?'資料未超過10筆':'該月尚無排名資料'}</div>`;
-    body=`<div class="panel"><h3 class="panel-title">${chosenMonth}月車站排名</h3><p class="panel-note">${isAllStations?'全部車站為彙總模式，不適用個別名次':`選定車站：${selectedRank||'—'} / ${ranked.length||'—'}`}｜${stationScope==='all'?'全線':RIDERSHIP_LINES[stationScope]}</p><div class="rank-band-tabs"><button class="${rankBand==='top'?'active':''}" data-rank-band="top">前10名</button><button class="${rankBand==='bottom'?'active':''}" data-rank-band="bottom">後10名</button></div>${rankListHtml}</div>`;
+    body=`<div class="panel"><h3 class="panel-title">${chosenMonth}月車站排名</h3><p class="panel-note">${isAllStations?'全部車站為彙總模式，不適用個別名次':`選定車站：${selectedRank||'—'} / ${ranked.length||'—'}`}｜${stationScope==='all'?'全線':RIDERSHIP_LINES[stationScope]}</p><div class="rank-band-tabs"><button class="${rankBand==='top'?'active':''}" data-rank-band="top">前10名</button><button class="${rankBand==='bottom'?'active':''}" data-rank-band="bottom">後10名</button></div>${rankListHtml}</div>${ridershipDistributionHtml(scopeRows)}`;
   }else{
     const events=eventsForRidershipSelection(stations,stationKey,year,chosenMonth);
     body=`<div class="panel"><h3 class="panel-title">${chosenMonth}月周邊大型活動</h3><p class="panel-note">${escapeHtml(selectionLabel)}｜僅作為運量變化背景，不代表因果關係。</p>${events.length?events.map(e=>`<div style="padding:10px 0;border-bottom:.5px solid var(--border)"><b>${escapeHtml(e.name)}</b><div class="tiny-muted" style="margin-top:5px">${escapeHtml(e.startDate)}${e.endDate&&e.endDate!==e.startDate?`～${escapeHtml(e.endDate)}`:''}${e.venue?`｜${escapeHtml(e.venue)}`:''}${e.type?`｜${escapeHtml(e.type)}`:''}</div>${e.note?`<div class="tiny-muted" style="margin-top:3px">${escapeHtml(e.note)}</div>`:''}</div>`).join(''):`<div class="empty" style="padding:30px">${isAllStations?'所選範圍':'此站'}該月尚無大型活動資料</div>`}</div>`;
@@ -2966,7 +3006,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.5.2 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.6 測試版</dd><dt>基準版本</dt><dd>手機版 v5.5.2</dd><dt>更新日期</dt><dd>2026-08-28</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.6</dd><dt>本次更新</dt><dd>引用條號分段修正、全部車站彙總運量與排名狀態</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.6 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.7 測試版</dd><dt>基準版本</dt><dd>手機版 v5.6</dd><dt>更新日期</dt><dd>2026-08-30</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.7</dd><dt>本次更新</dt><dd>通告階層、年度比較、運量分布、Y軸單位及單筆活動</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -3026,7 +3066,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.6・2026.08.28</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.7・2026.08.30</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

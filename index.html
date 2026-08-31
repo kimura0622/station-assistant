@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.8"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.8"></script>
+<script src="./vendor/pdf.min.js?v=5.8.1"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.8.1"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -254,8 +254,8 @@
   .data-table td{text-align:right;padding:9px;border-bottom:.5px solid var(--border);font-variant-numeric:tabular-nums;}
   .distribution-list{display:grid;gap:10px;margin-top:14px;}
   .distribution-row{display:grid;grid-template-columns:94px minmax(0,1fr) 92px;align-items:center;gap:9px;font-size:12px;width:100%;border:0;background:transparent;color:var(--text);padding:5px 0;text-align:left;}
-  .distribution-track{height:12px;background:#e7edf5;border-radius:999px;overflow:hidden;}
-  .distribution-fill{height:100%;min-width:2px;background:linear-gradient(90deg,#0b5cab,#1688e8);border-radius:inherit;}
+  .distribution-track{display:block;height:12px;background:#e7edf5;border-radius:999px;overflow:hidden;}
+  .distribution-fill{display:block;height:100%;min-width:2px;background:linear-gradient(90deg,#0b5cab,#1688e8);border-radius:inherit;}
   .distribution-value{text-align:right;font-variant-numeric:tabular-nums;color:var(--text-2);}
   .positive{color:#218739}.negative{color:#c43b32}.neutral{color:var(--text-2)}
   .import-report{background:#f7f7fa;border-radius:12px;padding:11px 12px;font-size:12px;line-height:1.7;color:var(--text-2);margin-top:10px;}
@@ -319,12 +319,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.8 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.8.1 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.8';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.8.1';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -2935,7 +2935,7 @@ function openRidershipEventEditor(eventId=''){
   document.getElementById('phone').appendChild(overlay);overlay.querySelector('#ree-close').onclick=()=>overlay.remove();overlay.querySelector('#ree-save').onclick=()=>{const name=overlay.querySelector('#ree-name').value.trim(),startDate=overlay.querySelector('#ree-start').value,endDate=overlay.querySelector('#ree-end').value,stationCodes=parseRidershipEventCodes(overlay.querySelector('#ree-stations').value);if(!name||!startDate||!stationCodes.length)return alert('請填寫活動名稱、開始日期及有效的車站代號。');if(endDate&&endDate<startDate)return alert('結束日期不可早於開始日期。');const duplicate=existing.some(e=>String(e.id)!==String(event.id)&&e.name.trim()===name&&e.startDate===startDate&&[...(e.stationCodes||[])].sort().join('|')===[...stationCodes].sort().join('|'));if(duplicate&&!confirm('已有相同名稱、日期及車站的活動，仍要儲存嗎？'))return;const row={...event,id:event.id||`manual-${Date.now()}`,name,startDate,endDate,stationCodes,venue:overlay.querySelector('#ree-venue').value.trim(),type:overlay.querySelector('#ree-type').value.trim(),attendance:overlay.querySelector('#ree-attendance').value.trim(),note:overlay.querySelector('#ree-note').value.trim(),sourceFile:event.sourceFile||'單筆建立',updatedAt:new Date().toISOString()};saveRidershipEvents(event.id?existing.map(e=>String(e.id)===String(event.id)?row:e):[...existing,row]);overlay.remove();renderRidership();};
 }
 function bindRidershipEventAdmin(){document.getElementById('ridership-event-add')?.addEventListener('click',()=>openRidershipEventEditor());document.querySelectorAll('[data-edit-ridership-event]').forEach(btn=>btn.onclick=()=>openRidershipEventEditor(btn.dataset.editRidershipEvent));document.querySelectorAll('[data-delete-ridership-event]').forEach(btn=>btn.onclick=()=>{const rows=ridershipEvents(),event=rows.find(e=>String(e.id)===String(btn.dataset.deleteRidershipEvent));if(event&&confirm(`確定刪除「${event.name}」嗎？`)){saveRidershipEvents(rows.filter(e=>String(e.id)!==String(event.id)));renderRidership();}});}
-/* v5.8：加權平均日運量與排名三段切換。 */
+/* v5.8.1：修正運量分布比例條顯示。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -3009,7 +3009,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.7 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.8 測試版</dd><dt>基準版本</dt><dd>手機版 v5.7</dd><dt>更新日期</dt><dd>2026-08-31</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.8</dd><dt>本次更新</dt><dd>加權平均日運量、排名三段切換及級距車站清單</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.8 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.8.1 測試版</dd><dt>基準版本</dt><dd>手機版 v5.8</dd><dt>更新日期</dt><dd>2026-08-31</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.8.1</dd><dt>本次更新</dt><dd>修正運量分布藍色比例條顯示</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -3069,7 +3069,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.8・2026.08.31</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.8.1・2026.08.31</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

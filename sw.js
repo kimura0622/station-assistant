@@ -1,11 +1,11 @@
-const CACHE_NAME = 'station-assistant-mobile-github-v5.8.1';
+const CACHE_NAME = 'station-assistant-mobile-github-v5.8.2';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './vendor/pdf.min.js?v=5.8.1',
-  './vendor/pdf.worker.min.js?v=5.8.1',
-  './vendor/xlsx.full.min.js?v=5.8.1',
+  './vendor/pdf.min.js?v=5.8.2',
+  './vendor/pdf.worker.min.js?v=5.8.2',
+  './vendor/xlsx.full.min.js?v=5.8.2',
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png'

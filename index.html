@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.8.2"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.8.2"></script>
+<script src="./vendor/pdf.min.js?v=5.8.3"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.8.3"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -320,12 +320,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.8.2 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.8.3 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.8.2';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.8.3';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -1175,7 +1175,7 @@ function openProcedureNameDialog(item,existing=null){
         rangeData={startPage,endPage,absolutePage:Math.min(endPage,Math.max(startPage,anchor))};
       }
       if(existing){
-        await dbPut('favorites',{...existing,...rangeData,title,sourceTitle,color:selectedColor});
+        await dbPut('favorites',{...existing,...rangeData,title,sourceTitle,color:selectedColor,needsPageReview:false});
       }else{
         const maxOrder=Math.max(0,...cache.favorites.map(f=>Number(f.sortOrder)||0));
         await dbAdd('favorites',{...item,...rangeData,title,sourceTitle,color:selectedColor,sortOrder:maxOrder+1,createdAt:new Date().toISOString()});
@@ -1204,7 +1204,7 @@ function renderShortcutSection(){
   rows.forEach(f=>{
     html+=`<article class="procedure-card procedure-${PROCEDURE_COLORS.includes(f.color)?f.color:'blue'}" data-procedure-card="${f.id}" draggable="true" title="拖曳可調整順序">
       <button class="procedure-card-menu" data-procedure-menu="${f.id}" aria-label="設定">⋯</button>
-      <p class="procedure-card-name">${escapeHtml(f.title)}</p>
+      <p class="procedure-card-name">${escapeHtml(f.title)}${f.needsPageReview?'<br><span class="badge revision">請確認頁碼</span>':''}</p>
     </article>`;
   });
   if(rows.length)html+='</div>';
@@ -1294,7 +1294,7 @@ async function exportProcedures(){
   const announcements=cache.announcements.map(n=>{const copy={...n,portableId:n.id,noticeKey:transferNoticeKey(n),pdfData:n.pdfData?bufToBase64(n.pdfData):null,relationDocumentKeys:(n.relations||[]).map(r=>{const d=cache.sopDocs.find(x=>x.id===Number(r.docId)),p=d?cache.pdfFiles.find(x=>x.id===Number(d.pdfFileId)):null;return d?{documentKey:transferDocumentKey(d,p),startPage:r.startPage||null,endPage:r.endPage||r.startPage||null}:null;}).filter(Boolean),procedurePortableIds:(n.procedureIds||[]).map(id=>Number(id))};delete copy.id;delete copy.relations;delete copy.procedureIds;return copy;});
   downloadJson({format:'station-assistant-transfer',version:4,mode:'lightweight',exportedAt:new Date().toISOString(),source:'mobile',documents,procedures:procedures.map(portableProcedureV3),annotations,announcements},`常用程序與通告輕量移轉-${new Date().toISOString().slice(0,10)}.json`);
 }
-async function transferSnapshot(){const out={};for(const name of ['pdfFiles','sopDocs','favorites','annotations','announcements'])out[name]=await dbGetAll(name);return out;}
+async function transferSnapshot(){const out={};for(const name of ['pdfFiles','sopDocs','favorites','annotations','announcements','recentViews'])out[name]=await dbGetAll(name);return out;}
 async function restoreTransferSnapshot(snapshot){for(const name of Object.keys(snapshot)){await dbClear(name);for(const row of snapshot[name])await dbAdd(name,row);}await reloadCache();}
 function chooseImportMode(fileData,stats){return new Promise(resolve=>{const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='95';overlay.innerHTML=`<div class="modal-sheet" style="height:auto;max-width:540px"><div class="modal-header"><b>匯入常用程序與通告</b><button id="pi-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body"><p style="line-height:1.75;margin-top:0">常用程序 <b>${stats.procedures}</b> 筆｜SOP 識別 <b>${stats.documents}</b> 份｜通告 <b>${stats.notices}</b> 筆｜通告 PDF <b>${stats.noticePdfs}</b> 份｜標註 <b>${stats.annotations}</b> 筆｜關聯 <b>${stats.relations}</b> 組</p><div class="import-report">輕量移轉不包含 SOP PDF 與正文。${stats.missingDocs.length?`<br><b style="color:var(--danger)">找不到相同 SOP：${stats.missingDocs.map(escapeHtml).join('、')}</b><br>相關常用程序、標註與 SOP 關聯將安全略過。`:'<br>所有 SOP 均可與本機文件配對。'}<br>匯入前會建立暫存快照；如發生錯誤，將自動回復。</div><button class="primary" id="pi-merge" style="width:100%;margin:12px 0 9px">合併匯入（建議）</button><button class="secondary" id="pi-replace" style="width:100%;color:var(--danger)">取代移轉資料</button></div></div>`;(document.getElementById('phone')||document.body).appendChild(overlay);overlay.querySelector('#pi-close').onclick=()=>{overlay.remove();resolve(null)};overlay.querySelector('#pi-merge').onclick=()=>{overlay.remove();resolve('merge')};overlay.querySelector('#pi-replace').onclick=()=>{overlay.remove();resolve('replace')};});}
 async function importProceduresFile(file){
@@ -1413,7 +1413,7 @@ function openCommonProcedures(){
         html+=`<div class="procedure-row" data-procedure-open="${f.id}">
           <div class="ios-entry-icon" style="width:32px;height:32px;font-size:15px;">${f.type==='notice'?'📣':'📄'}</div>
           <div class="ios-entry-main">
-            <p class="ios-entry-title">${escapeHtml(f.title)}</p>
+            <p class="ios-entry-title">${escapeHtml(f.title)}${f.needsPageReview?' <span class="badge revision">確認頁碼</span>':''}</p>
           </div>
           ${procedureEditMode?`<div class="procedure-actions">
             <button class="mini-action" data-procedure-rename="${f.id}">設定</button>
@@ -1478,12 +1478,18 @@ function bindImportBtn(id){
     if(!file) return;
     await handlePdfImport(file);
   });
+  const replaceInput=document.getElementById('replace-pdf-file-input');
+  replaceInput?.addEventListener('change',async e=>{
+    const file=e.target.files?.[0],oldPdfId=Number(e.target.dataset.replacePdfId);
+    if(file&&oldPdfId)await handlePdfImport(file,{replacePdfId:oldPdfId});
+    e.target.value='';delete e.target.dataset.replacePdfId;
+  });
 }
-async function handlePdfImport(file){
+async function handlePdfImport(file,options={}){
   const startedAt=Date.now();
   contentEl.innerHTML = `<div class="card" style="text-align:center;padding:28px 20px;">
     <div style="font-size:30px;">📄</div>
-    <p style="font-weight:600;margin:8px 0 4px;">正在解析PDF</p>
+    <p style="font-weight:600;margin:8px 0 4px;">${options.replacePdfId?'正在解析新版PDF':'正在解析PDF'}</p>
     <p class="tiny-muted" style="margin:0 0 14px;word-break:break-all;">${escapeHtml(file.name)}</p>
     <div style="height:8px;background:#e5e5ea;border-radius:99px;overflow:hidden;">
       <div id="pc-progress-bar" style="height:100%;width:1%;background:var(--accent);transition:width .2s;"></div>
@@ -1512,13 +1518,13 @@ async function handlePdfImport(file){
     parseBuffer=null;
     const docs = segmentDocuments(pages);
     const storageBuffer=await file.arrayBuffer();
-    const pdfFileId = await dbAdd('pdfFiles', {
-      fileName:file.name, displayName:file.name.replace(/\.pdf$/i,''), data:storageBuffer,
-      uploadedAt:new Date().toISOString(), pageCount:pages.length, documentCount:0,
-      fileSize:file.size, status:'待確認'
-    });
+    const fileRecord={fileName:file.name,displayName:file.name.replace(/\.pdf$/i,''),data:storageBuffer,uploadedAt:new Date().toISOString(),pageCount:pages.length,documentCount:0,fileSize:file.size,status:'待確認'};
     clearInterval(timer);
-    showImportReview(docs, pdfFileId);
+    if(options.replacePdfId)showImportReview(docs,null,{replacePdfId:options.replacePdfId,fileRecord});
+    else{
+      const pdfFileId=await dbAdd('pdfFiles',fileRecord);
+      showImportReview(docs,pdfFileId);
+    }
   }catch(err){
     clearInterval(timer);
     console.error(err);
@@ -1573,14 +1579,19 @@ function renderReviewBody(docs){
   });
   return html;
 }
-function showImportReview(docs, pdfFileId){
+function showImportReview(docs,pdfFileId,options={}){
+  const replacing=Number(options.replacePdfId)>0;
+  const oldDocs=replacing?cache.sopDocs.filter(d=>Number(d.pdfFileId)===Number(options.replacePdfId)):[];
+  const replacePlan=replacing?matchReplacementDocuments(oldDocs,docs):null;
+  const blocked=replacing?replacePlan.unmatchedOld.filter(d=>sopDependencyCount(d.id).protected>0):[];
+  const replaceReport=replacing?`<div class="import-report" style="margin-bottom:12px"><b>更新配對結果</b><br>成功配對 ${replacePlan.pairs.length} 份｜新增 ${replacePlan.unmatchedNew.length} 份｜舊版未配對 ${replacePlan.unmatchedOld.length} 份${blocked.length?`<br><b style="color:var(--danger)">仍在使用且無法配對：${blocked.map(resolvedDocName).map(escapeHtml).join('、')}。確認更新將被阻止。</b>`:'<br>確認後才會取代舊版並移轉關聯。'}</div>`:'';
   const html = `<div class="modal-overlay import-review-overlay"><div class="modal-sheet import-review-sheet">
     <div class="modal-header import-review-header">
       <button id="review-cancel" class="import-review-action import-review-cancel">取消</button>
-      <span class="import-review-title">確認匯入結果（共${docs.length}份）</span>
-      <button id="review-confirm" class="import-review-action import-review-confirm">確認</button>
+      <span class="import-review-title">${replacing?'確認更新結果':'確認匯入結果'}（共${docs.length}份）</span>
+      <button id="review-confirm" class="import-review-action import-review-confirm">${replacing?'更新':'確認'}</button>
     </div>
-    <div class="modal-body import-review-body"><div id="quality-report">${qualityReportHtml(docs)}</div><div id="review-body">${renderReviewBody(docs)}</div></div>
+    <div class="modal-body import-review-body">${replaceReport}<div id="quality-report">${qualityReportHtml(docs)}</div><div id="review-body">${renderReviewBody(docs)}</div></div>
   </div></div>`;
   contentEl.insertAdjacentHTML('beforeend', html);
 
@@ -1617,12 +1628,24 @@ function showImportReview(docs, pdfFileId){
   bindReviewEvents();
 
   document.getElementById('review-cancel').addEventListener('click', async ()=>{
-    await dbDelete('pdfFiles', pdfFileId);
+    if(pdfFileId)await dbDelete('pdfFiles',pdfFileId);
     render();
   });
   document.getElementById('review-confirm').addEventListener('click', async ()=>{
+    if(replacing){
+      const button=document.getElementById('review-confirm');button.disabled=true;button.textContent='處理中';
+      const snapshot=await transferSnapshot();
+      try{
+        const result=await applySopReplacement(options.replacePdfId,docs,options.fileRecord);
+        await reloadCache();currentTab='library';render();
+        alert(`SOP 更新完成：配對 ${result.matched} 份、新增 ${result.added} 份、移除 ${result.removed} 份。${result.review?`\n有 ${result.review} 份文件頁數改變，相關常用程序已標記為需確認頁碼。`:''}`);
+      }catch(error){await restoreTransferSnapshot(snapshot);button.disabled=false;button.textContent='更新';alert(`${error.message||error}\n已回復更新前資料。`);}
+      return;
+    }
+    const insertedDocs=[];
     for(const doc of docs){
-      await dbAdd('sopDocs', {pdfFileId, name: doc.name || '未命名文件', pages:doc.pages});
+      const id=await dbAdd('sopDocs',{pdfFileId,name:doc.name||'未命名文件',pages:doc.pages});
+      insertedDocs.push({...doc,id,pdfFileId});
     }
     const pdfRec=cache.pdfFiles.find(f=>f.id===pdfFileId) || await new Promise((res,rej)=>{
       const r=txStore('pdfFiles','readonly').get(pdfFileId);
@@ -1635,9 +1658,12 @@ function showImportReview(docs, pdfFileId){
       await dbPut('pdfFiles',pdfRec);
     }
     await reloadCache();
+    const repaired=await repairOrphanProcedures(insertedDocs);
+    if(repaired)await reloadCache();
     sopKeyword=''; sopFilter='content';
     currentTab='library';
     render();
+    if(repaired)alert(`已自動修復 ${repaired} 個原本失效的常用程序。請開啟確認頁碼是否正確。`);
   });
 }
 
@@ -2280,9 +2306,102 @@ function formatUploadDate(value){
   if(!value) return '舊版匯入';
   return new Date(value).toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
 }
+function normalizedSopIdentity(value){
+  return String(value||'').normalize('NFKC').toLocaleLowerCase().replace(/[^a-z0-9\u3400-\u9fff]/g,'');
+}
+function sopDocumentIdentity(doc){
+  let code='';
+  for(const page of doc?.pages||[]){
+    const info=extractHeaderInfo(page.formattedText||page.text||'');
+    if(info.code){code=normalizedSopIdentity(info.code);break;}
+  }
+  return {code,name:normalizedSopIdentity(resolvedDocName(doc))};
+}
+function sopPageRange(doc){
+  const values=(doc?.pages||[]).map(p=>Number(p.absolutePage)).filter(Number.isFinite);
+  return values.length?{min:Math.min(...values),max:Math.max(...values),count:values.length}:{min:1,max:1,count:0};
+}
+function matchReplacementDocuments(oldDocs,newDocs){
+  const available=new Set(newDocs.map((_,i)=>i)),pairs=[],unmatchedOld=[];
+  for(const oldDoc of oldDocs){
+    const oldKey=sopDocumentIdentity(oldDoc);
+    let index=[...available].find(i=>oldKey.code&&sopDocumentIdentity(newDocs[i]).code===oldKey.code);
+    if(index===undefined) index=[...available].find(i=>oldKey.name&&sopDocumentIdentity(newDocs[i]).name===oldKey.name);
+    if(index===undefined) unmatchedOld.push(oldDoc);else{pairs.push({oldDoc,newDoc:newDocs[index]});available.delete(index);}
+  }
+  return {pairs,unmatchedOld,unmatchedNew:[...available].map(i=>newDocs[i])};
+}
+function sopDependencyCount(docId){
+  const procedures=cache.favorites.filter(f=>f.type==='sop'&&Number(f.docId)===Number(docId)).length;
+  const notices=cache.announcements.reduce((n,a)=>n+(a.relations||[]).filter(r=>Number(r.docId)===Number(docId)).length,0);
+  const recent=cache.recentViews.filter(r=>Number(r.docId)===Number(docId)).length;
+  return {procedures,notices,recent,total:procedures+notices+recent,protected:procedures+notices};
+}
+async function shiftSopReferences(docId,delta,newRange,pageCountChanged){
+  const favorites=cache.favorites.filter(f=>f.type==='sop'&&Number(f.docId)===Number(docId));
+  for(const favorite of favorites){
+    for(const key of ['startPage','endPage','absolutePage']) if(Number.isFinite(Number(favorite[key]))) favorite[key]=Math.min(newRange.max,Math.max(newRange.min,Number(favorite[key])+delta));
+    favorite.needsPageReview=!!pageCountChanged;
+    await dbPut('favorites',favorite);
+  }
+  const favoriteIds=new Set(favorites.map(f=>Number(f.id)));
+  for(const annotation of cache.annotations.filter(a=>favoriteIds.has(Number(a.favoriteId)))){
+    if(Number.isFinite(Number(annotation.page))) annotation.page=Math.min(newRange.max,Math.max(newRange.min,Number(annotation.page)+delta));
+    await dbPut('annotations',annotation);
+  }
+  for(const notice of cache.announcements){
+    let changed=false;
+    notice.relations=(notice.relations||[]).map(relation=>{
+      if(Number(relation.docId)!==Number(docId))return relation;
+      changed=true;const next={...relation};
+      for(const key of ['startPage','endPage']) if(Number.isFinite(Number(next[key]))) next[key]=Math.min(newRange.max,Math.max(newRange.min,Number(next[key])+delta));
+      return next;
+    });
+    if(changed){notice.updatedAt=new Date().toISOString();await dbPut('announcements',notice);}
+  }
+  for(const recent of cache.recentViews.filter(r=>Number(r.docId)===Number(docId))){
+    if(Number.isFinite(Number(recent.absolutePage))) recent.absolutePage=Math.min(newRange.max,Math.max(newRange.min,Number(recent.absolutePage)+delta));
+    await dbPut('recentViews',recent);
+  }
+}
+async function applySopReplacement(oldPdfId,newDocs,fileRecord){
+  const oldPdf=cache.pdfFiles.find(p=>Number(p.id)===Number(oldPdfId));
+  const oldDocs=cache.sopDocs.filter(d=>Number(d.pdfFileId)===Number(oldPdfId));
+  if(!oldPdf)throw new Error('找不到要更新的舊 PDF。');
+  const plan=matchReplacementDocuments(oldDocs,newDocs);
+  const blocked=plan.unmatchedOld.filter(d=>sopDependencyCount(d.id).protected>0);
+  if(blocked.length)throw new Error(`新版無法配對仍在使用的文件：${blocked.map(resolvedDocName).join('、')}。舊版未變更。`);
+  for(const {oldDoc,newDoc} of plan.pairs){
+    const oldRange=sopPageRange(oldDoc),newRange=sopPageRange(newDoc),delta=newRange.min-oldRange.min;
+    await shiftSopReferences(oldDoc.id,delta,newRange,oldRange.count!==newRange.count);
+    await dbPut('sopDocs',{...oldDoc,name:newDoc.name||oldDoc.name,pages:newDoc.pages,pdfFileId:oldPdfId,updatedAt:new Date().toISOString()});
+  }
+  for(const oldDoc of plan.unmatchedOld)await dbDelete('sopDocs',oldDoc.id);
+  for(const newDoc of plan.unmatchedNew)await dbAdd('sopDocs',{pdfFileId:oldPdfId,name:newDoc.name||'未命名文件',pages:newDoc.pages,createdAt:new Date().toISOString()});
+  await dbPut('pdfFiles',{...oldPdf,...fileRecord,id:oldPdfId,documentCount:newDocs.length,status:'已完成',qualityReport:buildPdfQualityReport(newDocs),updatedAt:new Date().toISOString()});
+  return {matched:plan.pairs.length,added:plan.unmatchedNew.length,removed:plan.unmatchedOld.length,review:plan.pairs.filter(({oldDoc,newDoc})=>sopPageRange(oldDoc).count!==sopPageRange(newDoc).count).length};
+}
+async function repairOrphanProcedures(candidateDocs){
+  let repaired=0;
+  for(const favorite of cache.favorites.filter(f=>f.type==='sop'&&!cache.sopDocs.some(d=>Number(d.id)===Number(f.docId)))){
+    const key=normalizedSopIdentity(favorite.sourceTitle);
+    const matches=candidateDocs.filter(d=>normalizedSopIdentity(resolvedDocName(d))===key);
+    if(!key||matches.length!==1)continue;
+    const doc=matches[0],range=sopPageRange(doc);
+    favorite.docId=doc.id;favorite.needsPageReview=true;
+    const inRange=Number(favorite.startPage)>=range.min&&Number(favorite.endPage)<=range.max;
+    if(!inRange){favorite.startPage=range.min;favorite.endPage=Math.min(range.max,range.min+2);favorite.absolutePage=favorite.startPage;favorite.needsPageReview=true;}
+    await dbPut('favorites',favorite);repaired++;
+  }
+  return repaired;
+}
 async function deletePdfSource(id){
   const related=cache.sopDocs.filter(d=>d.pdfFileId===id);
+  const dependency=related.reduce((sum,d)=>sum+sopDependencyCount(d.id).protected,0);
+  if(dependency)return alert(`這份 PDF 仍有 ${dependency} 項常用程序或通告關聯，請使用「更新」保留關聯，不能直接刪除。`);
   if(!confirm(`確定刪除這個PDF及其 ${related.length} 份SOP搜尋資料嗎？`)) return;
+  const docIds=new Set(related.map(d=>Number(d.id)));
+  for(const recent of cache.recentViews.filter(r=>docIds.has(Number(r.docId))))await dbDelete('recentViews',recent.id);
   for(const doc of related) await dbDelete('sopDocs',doc.id);
   await dbDelete('pdfFiles',id);
   await reloadCache(); renderLibrary();
@@ -2357,6 +2476,7 @@ function openSynonymManager(){
   draw();
 }
 function renderLibrary(){
+  const orphanProcedureCount=cache.favorites.filter(f=>f.type==='sop'&&!cache.sopDocs.some(d=>Number(d.id)===Number(f.docId))).length;
   let html = `<div class="page-tabs" role="tablist">
       <button class="page-tab ${librarySection==='sop'?'active':''}" data-library-section="sop">SOP 文件</button>
       <button class="page-tab ${librarySection==='notice'?'active':''}" data-library-section="notice">通告資料</button>
@@ -2365,9 +2485,10 @@ function renderLibrary(){
     <div class="card">
       <div class="row between">
         <div><p style="font-weight:600;margin:0 0 3px;">SOP PDF文件</p><p class="tiny-muted" style="margin:0;">上傳後解析為可搜尋文字</p></div>
-        <button class="primary" id="import-pdf-btn">上傳PDF</button>
+        <div class="row">${orphanProcedureCount?`<button class="secondary" id="repair-procedures-btn">修復失效（${orphanProcedureCount}）</button>`:''}<button class="primary" id="import-pdf-btn">上傳PDF</button></div>
       </div>
       <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none">
+      <input type="file" id="replace-pdf-file-input" accept="application/pdf" style="display:none">
     </div>
     <p class="tiny-muted" style="margin:12px 2px 6px;">PDF文件（${cache.pdfFiles.length}）</p>`;
   if(cache.pdfFiles.length===0){
@@ -2380,7 +2501,7 @@ function renderLibrary(){
       html+=`<div class="card">
         <div class="row between">
           <span style="font-size:13px;font-weight:600;line-height:1.4;">📄 ${escapeHtml(f.displayName||f.fileName)}</span>
-          <button class="danger-text" data-del-pdf="${f.id}">刪除</button>
+          <div class="row"><button class="secondary" data-replace-pdf="${f.id}" style="padding:5px 9px;min-height:32px">更新</button><button class="danger-text" data-del-pdf="${f.id}">刪除</button></div>
         </div>
         <p class="tiny-muted" style="margin:6px 0 2px;">上傳：${formatUploadDate(f.uploadedAt)}</p>
         <p class="muted" style="margin:0;">${pageCount||'—'}頁｜${docCount}份文件｜${formatFileSize(f.fileSize||f.data?.byteLength)}</p>
@@ -2440,6 +2561,11 @@ function renderLibrary(){
     await reloadCache(); renderLibrary();
   });
   bindImportBtn();
+  document.getElementById('repair-procedures-btn')?.addEventListener('click',async()=>{
+    const repaired=await repairOrphanProcedures(cache.sopDocs);
+    await reloadCache();renderLibrary();
+    alert(repaired?`已修復 ${repaired} 個常用程序。請開啟並確認頁碼。`:'目前無法依文件名稱自動配對，請使用各 PDF 的「更新」功能或重新上傳同名 SOP。');
+  });
   bindImeSafeSearch(document.getElementById('notice-library-search'),value=>{noticeKeyword=value;noticePage=1;filterNoticeCards();},filterNoticeCards);
   document.getElementById('notice-filter-cat')?.addEventListener('change',()=>{noticePage=1;filterNoticeCards();});
   document.getElementById('notice-prev-page')?.addEventListener('click',()=>{noticePage=Math.max(1,noticePage-1);filterNoticeCards();});
@@ -2449,6 +2575,12 @@ function renderLibrary(){
   contentEl.querySelectorAll('[data-edit-notice-links]').forEach(btn=>btn.addEventListener('click',()=>openNoticeRelationsEditor(Number(btn.dataset.editNoticeLinks))));
   contentEl.querySelectorAll('[data-del-pdf]').forEach(btn=>{
     btn.addEventListener('click',()=>deletePdfSource(Number(btn.dataset.delPdf)));
+  });
+  contentEl.querySelectorAll('[data-replace-pdf]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const input=document.getElementById('replace-pdf-file-input');
+      input.dataset.replacePdfId=btn.dataset.replacePdf;input.click();
+    });
   });
   contentEl.querySelectorAll('[data-del-notice]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
@@ -2947,7 +3079,7 @@ function openRidershipEventEditor(eventId=''){
   document.getElementById('phone').appendChild(overlay);overlay.querySelector('#ree-close').onclick=()=>overlay.remove();overlay.querySelector('#ree-save').onclick=()=>{const name=overlay.querySelector('#ree-name').value.trim(),startDate=overlay.querySelector('#ree-start').value,endDate=overlay.querySelector('#ree-end').value,stationCodes=parseRidershipEventCodes(overlay.querySelector('#ree-stations').value);if(!name||!startDate||!stationCodes.length)return alert('請填寫活動名稱、開始日期及有效的車站代號。');if(endDate&&endDate<startDate)return alert('結束日期不可早於開始日期。');const duplicate=existing.some(e=>String(e.id)!==String(event.id)&&e.name.trim()===name&&e.startDate===startDate&&[...(e.stationCodes||[])].sort().join('|')===[...stationCodes].sort().join('|'));if(duplicate&&!confirm('已有相同名稱、日期及車站的活動，仍要儲存嗎？'))return;const row={...event,id:event.id||`manual-${Date.now()}`,name,startDate,endDate,stationCodes,venue:overlay.querySelector('#ree-venue').value.trim(),type:overlay.querySelector('#ree-type').value.trim(),attendance:overlay.querySelector('#ree-attendance').value.trim(),note:overlay.querySelector('#ree-note').value.trim(),sourceFile:event.sourceFile||'單筆建立',updatedAt:new Date().toISOString()};saveRidershipEvents(event.id?existing.map(e=>String(e.id)===String(event.id)?row:e):[...existing,row]);overlay.remove();renderRidership();};
 }
 function bindRidershipEventAdmin(){document.getElementById('ridership-event-add')?.addEventListener('click',()=>openRidershipEventEditor());document.querySelectorAll('[data-edit-ridership-event]').forEach(btn=>btn.onclick=()=>openRidershipEventEditor(btn.dataset.editRidershipEvent));document.querySelectorAll('[data-delete-ridership-event]').forEach(btn=>btn.onclick=()=>{const rows=ridershipEvents(),event=rows.find(e=>String(e.id)===String(btn.dataset.deleteRidershipEvent));if(event&&confirm(`確定刪除「${event.name}」嗎？`)){saveRidershipEvents(rows.filter(e=>String(e.id)!==String(event.id)));renderRidership();}});}
-/* v5.8.2：降低手機 PDF 匯入記憶體用量並固定確認列。 */
+/* v5.8.3：SOP 安全更新、關聯移轉及失效常用程序修復。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -3021,7 +3153,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.8.1 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.8.2 測試版</dd><dt>基準版本</dt><dd>手機版 v5.8.1</dd><dt>更新日期</dt><dd>2026-09-01</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.8.2</dd><dt>本次更新</dt><dd>降低 PDF 匯入記憶體用量並固定確認匯入列</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.8.2 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.8.3 測試版</dd><dt>基準版本</dt><dd>手機版 v5.8.2</dd><dt>更新日期</dt><dd>2026-09-02</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.8.3</dd><dt>本次更新</dt><dd>SOP 安全更新、關聯移轉及失效常用程序修復</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -3081,7 +3213,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.8.2・2026.09.01</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.8.3・2026.09.02</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

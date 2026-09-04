@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.8.3"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.8.3"></script>
+<script src="./vendor/pdf.min.js?v=5.9.0"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.9.0"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -43,6 +43,14 @@
   .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;}
   .tab-btn.active{color:var(--accent);box-shadow:inset 0 3px 0 var(--signal);font-weight:650;}
   .tab-btn .icon{font-size:20px;}
+
+
+  .search-float{position:absolute;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:16;display:none;align-items:center;gap:7px;padding:8px 10px;border:1px solid rgba(20,103,184,.22);border-radius:13px;background:rgba(255,255,255,.96);box-shadow:0 8px 24px rgba(16,29,51,.16);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}
+  .search-float.show{display:flex}.search-float-key{min-width:0;flex:1;font-size:12px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.search-float-count{font-size:11px;color:var(--text-muted);white-space:nowrap}.search-float button{min-height:34px;padding:6px 9px;font-size:12px}
+  .viewed-badge{font-size:10px;color:#667487;background:#eef2f6;border-radius:999px;padding:3px 7px;white-space:nowrap;font-weight:500}
+  .event-kind-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.event-kind{min-height:42px;border:.5px solid var(--border-strong);border-radius:11px;background:#fff;font-size:13px;color:var(--text-2)}.event-kind.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent-text);font-weight:650}
+  .event-timeline{position:relative;margin:8px 0 12px 8px;padding-left:19px;border-left:2px solid #b8d3ec}.event-time-row{position:relative;background:#fff;border:.5px solid var(--border);border-radius:11px;padding:10px 11px;margin:0 0 9px}.event-time-row:before{content:"";position:absolute;left:-26px;top:15px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 0 0 1px var(--accent)}.event-time{font-size:12px;font-weight:750;color:var(--accent-text);margin-bottom:4px}.event-body{font-size:13px;line-height:1.65;color:var(--text)}
+  .event-summary-card{border-left:4px solid var(--accent)}.event-raw{white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.65;color:var(--text-2)}
 
   .card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.035);}
   .row{display:flex;align-items:center;gap:8px;}
@@ -320,12 +328,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.8.3 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.9.0 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.8.3';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.9.0';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -392,6 +400,8 @@ let currentTab = 'sop';
 let sopFilter = 'content'; // 'content' | 'all'
 let searchSource = 'all'; // 'all' | 'sop' | 'notice'
 let sopKeyword = '';
+let sopSearchReturnTop = null;
+const SOP_VIEWED_KEY='stationAssistantSopViewedV1';
 let noticeKeyword = '';
 let personnelKeyword = '';
 let ridershipKeyword = '';
@@ -754,7 +764,10 @@ function focusAtEnd(id){
   input.setSelectionRange(input.value.length, input.value.length);
 }
 
+contentEl.addEventListener('scroll',updateSearchFloat,{passive:true});
+
 function render(){
+  if(currentTab!=='sop') document.getElementById('sop-search-float')?.remove();
   titleEl.textContent = titleMap[currentTab];
   document.getElementById('phone').classList.toggle('ridership-mode',currentTab==='ridership');
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===currentTab));
@@ -771,9 +784,18 @@ function countTypes(doc){
   doc.pages.forEach(p=>{ if(p.type==='cover')c++; else if(p.type==='revision')r++; else ct++; });
   return {c,r,ct};
 }
+
+function getViewedSearchResults(){try{return new Set(JSON.parse(localStorage.getItem(SOP_VIEWED_KEY)||'[]'));}catch{return new Set();}}
+function markViewedSearchResult(key){const set=getViewedSearchResults();set.add(key);localStorage.setItem(SOP_VIEWED_KEY,JSON.stringify([...set].slice(-500)));}
+function searchResultKey(r){return r.source==='sop'?`sop:${r.docId}:${r.absolutePage}`:`notice:${r.noticeId}`;}
+function clearSopSearchToHome(){sopKeyword='';sopSearchReturnTop=null;contentEl.scrollTop=0;render();}
+function restoreSopSearchPosition(){if(sopSearchReturnTop==null)return;requestAnimationFrame(()=>{contentEl.scrollTop=sopSearchReturnTop;updateSearchFloat();});}
+function updateSearchFloat(){const bar=document.getElementById('sop-search-float');if(!bar)return;bar.classList.toggle('show',!!sopKeyword.trim()&&contentEl.scrollTop>170);}
+
 function renderSop(){
   const results = sopKeyword.trim() ? searchUnified(sopKeyword.trim()) : null;
   const recentSearches=getSearchHistory();
+  const viewedResults=getViewedSearchResults();
   let html = `
     <div class="search-field">
       <span class="search-icon">⌕</span>
@@ -796,6 +818,7 @@ function renderSop(){
       <div class="search-keywords">${terms.slice(0,12).map(t=>`<span class="search-keyword">${escapeHtml(t)}</span>`).join('')}</div>
       <p class="search-summary">找到 ${docCount} 份資料、${results.length} 條相關內容｜點選卡片直接閱讀原始PDF</p>`;
     results.forEach(r=>{
+      const resultKey=searchResultKey(r),isViewed=viewedResults.has(resultKey);
       const savedItem=r.source==='sop'
         ? {type:'sop',docId:r.docId,absolutePage:r.absolutePage,title:r.docName}
         : {type:'notice',noticeId:r.noticeId,title:r.docName};
@@ -807,6 +830,7 @@ function renderSop(){
         <div class="row between" style="margin-bottom:4px;">
           <span class="search-doc-title">${r.source==='sop'?'📄':'📣'} ${escapeHtml(r.docName)}</span>
           <span class="search-page-badge">${r.source==='sop'?`PDF第${r.absolutePage}頁${r.clauseMarker?`・${r.clauseMarker}`:''}`:'通告'}</span>
+          ${isViewed?'<span class="viewed-badge">已查看</span>':''}
           ${r.source==='sop'?`<button class="favorite-btn" data-fav-type="sop" data-fav-id="${r.docId}" data-fav-page="${r.absolutePage||''}" data-fav-title="${escapeHtml(r.docName)}">${isFav?'★':'☆'}</button>`:''}
         </div>
         <div style="margin:6px 0 2px"><span class="match-label ${r.matchType==='synonym'?'synonym':r.matchType==='notice'?'notice':''}">${r.matchType==='notice'?'通告符合':r.matchType==='synonym'?'同義詞符合':'原文符合'}</span>${r.titleMatched?'<span class="tiny-muted">文件名稱符合</span>':''}</div>
@@ -820,6 +844,12 @@ function renderSop(){
     }
   } else html += renderShortcutSection();
   contentEl.innerHTML = html;
+  document.getElementById('sop-search-float')?.remove();
+  if(results){
+    document.getElementById('phone').insertAdjacentHTML('beforeend',`<div class="search-float" id="sop-search-float"><span class="search-float-key">${escapeHtml(sopKeyword)}</span><span class="search-float-count">${results.length}筆</span><button class="secondary" id="sop-float-clear">清除搜尋</button></div>`);
+    document.getElementById('sop-float-clear').onclick=clearSopSearchToHome;
+    updateSearchFloat();
+  }
 
   const searchInput = document.getElementById('sop-search-input');
   if(searchInput){
@@ -830,11 +860,7 @@ function renderSop(){
     });
     focusAtEnd('sop-search-input');
   }
-  document.getElementById('sop-search-clear')?.addEventListener('click',()=>{
-    sopKeyword='';
-    render();
-    focusAtEnd('sop-search-input');
-  });
+  document.getElementById('sop-search-clear')?.addEventListener('click',clearSopSearchToHome);
   contentEl.querySelectorAll('[data-source]').forEach(c=>{
     c.addEventListener('click', ()=>{ searchSource=c.dataset.source; render(); });
   });
@@ -843,12 +869,13 @@ function renderSop(){
   });
   contentEl.querySelectorAll('[data-open-text]').forEach(card=>{
     card.addEventListener('click', ()=>{
-      saveSearchHistory(sopKeyword);
-      openSopPdfReader(Number(card.dataset.openText),Number(card.dataset.page));
+      saveSearchHistory(sopKeyword);sopSearchReturnTop=contentEl.scrollTop;
+      markViewedSearchResult(`sop:${card.dataset.openText}:${card.dataset.page}`);
+      openSopPdfReader(Number(card.dataset.openText),Number(card.dataset.page),{onClose:()=>{renderSop();restoreSopSearchPosition();}});
     });
   });
   contentEl.querySelectorAll('[data-open-notice]').forEach(card=>{
-    card.addEventListener('click', ()=>{saveSearchHistory(sopKeyword);openNoticeReader(Number(card.dataset.openNotice));});
+    card.addEventListener('click', ()=>{saveSearchHistory(sopKeyword);sopSearchReturnTop=contentEl.scrollTop;markViewedSearchResult(`notice:${card.dataset.openNotice}`);openNoticeReader(Number(card.dataset.openNotice),{onClose:()=>{renderSop();restoreSopSearchPosition();}});});
   });
   contentEl.querySelectorAll('[data-fav-type]').forEach(btn=>{
     btn.addEventListener('click',async e=>{
@@ -2022,7 +2049,7 @@ async function openTextReader(docId,absolutePage,targetClause=null,options={}){
   }
   document.getElementById('reader-close').addEventListener('click',()=>{
     overlay.remove();
-    if(currentTab==='sop'&&!sopKeyword) render();
+    if(options.onClose) options.onClose(); else if(currentTab==='sop'&&!sopKeyword) render();
   });
   document.getElementById('reader-prev').addEventListener('click',()=>{ if(currentIndex>0){currentIndex--;draw();} });
   document.getElementById('reader-next').addEventListener('click',()=>{ if(currentIndex<eligible.length-1){currentIndex++;draw();} });
@@ -2035,7 +2062,7 @@ async function openTextReader(docId,absolutePage,targetClause=null,options={}){
   document.getElementById('reader-pdf').addEventListener('click',()=>{
     const p=eligible[currentIndex];
     overlay.remove();
-    openSopPdfReader(doc.id,p.absolutePage,hasSavedRange?{startPage:rangeStart,endPage:rangeEnd,favoriteId:options.favoriteId}:{});
+    openSopPdfReader(doc.id,p.absolutePage,{...(hasSavedRange?{startPage:rangeStart,endPage:rangeEnd,favoriteId:options.favoriteId}:{}),onClose:options.onClose});
   });
   draw();
   if(targetClause){
@@ -2183,7 +2210,7 @@ async function openSopPdfReader(docId,absolutePage,options={}){
   stage.addEventListener('touchmove',e=>{if(!pinch||e.touches.length!==2)return;pinch.nextZoom=Math.max(.6,Math.min(2,pinch.startZoom*touchDistance(e.touches)/Math.max(1,pinch.startDistance)));overlay.querySelector('#sop-pdf-status').textContent=`PDF第 ${rangeStart}～${rangeEnd} 頁｜目前第 ${currentPage} 頁｜${Math.round(pinch.nextZoom*100)}%`;e.preventDefault();},{passive:false});
   stage.addEventListener('touchend',e=>{if(!pinch||e.touches.length>1)return;zoom=pinch.nextZoom;pinch=null;renderPages(false);e.preventDefault();},{passive:false});
   stage.addEventListener('touchcancel',()=>{pinch=null;});
-  overlay.querySelector('#sop-pdf-text').addEventListener('click',()=>{closed=true;renderToken++;overlay.remove();openTextReader(doc.id,currentPage,null,hasSavedRange?{startPage:rangeStart,endPage:rangeEnd,favoriteId:options.favoriteId}:{});});
+  overlay.querySelector('#sop-pdf-text').addEventListener('click',()=>{closed=true;renderToken++;overlay.remove();openTextReader(doc.id,currentPage,null,{...(hasSavedRange?{startPage:rangeStart,endPage:rangeEnd,favoriteId:options.favoriteId}:{}),onClose:options.onClose});});
   overlay.querySelector('#sop-pdf-related').addEventListener('click',()=>openRelatedNoticeList(doc.id,options.favoriteId));
   overlay.querySelector('#sop-pdf-annotate').addEventListener('click',()=>{
     const favoriteId=activeAnnotationFavoriteId();if(!favoriteId)return alert('請先將這段頁面加入常用程序，再進行標註。');
@@ -2267,7 +2294,7 @@ function openRelatedNoticeList(docId,favoriteId=0){
   const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='94';overlay.innerHTML=`<div class="modal-sheet" style="height:auto;max-width:620px"><div class="modal-header"><b>相關通告</b><button id="rn-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body">${rows.length?rows.map(n=>`<button class="secondary" data-rn="${n.id}" style="width:100%;text-align:left;margin-bottom:8px"><b>${escapeHtml(n.title)}</b><br><span class="tiny-muted">${escapeHtml(n.number||'未填編號')}｜${escapeHtml(n.category||'其他')}｜${escapeHtml(n.date||'')}</span></button>`).join(''):'<div class="empty" style="padding:35px">目前沒有關聯通告</div>'}</div></div>`;document.getElementById('phone').appendChild(overlay);overlay.querySelector('#rn-close').onclick=()=>overlay.remove();overlay.querySelectorAll('[data-rn]').forEach(b=>b.onclick=()=>{const noticeId=Number(b.dataset.rn);overlay.remove();openNoticeReader(noticeId);});
 }
 
-async function openNoticeReader(id){
+async function openNoticeReader(id,options={}){
   const notice=cache.announcements.find(n=>n.id===id);
   if(!notice) return;
   const terms=parseSearchTerms(sopKeyword);
@@ -2288,7 +2315,7 @@ async function openNoticeReader(id){
   document.getElementById('phone').insertAdjacentHTML('beforeend',html);
   document.getElementById('notice-reader-close').addEventListener('click',()=>{
     document.getElementById('notice-reader').remove();
-    if(currentTab==='sop'&&!sopKeyword) render();
+    if(options.onClose) options.onClose(); else if(currentTab==='sop'&&!sopKeyword) render();
   });
   document.getElementById('notice-open-pdf')?.addEventListener('click',()=>openRawPdfData(notice.pdfData,notice.title));
   const readerOverlay=document.getElementById('notice-reader');
@@ -2654,49 +2681,86 @@ function openNoticeRelationsEditor(id){
 }
 
 /* --- Personnel/event tab --- */
-function renderPersonnel(){
-  let html = `<div class="card">
-      <div class="field"><label>姓名</label><input id="p-name"></div>
-      <div class="field"><label>事件</label><input id="p-event"></div>
-      <div class="field"><label>日期</label><input type="date" id="p-date" value="${new Date().toISOString().slice(0,10)}"></div>
-      <div class="field"><label>備註</label><textarea id="p-note"></textarea></div>
-      <button class="primary" id="p-add-btn" style="width:100%;">新增紀錄</button>
-    </div>
-    <input type="text" id="p-search" placeholder="搜尋姓名或事件" value="${escapeHtml(personnelKeyword)}" style="margin-bottom:10px;">`;
-  const kw = personnelKeyword;
-  const list = [...cache.personnel].sort((a,b)=>b.date.localeCompare(a.date))
-    .filter(p=> !kw || p.name.includes(kw) || p.event.includes(kw));
-  if(list.length===0){
-    html += `<div class="empty"><p>尚無資料</p></div>`;
-  } else {
-    list.forEach(p=>{
-      html += `<div class="card">
-        <div class="row between"><span style="font-weight:500;font-size:14px;">${escapeHtml(p.name)}</span>
-          <button class="danger-text" data-del-p="${p.id}">刪除</button></div>
-        <p class="tiny-muted" style="margin:2px 0 6px;">${p.date}　${escapeHtml(p.event)}</p>
-        ${p.note?`<p class="muted" style="margin:0;">${escapeHtml(p.note)}</p>`:''}
-      </div>`;
-    });
+function eventStationOptions(){
+  const map=new Map();
+  for(const row of cache.ridership){
+    const r=(row.station&&row.code)?{station:row.station,code:row.code,lineCode:row.lineCode||((String(row.code).match(/^(BR|BL|R|G|O|Y)/)||[])[1]||''),lineName:row.lineName||RIDERSHIP_LINES[row.lineCode]||''}:parseRidershipStation(row.station||row.stationName||row.name||'');
+    if(r.station&&r.code&&!/^Y/.test(r.code)&&['BR','R','G','O','BL'].includes(r.lineCode))map.set(r.station,r);
   }
-  contentEl.innerHTML = html;
-  document.getElementById('p-add-btn').addEventListener('click', async ()=>{
-    const name = document.getElementById('p-name').value.trim();
-    if(!name) return alert('請輸入姓名');
-    await dbAdd('personnel', {
-      name, event: document.getElementById('p-event').value.trim(),
-      date: document.getElementById('p-date').value,
-      note: document.getElementById('p-note').value.trim()
-    });
-    await reloadCache(); renderPersonnel();
-  });
-  bindImeSafeSearch(document.getElementById('p-search'), value=>{ personnelKeyword=value; }, renderPersonnel);
-  if(personnelKeyword) focusAtEnd('p-search');
-  contentEl.querySelectorAll('[data-del-p]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      await dbDelete('personnel', Number(btn.dataset.delP));
-      await reloadCache(); renderPersonnel();
-    });
-  });
+  return [...map.values()].sort(compareStationsByCode);
+}
+function parseEventTimeline(raw){
+  const lines=String(raw||'').replace(/\r/g,'').split('\n');
+  const out=[];let current=null;
+  for(const line of lines){
+    const m=line.trim().match(/^([01]?\d|2[0-3]):([0-5]\d)\s+(.+)$/);
+    if(m){current={time:`${m[1].padStart(2,'0')}:${m[2]}`,text:m[3].trim()};out.push(current);}
+    else if(line.trim()&&current) current.text+=`\n${line.trim()}`;
+  }
+  return out;
+}
+function detectStationsInEvent(raw){
+  const names=eventStationOptions().map(r=>r.station).filter(n=>n&&String(raw).includes(n));
+  return [...new Set(names)];
+}
+function renderEventTimelineRows(timeline,editable=false){
+  return `<div class="event-timeline">${timeline.map((r,i)=>`<div class="event-time-row">${editable?`<div class="row"><input type="time" data-event-time="${i}" value="${escapeHtml(r.time)}" style="width:112px;min-height:38px"><textarea data-event-text="${i}" style="min-height:72px">${escapeHtml(r.text)}</textarea></div>`:`<div class="event-time">${escapeHtml(r.time)}</div><div class="event-body">${escapeHtml(r.text)}</div>`}</div>`).join('')}</div>`;
+}
+function openEventPasteDialog(){
+  const stations=eventStationOptions();
+  const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='90';
+  overlay.innerHTML=`<div class="modal-sheet" style="height:92%"><div class="modal-header"><b>貼上事件紀錄</b><button id="ep-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body">
+    <div class="field"><label>車站（先選擇）</label><select id="ep-station"><option value="">請選擇車站</option>${stations.map(r=>`<option value="${escapeHtml(r.station)}">${escapeHtml(r.station)}${r.code?`（${escapeHtml(r.code)}）`:''}</option>`).join('')}</select>${stations.length?'<span class="tiny-muted">車站清單沿用目前已匯入的運量車站資料。</span>':'<span class="tiny-muted">目前尚無運量車站資料；可先手動輸入車站。</span>'}</div>
+    ${stations.length?'':`<div class="field"><label>車站名稱</label><input id="ep-station-manual" placeholder="例如：三重國小站"></div>`}
+    <div class="field"><label>事件屬性</label><div class="event-kind-row"><button class="event-kind active" data-kind="一般事件">一般事件</button><button class="event-kind" data-kind="良好案例">良好案例</button><button class="event-kind" data-kind="待改善案例">待改善</button></div></div>
+    <div class="field"><label>事件日期</label><input type="date" id="ep-date" value="${new Date().toISOString().slice(0,10)}"></div>
+    <div class="field"><label>貼上原始事件紀錄</label><textarea id="ep-raw" style="min-height:230px" placeholder="18:02 因站外大雨……&#10;18:03 副站長……"></textarea><span class="tiny-muted">以 HH:MM 開頭的段落會在本機自動拆成時間軸，資料不會上傳網路。</span></div>
+    <button class="primary" id="ep-parse" style="width:100%">解析事件</button>
+    <div id="ep-preview"></div>
+  </div></div>`;
+  document.getElementById('phone').appendChild(overlay);
+  let kind='一般事件',timeline=[];
+  overlay.querySelector('#ep-close').onclick=()=>overlay.remove();
+  overlay.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{kind=b.dataset.kind;overlay.querySelectorAll('[data-kind]').forEach(x=>x.classList.toggle('active',x===b));});
+  overlay.querySelector('#ep-parse').onclick=()=>{
+    const raw=overlay.querySelector('#ep-raw').value.trim();timeline=parseEventTimeline(raw);
+    if(!raw)return alert('請先貼上事件紀錄。');
+    if(!timeline.length)return alert('沒有辨識到時間軸。請確認每筆紀錄以 HH:MM 開頭。');
+    const selected=overlay.querySelector('#ep-station')?.value||overlay.querySelector('#ep-station-manual')?.value.trim()||'';
+    if(!selected)return alert('請先選擇或輸入車站。');
+    const detected=detectStationsInEvent(raw),other=detected.filter(n=>n!==selected);
+    overlay.querySelector('#ep-preview').innerHTML=`<div class="card event-summary-card" style="margin-top:12px"><b>解析結果</b><p class="tiny-muted">${escapeHtml(selected)}｜${escapeHtml(kind)}｜共 ${timeline.length} 筆時間紀錄</p>${detected.includes(selected)?'<span class="viewed-badge">✓ 內文車站符合</span>':''}${other.length?`<p class="tiny-muted">內文另有出現：${escapeHtml(other.join('、'))}，請確認是否為支援／通報車站。</p>`:''}</div>${renderEventTimelineRows(timeline,true)}<button class="primary" id="ep-save" style="width:100%;margin-bottom:10px">確認存入</button><details><summary class="tiny-muted">查看原始紀錄</summary><div class="card event-raw">${escapeHtml(raw)}</div></details>`;
+    overlay.querySelector('#ep-save').onclick=async()=>{
+      const station=overlay.querySelector('#ep-station')?.value||overlay.querySelector('#ep-station-manual')?.value.trim()||'';
+      const edited=timeline.map((r,i)=>({time:overlay.querySelector(`[data-event-time="${i}"]`).value,text:overlay.querySelector(`[data-event-text="${i}"]`).value.trim()})).filter(r=>r.time&&r.text);
+      const first=edited[0]?.text||'事件紀錄';
+      await dbAdd('personnel',{recordType:'event',station,category:kind,date:overlay.querySelector('#ep-date').value,title:first.length>34?first.slice(0,34)+'…':first,rawText:raw,timeline:edited,createdAt:new Date().toISOString()});
+      await reloadCache();overlay.remove();renderPersonnel();
+    };
+  };
+}
+function openEventDetail(id){
+  const e=cache.personnel.find(x=>x.id===Number(id)&&x.recordType==='event');if(!e)return;
+  const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='88';
+  overlay.innerHTML=`<div class="modal-sheet" style="height:90%"><div class="modal-header"><b>${escapeHtml(e.station||'未指定車站')}｜${escapeHtml(e.category||'一般事件')}</b><button id="ed-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body"><div class="card event-summary-card"><b>${escapeHtml(e.title||'事件紀錄')}</b><p class="tiny-muted">${escapeHtml(e.date||'')}｜${(e.timeline||[]).length} 筆時間紀錄</p></div>${renderEventTimelineRows(e.timeline||[])}<details><summary class="tiny-muted">原始事件紀錄</summary><div class="card event-raw">${escapeHtml(e.rawText||'')}</div></details></div></div>`;
+  document.getElementById('phone').appendChild(overlay);overlay.querySelector('#ed-close').onclick=()=>overlay.remove();
+}
+function renderPersonnel(){
+  const events=cache.personnel.filter(p=>p.recordType==='event').sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const legacy=cache.personnel.filter(p=>p.recordType!=='event');
+  let html=`<button class="primary" id="event-paste-open" style="width:100%;margin-bottom:12px">＋ 貼上事件紀錄並解析</button>
+    <input type="text" id="p-search" placeholder="搜尋車站、事件內容或既有人員紀錄" value="${escapeHtml(personnelKeyword)}" style="margin-bottom:10px;">`;
+  const kw=personnelKeyword.trim();
+  const filtered=events.filter(e=>!kw||[e.station,e.category,e.title,e.rawText].some(v=>String(v||'').includes(kw)));
+  if(filtered.length) filtered.forEach(e=>{html+=`<div class="card" data-event-detail="${e.id}"><div class="row between"><div><b style="font-size:14px">${escapeHtml(e.station||'未指定車站')}</b><div class="tiny-muted">${escapeHtml(e.date||'')}｜${escapeHtml(e.category||'一般事件')}｜${(e.timeline||[]).length}筆</div></div><button class="danger-text" data-del-event="${e.id}">刪除</button></div><p class="muted" style="margin:8px 0 0">${escapeHtml(e.title||'事件紀錄')}</p></div>`;});
+  else html+=`<div class="empty" style="padding:34px 20px"><p>尚無事件資料</p><span class="tiny-muted">可先貼上時間格式的事件紀錄測試解析效果。</span></div>`;
+  if(legacy.length) html+=`<details style="margin-top:12px"><summary class="tiny-muted">既有人員／事件紀錄（${legacy.length}）</summary>${legacy.filter(p=>!kw||String(p.name||'').includes(kw)||String(p.event||'').includes(kw)).map(p=>`<div class="card"><div class="row between"><span style="font-weight:500;font-size:14px">${escapeHtml(p.name||'')}</span><button class="danger-text" data-del-p="${p.id}">刪除</button></div><p class="tiny-muted">${escapeHtml(p.date||'')}　${escapeHtml(p.event||'')}</p>${p.note?`<p class="muted">${escapeHtml(p.note)}</p>`:''}</div>`).join('')}</details>`;
+  contentEl.innerHTML=html;
+  document.getElementById('event-paste-open').onclick=openEventPasteDialog;
+  bindImeSafeSearch(document.getElementById('p-search'),value=>{personnelKeyword=value;},renderPersonnel);
+  contentEl.querySelectorAll('[data-event-detail]').forEach(card=>card.onclick=e=>{if(e.target.closest('[data-del-event]'))return;openEventDetail(card.dataset.eventDetail);});
+  contentEl.querySelectorAll('[data-del-event]').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();if(confirm('確定刪除此事件紀錄？')){await dbDelete('personnel',Number(btn.dataset.delEvent));await reloadCache();renderPersonnel();}});
+  contentEl.querySelectorAll('[data-del-p]').forEach(btn=>btn.onclick=async()=>{if(confirm('確定刪除此筆紀錄？')){await dbDelete('personnel',Number(btn.dataset.delP));await reloadCache();renderPersonnel();}});
 }
 
 /* --- Ridership tab --- */
@@ -3079,7 +3143,7 @@ function openRidershipEventEditor(eventId=''){
   document.getElementById('phone').appendChild(overlay);overlay.querySelector('#ree-close').onclick=()=>overlay.remove();overlay.querySelector('#ree-save').onclick=()=>{const name=overlay.querySelector('#ree-name').value.trim(),startDate=overlay.querySelector('#ree-start').value,endDate=overlay.querySelector('#ree-end').value,stationCodes=parseRidershipEventCodes(overlay.querySelector('#ree-stations').value);if(!name||!startDate||!stationCodes.length)return alert('請填寫活動名稱、開始日期及有效的車站代號。');if(endDate&&endDate<startDate)return alert('結束日期不可早於開始日期。');const duplicate=existing.some(e=>String(e.id)!==String(event.id)&&e.name.trim()===name&&e.startDate===startDate&&[...(e.stationCodes||[])].sort().join('|')===[...stationCodes].sort().join('|'));if(duplicate&&!confirm('已有相同名稱、日期及車站的活動，仍要儲存嗎？'))return;const row={...event,id:event.id||`manual-${Date.now()}`,name,startDate,endDate,stationCodes,venue:overlay.querySelector('#ree-venue').value.trim(),type:overlay.querySelector('#ree-type').value.trim(),attendance:overlay.querySelector('#ree-attendance').value.trim(),note:overlay.querySelector('#ree-note').value.trim(),sourceFile:event.sourceFile||'單筆建立',updatedAt:new Date().toISOString()};saveRidershipEvents(event.id?existing.map(e=>String(e.id)===String(event.id)?row:e):[...existing,row]);overlay.remove();renderRidership();};
 }
 function bindRidershipEventAdmin(){document.getElementById('ridership-event-add')?.addEventListener('click',()=>openRidershipEventEditor());document.querySelectorAll('[data-edit-ridership-event]').forEach(btn=>btn.onclick=()=>openRidershipEventEditor(btn.dataset.editRidershipEvent));document.querySelectorAll('[data-delete-ridership-event]').forEach(btn=>btn.onclick=()=>{const rows=ridershipEvents(),event=rows.find(e=>String(e.id)===String(btn.dataset.deleteRidershipEvent));if(event&&confirm(`確定刪除「${event.name}」嗎？`)){saveRidershipEvents(rows.filter(e=>String(e.id)!==String(event.id)));renderRidership();}});}
-/* v5.8.3：SOP 安全更新、關聯移轉及失效常用程序修復。 */
+/* v5.9.0：SOP 安全更新、關聯移轉及失效常用程序修復。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -3153,7 +3217,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.8.2 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.8.3 測試版</dd><dt>基準版本</dt><dd>手機版 v5.8.2</dd><dt>更新日期</dt><dd>2026-09-02</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.8.3</dd><dt>本次更新</dt><dd>SOP 安全更新、關聯移轉及失效常用程序修復</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.8.3 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.9.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.8.3</dd><dt>更新日期</dt><dd>2026-09-04</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.9.0</dd><dt>本次更新</dt><dd>搜尋結果返回定位、已查看標示、浮動搜尋控制列；事件文字貼入解析與時間軸測試</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -3213,7 +3277,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.8.3・2026.09.02</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.9.0・2026.09.04</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

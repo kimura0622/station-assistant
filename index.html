@@ -52,6 +52,11 @@
   .event-timeline{position:relative;margin:8px 0 12px 8px;padding-left:19px;border-left:2px solid #b8d3ec}.event-time-row{position:relative;background:#fff;border:.5px solid var(--border);border-radius:11px;padding:10px 11px;margin:0 0 9px}.event-time-row:before{content:"";position:absolute;left:-26px;top:15px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 0 0 1px var(--accent)}.event-time{font-size:12px;font-weight:750;color:var(--accent-text);margin-bottom:4px}.event-body{font-size:13px;line-height:1.65;color:var(--text)}
   .event-summary-card{border-left:4px solid var(--accent)}.event-raw{white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.65;color:var(--text-2)}
 
+
+  .event-kind-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.event-kind{min-height:42px;border:.5px solid var(--border-strong);border-radius:11px;background:#fff;font-size:13px;color:var(--text-2)}.event-kind.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent-text);font-weight:650}
+  .event-bad{color:#c62828!important;font-weight:750}.event-good{color:#14733b!important;font-weight:700}.event-editor-sheet{height:92%;max-width:900px}.event-raw-input{min-height:220px}.event-timeline{position:relative;margin:8px 0 12px 8px;padding-left:19px;border-left:2px solid #b8d3ec}.event-time-row{position:relative;background:#fff;border:.5px solid var(--border);border-radius:11px;padding:10px 11px;margin:0 0 9px}.event-time-row:before{content:"";position:absolute;left:-26px;top:15px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 0 0 1px var(--accent)}.event-time{font-size:12px;font-weight:750;color:var(--accent-text);margin-bottom:4px}.event-body{font-size:13px;line-height:1.65;color:var(--text)}.event-edit-grid{display:grid;grid-template-columns:110px 1fr;gap:8px}.event-edit-grid textarea{min-height:74px}.event-person-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:7px}.event-person-card{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:.5px solid var(--border)}.event-person-card:last-child{border-bottom:0}.event-person-card span{font-size:12px;color:var(--text-2)}.event-summary-card{border-left:4px solid var(--accent)}.event-raw{white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.65;color:var(--text-2)}
+  @media(max-width:700px){.event-person-row{grid-template-columns:1fr 1fr}.event-edit-grid{grid-template-columns:1fr}.event-editor-sheet{height:94%}}
+
   .card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.035);}
   .row{display:flex;align-items:center;gap:8px;}
   .between{justify-content:space-between;}
@@ -328,7 +333,7 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.9.0 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.10.0 · 資料僅存本機</div>
   </div>
 </div>
 
@@ -2682,12 +2687,12 @@ function openNoticeRelationsEditor(id){
 
 /* --- Personnel/event tab --- */
 function eventStationOptions(){
-  const map=new Map();
+  const rows=[];
   for(const row of cache.ridership){
     const r=(row.station&&row.code)?{station:row.station,code:row.code,lineCode:row.lineCode||((String(row.code).match(/^(BR|BL|R|G|O|Y)/)||[])[1]||''),lineName:row.lineName||RIDERSHIP_LINES[row.lineCode]||''}:parseRidershipStation(row.station||row.stationName||row.name||'');
-    if(r.station&&r.code&&!/^Y/.test(r.code)&&['BR','R','G','O','BL'].includes(r.lineCode))map.set(r.station,r);
+    if(r.station&&r.code&&!/^Y/.test(r.code)&&['BR','R','G','O','BL'].includes(r.lineCode)) rows.push(r);
   }
-  return [...map.values()].sort(compareStationsByCode);
+  return rows.sort(compareStationsByCode);
 }
 function parseEventTimeline(raw){
   const lines=String(raw||'').replace(/\r/g,'').split('\n');
@@ -2699,66 +2704,108 @@ function parseEventTimeline(raw){
   }
   return out;
 }
+function parseEventParticipants(raw){
+  const lines=String(raw||'').replace(/\r/g,'').split('\n');
+  const out=[];const known=['值班站長','值班站務員','站務專員','日班保全','清潔人員','副站長','保全','清潔','站長'];
+  for(const rawLine of lines){
+    const line=rawLine.trim(); if(!line||/^([01]?\d|2[0-3]):[0-5]\d\s+/.test(line)) break;
+    const m=line.match(/^(.*?)[（(](?:以下)?簡稱\s*([^）)]+)[）)]於(.+?)(?:值勤|備勤)[。．.]?$/);
+    if(!m) continue;
+    const before=m[1].trim(),alias=m[2].trim(),location=m[3].trim();
+    let role='',name=before;
+    for(const k of known){ if(before.startsWith(k)){role=k;name=before.slice(k.length).trim();break;} }
+    out.push({role,name,alias,location});
+  }
+  return out;
+}
 function detectStationsInEvent(raw){
-  const names=eventStationOptions().map(r=>r.station).filter(n=>n&&String(raw).includes(n));
-  return [...new Set(names)];
+  const names=[...new Set(eventStationOptions().map(r=>r.station))].filter(n=>n&&String(raw).includes(n));
+  return names;
 }
+function eventLineOptions(){return ['BR','R','G','O','BL'].filter(code=>eventStationOptions().some(r=>r.lineCode===code));}
+function eventCategoryClass(category){return category==='待改善案例'?'event-bad':category==='良好案例'?'event-good':'';}
 function renderEventTimelineRows(timeline,editable=false){
-  return `<div class="event-timeline">${timeline.map((r,i)=>`<div class="event-time-row">${editable?`<div class="row"><input type="time" data-event-time="${i}" value="${escapeHtml(r.time)}" style="width:112px;min-height:38px"><textarea data-event-text="${i}" style="min-height:72px">${escapeHtml(r.text)}</textarea></div>`:`<div class="event-time">${escapeHtml(r.time)}</div><div class="event-body">${escapeHtml(r.text)}</div>`}</div>`).join('')}</div>`;
+  return `<div class="event-timeline">${(timeline||[]).map((r,i)=>`<div class="event-time-row">${editable?`<div class="event-edit-grid"><input type="time" data-event-time="${i}" value="${escapeHtml(r.time||'')}"><textarea data-event-text="${i}">${escapeHtml(r.text||'')}</textarea></div>`:`<div class="event-time">${escapeHtml(r.time||'')}</div><div class="event-body">${escapeHtml(r.text||'')}</div>`}</div>`).join('')}</div>`;
 }
-function openEventPasteDialog(){
-  const stations=eventStationOptions();
+function renderEventParticipantRows(participants,editable=false){
+  if(!(participants||[]).length)return '<p class="tiny-muted">未辨識到事件參與人員，可直接保留原始紀錄。</p>';
+  return `<div class="event-participants">${participants.map((p,i)=>editable?`<div class="event-person-row"><input data-person-role="${i}" value="${escapeHtml(p.role||'')}" placeholder="身分"><input data-person-name="${i}" value="${escapeHtml(p.name||'')}" placeholder="姓名"><input data-person-alias="${i}" value="${escapeHtml(p.alias||'')}" placeholder="事件內簡稱"><input data-person-location="${i}" value="${escapeHtml(p.location||'')}" placeholder="初始位置"></div>`:`<div class="event-person-card"><b>${escapeHtml(p.alias||p.role||'參與人員')}</b><span>${escapeHtml([p.role,p.name].filter(Boolean).join(' '))}${p.location?`｜${escapeHtml(p.location)}`:''}</span></div>`).join('')}</div>`;
+}
+function buildEventStationSelectors(stations,event={}){
+  const lines=eventLineOptions();
+  return `<div class="field"><label>路線</label><select id="ep-line"><option value="">請選擇路線</option>${lines.map(code=>`<option value="${code}" ${event.lineCode===code?'selected':''}>${escapeHtml(RIDERSHIP_LINES[code]||code)}</option>`).join('')}</select></div><div class="field"><label>車站</label><select id="ep-station"><option value="">請先選擇路線</option></select>${stations.length?'<span class="tiny-muted">先選路線，再顯示該線車站。</span>':'<span class="tiny-muted">目前尚無運量車站資料，可改用手動輸入。</span>'}</div>${stations.length?'':`<div class="field"><label>車站名稱</label><input id="ep-station-manual" value="${escapeHtml(event.station||'')}" placeholder="例如：三重國小站"></div>`}`;
+}
+function populateEventStationSelect(overlay,lineCode,selected=''){
+  const stationSel=overlay.querySelector('#ep-station'); if(!stationSel)return;
+  const rows=eventStationOptions().filter(r=>r.lineCode===lineCode);
+  stationSel.innerHTML=`<option value="">${lineCode?'請選擇車站':'請先選擇路線'}</option>${rows.map(r=>`<option value="${escapeHtml(r.station)}" data-code="${escapeHtml(r.code)}" ${r.station===selected?'selected':''}>${escapeHtml(r.station)}（${escapeHtml(r.code)}）</option>`).join('')}`;
+}
+function collectEventPreview(overlay,timeline,participants){
+  const editedTimeline=(timeline||[]).map((r,i)=>({time:overlay.querySelector(`[data-event-time="${i}"]`)?.value||r.time||'',text:overlay.querySelector(`[data-event-text="${i}"]`)?.value.trim()||r.text||''})).filter(r=>r.time&&r.text);
+  const editedParticipants=(participants||[]).map((p,i)=>({role:overlay.querySelector(`[data-person-role="${i}"]`)?.value.trim()||p.role||'',name:overlay.querySelector(`[data-person-name="${i}"]`)?.value.trim()||p.name||'',alias:overlay.querySelector(`[data-person-alias="${i}"]`)?.value.trim()||p.alias||'',location:overlay.querySelector(`[data-person-location="${i}"]`)?.value.trim()||p.location||''})).filter(p=>p.role||p.name||p.alias||p.location);
+  return {timeline:editedTimeline,participants:editedParticipants};
+}
+function openEventEditor(existing=null){
+  const isEdit=!!existing,stations=eventStationOptions();
+  if(existing&&!existing.lineCode){const hit=stations.find(r=>r.station===existing.station);if(hit)existing={...existing,lineCode:hit.lineCode};}
   const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='90';
-  overlay.innerHTML=`<div class="modal-sheet" style="height:92%"><div class="modal-header"><b>貼上事件紀錄</b><button id="ep-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body">
-    <div class="field"><label>車站（先選擇）</label><select id="ep-station"><option value="">請選擇車站</option>${stations.map(r=>`<option value="${escapeHtml(r.station)}">${escapeHtml(r.station)}${r.code?`（${escapeHtml(r.code)}）`:''}</option>`).join('')}</select>${stations.length?'<span class="tiny-muted">車站清單沿用目前已匯入的運量車站資料。</span>':'<span class="tiny-muted">目前尚無運量車站資料；可先手動輸入車站。</span>'}</div>
-    ${stations.length?'':`<div class="field"><label>車站名稱</label><input id="ep-station-manual" placeholder="例如：三重國小站"></div>`}
-    <div class="field"><label>事件屬性</label><div class="event-kind-row"><button class="event-kind active" data-kind="一般事件">一般事件</button><button class="event-kind" data-kind="良好案例">良好案例</button><button class="event-kind" data-kind="待改善案例">待改善</button></div></div>
-    <div class="field"><label>事件日期</label><input type="date" id="ep-date" value="${new Date().toISOString().slice(0,10)}"></div>
-    <div class="field"><label>貼上原始事件紀錄</label><textarea id="ep-raw" style="min-height:230px" placeholder="18:02 因站外大雨……&#10;18:03 副站長……"></textarea><span class="tiny-muted">以 HH:MM 開頭的段落會在本機自動拆成時間軸，資料不會上傳網路。</span></div>
-    <button class="primary" id="ep-parse" style="width:100%">解析事件</button>
+  overlay.innerHTML=`<div class="modal-sheet event-editor-sheet"><div class="modal-header"><b>${isEdit?'修改事件':'貼上事件紀錄'}</b><button id="ep-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body">
+    ${buildEventStationSelectors(stations,existing||{})}
+    <div class="field"><label>事件屬性</label><div class="event-kind-row"><button class="event-kind ${!existing||existing.category==='一般事件'?'active':''}" data-kind="一般事件">一般事件</button><button class="event-kind ${existing?.category==='良好案例'?'active':''}" data-kind="良好案例">良好案例</button><button class="event-kind ${existing?.category==='待改善案例'?'active':''}" data-kind="待改善案例">待改善</button></div></div>
+    <div class="field"><label>事件日期</label><input type="date" id="ep-date" value="${escapeHtml(existing?.date||new Date().toISOString().slice(0,10))}"></div>
+    <div class="field"><label>事件主旨</label><input id="ep-subject" value="${escapeHtml(existing?.subject||existing?.title||'')}" placeholder="例如：4號電扶梯異常向下滑行處理事件"></div>
+    <div class="field"><label>貼上／修改原始事件紀錄</label><textarea id="ep-raw" class="event-raw-input" placeholder="可先貼人員值勤說明，再貼 18:02、18:03…時間紀錄">${escapeHtml(existing?.rawText||'')}</textarea><span class="tiny-muted">人員前言會辨識「簡稱／以下簡稱＋值勤位置」；HH:MM 開頭段落會拆成時間軸。解析只在本機進行。</span></div>
+    <button class="primary" id="ep-parse" style="width:100%">${isEdit?'重新解析原始文字':'解析事件'}</button>
     <div id="ep-preview"></div>
   </div></div>`;
   document.getElementById('phone').appendChild(overlay);
-  let kind='一般事件',timeline=[];
+  let kind=existing?.category||'一般事件',timeline=(existing?.timeline||[]).map(x=>({...x})),participants=(existing?.participants||[]).map(x=>({...x}));
+  const lineSel=overlay.querySelector('#ep-line'); if(lineSel){populateEventStationSelect(overlay,lineSel.value,existing?.station||'');lineSel.onchange=()=>populateEventStationSelect(overlay,lineSel.value,'');}
   overlay.querySelector('#ep-close').onclick=()=>overlay.remove();
   overlay.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{kind=b.dataset.kind;overlay.querySelectorAll('[data-kind]').forEach(x=>x.classList.toggle('active',x===b));});
-  overlay.querySelector('#ep-parse').onclick=()=>{
-    const raw=overlay.querySelector('#ep-raw').value.trim();timeline=parseEventTimeline(raw);
-    if(!raw)return alert('請先貼上事件紀錄。');
-    if(!timeline.length)return alert('沒有辨識到時間軸。請確認每筆紀錄以 HH:MM 開頭。');
-    const selected=overlay.querySelector('#ep-station')?.value||overlay.querySelector('#ep-station-manual')?.value.trim()||'';
-    if(!selected)return alert('請先選擇或輸入車站。');
-    const detected=detectStationsInEvent(raw),other=detected.filter(n=>n!==selected);
-    overlay.querySelector('#ep-preview').innerHTML=`<div class="card event-summary-card" style="margin-top:12px"><b>解析結果</b><p class="tiny-muted">${escapeHtml(selected)}｜${escapeHtml(kind)}｜共 ${timeline.length} 筆時間紀錄</p>${detected.includes(selected)?'<span class="viewed-badge">✓ 內文車站符合</span>':''}${other.length?`<p class="tiny-muted">內文另有出現：${escapeHtml(other.join('、'))}，請確認是否為支援／通報車站。</p>`:''}</div>${renderEventTimelineRows(timeline,true)}<button class="primary" id="ep-save" style="width:100%;margin-bottom:10px">確認存入</button><details><summary class="tiny-muted">查看原始紀錄</summary><div class="card event-raw">${escapeHtml(raw)}</div></details>`;
+  const renderPreview=()=>{
+    const raw=overlay.querySelector('#ep-raw').value.trim();
+    const station=overlay.querySelector('#ep-station')?.value||overlay.querySelector('#ep-station-manual')?.value.trim()||'';
+    const detected=detectStationsInEvent(raw),other=detected.filter(n=>n!==station);
+    overlay.querySelector('#ep-preview').innerHTML=`<div class="card event-summary-card" style="margin-top:12px"><b>解析結果</b><p class="tiny-muted">${escapeHtml(station||'未選車站')}｜<span class="${eventCategoryClass(kind)}">${escapeHtml(kind)}</span></p>${detected.includes(station)?'<span class="viewed-badge">✓ 內文車站符合</span>':''}${other.length?`<p class="tiny-muted">內文另有出現：${escapeHtml(other.join('、'))}，請確認是否為支援／通報車站。</p>`:''}</div><div class="panel"><h3 class="panel-title">參與人員／事件內簡稱</h3>${renderEventParticipantRows(participants,true)}</div><div class="panel"><h3 class="panel-title">事件時間軸</h3>${renderEventTimelineRows(timeline,true)}</div><button class="primary" id="ep-save" style="width:100%;margin-bottom:10px">${isEdit?'儲存修改':'確認存入'}</button>`;
     overlay.querySelector('#ep-save').onclick=async()=>{
-      const station=overlay.querySelector('#ep-station')?.value||overlay.querySelector('#ep-station-manual')?.value.trim()||'';
-      const edited=timeline.map((r,i)=>({time:overlay.querySelector(`[data-event-time="${i}"]`).value,text:overlay.querySelector(`[data-event-text="${i}"]`).value.trim()})).filter(r=>r.time&&r.text);
-      const first=edited[0]?.text||'事件紀錄';
-      await dbAdd('personnel',{recordType:'event',station,category:kind,date:overlay.querySelector('#ep-date').value,title:first.length>34?first.slice(0,34)+'…':first,rawText:raw,timeline:edited,createdAt:new Date().toISOString()});
+      const station=overlay.querySelector('#ep-station')?.value||overlay.querySelector('#ep-station-manual')?.value.trim()||''; if(!station)return alert('請先選擇或輸入車站。');
+      const state=collectEventPreview(overlay,timeline,participants); if(!state.timeline.length)return alert('至少需要一筆時間紀錄。');
+      const subject=overlay.querySelector('#ep-subject').value.trim()||'事件紀錄';
+      const record={...(existing||{}),recordType:'event',lineCode:overlay.querySelector('#ep-line')?.value||existing?.lineCode||'',station,category:kind,date:overlay.querySelector('#ep-date').value,subject,title:subject,rawText:overlay.querySelector('#ep-raw').value.trim(),timeline:state.timeline,participants:state.participants,updatedAt:new Date().toISOString()};
+      if(existing?.id) await dbPut('personnel',record); else {record.createdAt=new Date().toISOString();await dbAdd('personnel',record);}
       await reloadCache();overlay.remove();renderPersonnel();
     };
   };
+  overlay.querySelector('#ep-parse').onclick=()=>{
+    const raw=overlay.querySelector('#ep-raw').value.trim(); if(!raw)return alert('請先貼上事件紀錄。');
+    timeline=parseEventTimeline(raw); participants=parseEventParticipants(raw);
+    if(!timeline.length)return alert('沒有辨識到時間軸。請確認每筆紀錄以 HH:MM 開頭。');
+    const station=overlay.querySelector('#ep-station')?.value||overlay.querySelector('#ep-station-manual')?.value.trim()||''; if(!station)return alert('請先選擇或輸入車站。');
+    renderPreview();
+  };
+  if(isEdit&&timeline.length) renderPreview();
 }
 function openEventDetail(id){
   const e=cache.personnel.find(x=>x.id===Number(id)&&x.recordType==='event');if(!e)return;
   const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='88';
-  overlay.innerHTML=`<div class="modal-sheet" style="height:90%"><div class="modal-header"><b>${escapeHtml(e.station||'未指定車站')}｜${escapeHtml(e.category||'一般事件')}</b><button id="ed-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body"><div class="card event-summary-card"><b>${escapeHtml(e.title||'事件紀錄')}</b><p class="tiny-muted">${escapeHtml(e.date||'')}｜${(e.timeline||[]).length} 筆時間紀錄</p></div>${renderEventTimelineRows(e.timeline||[])}<details><summary class="tiny-muted">原始事件紀錄</summary><div class="card event-raw">${escapeHtml(e.rawText||'')}</div></details></div></div>`;
-  document.getElementById('phone').appendChild(overlay);overlay.querySelector('#ed-close').onclick=()=>overlay.remove();
+  overlay.innerHTML=`<div class="modal-sheet event-editor-sheet"><div class="modal-header"><b>${escapeHtml(e.station||'未指定車站')}｜<span class="${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span></b><button id="ed-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body"><div class="card event-summary-card"><div class="row between"><div><b>${escapeHtml(e.subject||e.title||'事件紀錄')}</b><p class="tiny-muted">${escapeHtml(e.date||'')}｜${escapeHtml(RIDERSHIP_LINES[e.lineCode]||'')}</p></div><button class="secondary" id="ed-edit">修改</button></div></div><div class="panel"><h3 class="panel-title">參與人員</h3>${renderEventParticipantRows(e.participants||[])}</div><div class="panel"><h3 class="panel-title">事件時間軸</h3>${renderEventTimelineRows(e.timeline||[])}</div><details><summary class="tiny-muted">原始事件紀錄</summary><div class="card event-raw">${escapeHtml(e.rawText||'')}</div></details></div></div>`;
+  document.getElementById('phone').appendChild(overlay);overlay.querySelector('#ed-close').onclick=()=>overlay.remove();overlay.querySelector('#ed-edit').onclick=()=>{overlay.remove();openEventEditor(e);};
 }
 function renderPersonnel(){
   const events=cache.personnel.filter(p=>p.recordType==='event').sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const legacy=cache.personnel.filter(p=>p.recordType!=='event');
-  let html=`<button class="primary" id="event-paste-open" style="width:100%;margin-bottom:12px">＋ 貼上事件紀錄並解析</button>
-    <input type="text" id="p-search" placeholder="搜尋車站、事件內容或既有人員紀錄" value="${escapeHtml(personnelKeyword)}" style="margin-bottom:10px;">`;
+  let html=`<button class="primary" id="event-paste-open" style="width:100%;margin-bottom:12px">＋ 貼上事件紀錄並解析</button><input type="text" id="p-search" placeholder="搜尋車站、事件主旨或內容" value="${escapeHtml(personnelKeyword)}" style="margin-bottom:10px;">`;
   const kw=personnelKeyword.trim();
-  const filtered=events.filter(e=>!kw||[e.station,e.category,e.title,e.rawText].some(v=>String(v||'').includes(kw)));
-  if(filtered.length) filtered.forEach(e=>{html+=`<div class="card" data-event-detail="${e.id}"><div class="row between"><div><b style="font-size:14px">${escapeHtml(e.station||'未指定車站')}</b><div class="tiny-muted">${escapeHtml(e.date||'')}｜${escapeHtml(e.category||'一般事件')}｜${(e.timeline||[]).length}筆</div></div><button class="danger-text" data-del-event="${e.id}">刪除</button></div><p class="muted" style="margin:8px 0 0">${escapeHtml(e.title||'事件紀錄')}</p></div>`;});
-  else html+=`<div class="empty" style="padding:34px 20px"><p>尚無事件資料</p><span class="tiny-muted">可先貼上時間格式的事件紀錄測試解析效果。</span></div>`;
+  const filtered=events.filter(e=>!kw||[e.station,e.category,e.subject,e.title,e.rawText,(e.participants||[]).map(p=>`${p.role} ${p.name} ${p.alias}`).join(' ')].some(v=>String(v||'').includes(kw)));
+  if(filtered.length) filtered.forEach(e=>{html+=`<div class="card" data-event-detail="${e.id}"><div class="row between"><div><b style="font-size:14px">${escapeHtml(e.station||'未指定車站')}</b><div class="tiny-muted">${escapeHtml(e.date||'')}｜<span class="${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span></div></div><div class="row"><button class="secondary" data-edit-event="${e.id}">修改</button><button class="danger-text" data-del-event="${e.id}">刪除</button></div></div><p class="muted" style="margin:8px 0 0;font-weight:650">${escapeHtml(e.subject||e.title||'事件紀錄')}</p></div>`;});
+  else html+=`<div class="empty" style="padding:34px 20px"><p>尚無事件資料</p><span class="tiny-muted">可貼上事件紀錄，由本機解析參與人員與時間軸。</span></div>`;
   if(legacy.length) html+=`<details style="margin-top:12px"><summary class="tiny-muted">既有人員／事件紀錄（${legacy.length}）</summary>${legacy.filter(p=>!kw||String(p.name||'').includes(kw)||String(p.event||'').includes(kw)).map(p=>`<div class="card"><div class="row between"><span style="font-weight:500;font-size:14px">${escapeHtml(p.name||'')}</span><button class="danger-text" data-del-p="${p.id}">刪除</button></div><p class="tiny-muted">${escapeHtml(p.date||'')}　${escapeHtml(p.event||'')}</p>${p.note?`<p class="muted">${escapeHtml(p.note)}</p>`:''}</div>`).join('')}</details>`;
   contentEl.innerHTML=html;
-  document.getElementById('event-paste-open').onclick=openEventPasteDialog;
+  document.getElementById('event-paste-open').onclick=()=>openEventEditor();
   bindImeSafeSearch(document.getElementById('p-search'),value=>{personnelKeyword=value;},renderPersonnel);
-  contentEl.querySelectorAll('[data-event-detail]').forEach(card=>card.onclick=e=>{if(e.target.closest('[data-del-event]'))return;openEventDetail(card.dataset.eventDetail);});
+  contentEl.querySelectorAll('[data-event-detail]').forEach(card=>card.onclick=e=>{if(e.target.closest('button'))return;openEventDetail(card.dataset.eventDetail);});
+  contentEl.querySelectorAll('[data-edit-event]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();const rec=cache.personnel.find(x=>x.id===Number(btn.dataset.editEvent));if(rec)openEventEditor(rec);});
   contentEl.querySelectorAll('[data-del-event]').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();if(confirm('確定刪除此事件紀錄？')){await dbDelete('personnel',Number(btn.dataset.delEvent));await reloadCache();renderPersonnel();}});
   contentEl.querySelectorAll('[data-del-p]').forEach(btn=>btn.onclick=async()=>{if(confirm('確定刪除此筆紀錄？')){await dbDelete('personnel',Number(btn.dataset.delP));await reloadCache();renderPersonnel();}});
 }
@@ -3143,7 +3190,7 @@ function openRidershipEventEditor(eventId=''){
   document.getElementById('phone').appendChild(overlay);overlay.querySelector('#ree-close').onclick=()=>overlay.remove();overlay.querySelector('#ree-save').onclick=()=>{const name=overlay.querySelector('#ree-name').value.trim(),startDate=overlay.querySelector('#ree-start').value,endDate=overlay.querySelector('#ree-end').value,stationCodes=parseRidershipEventCodes(overlay.querySelector('#ree-stations').value);if(!name||!startDate||!stationCodes.length)return alert('請填寫活動名稱、開始日期及有效的車站代號。');if(endDate&&endDate<startDate)return alert('結束日期不可早於開始日期。');const duplicate=existing.some(e=>String(e.id)!==String(event.id)&&e.name.trim()===name&&e.startDate===startDate&&[...(e.stationCodes||[])].sort().join('|')===[...stationCodes].sort().join('|'));if(duplicate&&!confirm('已有相同名稱、日期及車站的活動，仍要儲存嗎？'))return;const row={...event,id:event.id||`manual-${Date.now()}`,name,startDate,endDate,stationCodes,venue:overlay.querySelector('#ree-venue').value.trim(),type:overlay.querySelector('#ree-type').value.trim(),attendance:overlay.querySelector('#ree-attendance').value.trim(),note:overlay.querySelector('#ree-note').value.trim(),sourceFile:event.sourceFile||'單筆建立',updatedAt:new Date().toISOString()};saveRidershipEvents(event.id?existing.map(e=>String(e.id)===String(event.id)?row:e):[...existing,row]);overlay.remove();renderRidership();};
 }
 function bindRidershipEventAdmin(){document.getElementById('ridership-event-add')?.addEventListener('click',()=>openRidershipEventEditor());document.querySelectorAll('[data-edit-ridership-event]').forEach(btn=>btn.onclick=()=>openRidershipEventEditor(btn.dataset.editRidershipEvent));document.querySelectorAll('[data-delete-ridership-event]').forEach(btn=>btn.onclick=()=>{const rows=ridershipEvents(),event=rows.find(e=>String(e.id)===String(btn.dataset.deleteRidershipEvent));if(event&&confirm(`確定刪除「${event.name}」嗎？`)){saveRidershipEvents(rows.filter(e=>String(e.id)!==String(event.id)));renderRidership();}});}
-/* v5.9.0：SOP 安全更新、關聯移轉及失效常用程序修復。 */
+/* v5.10.0：事件路線選站、參與人員解析、事件主旨與修改；保留搜尋改善。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -3217,7 +3264,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.8.3 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.9.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.8.3</dd><dt>更新日期</dt><dd>2026-09-04</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.9.0</dd><dt>本次更新</dt><dd>搜尋結果返回定位、已查看標示、浮動搜尋控制列；事件文字貼入解析與時間軸測試</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.9.0 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.10.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.9.0</dd><dt>更新日期</dt><dd>2026-09-07</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.10.0</dd><dt>本次更新</dt><dd>事件路線選站、主旨與修改；參與人員／簡稱解析；保留搜尋返回定位與已查看功能</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -3277,7 +3324,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.9.0・2026.09.04</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.10.0・2026.09.07</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

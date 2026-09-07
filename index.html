@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.9.0"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.9.0"></script>
+<script src="./vendor/pdf.min.js?v=5.11.0"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.11.0"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -56,6 +56,31 @@
   .event-kind-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.event-kind{min-height:42px;border:.5px solid var(--border-strong);border-radius:11px;background:#fff;font-size:13px;color:var(--text-2)}.event-kind.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent-text);font-weight:650}
   .event-bad{color:#c62828!important;font-weight:750}.event-good{color:#14733b!important;font-weight:700}.event-editor-sheet{height:92%;max-width:900px}.event-raw-input{min-height:220px}.event-timeline{position:relative;margin:8px 0 12px 8px;padding-left:19px;border-left:2px solid #b8d3ec}.event-time-row{position:relative;background:#fff;border:.5px solid var(--border);border-radius:11px;padding:10px 11px;margin:0 0 9px}.event-time-row:before{content:"";position:absolute;left:-26px;top:15px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 0 0 1px var(--accent)}.event-time{font-size:12px;font-weight:750;color:var(--accent-text);margin-bottom:4px}.event-body{font-size:13px;line-height:1.65;color:var(--text)}.event-edit-grid{display:grid;grid-template-columns:110px 1fr;gap:8px}.event-edit-grid textarea{min-height:74px}.event-person-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:7px}.event-person-card{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:.5px solid var(--border)}.event-person-card:last-child{border-bottom:0}.event-person-card span{font-size:12px;color:var(--text-2)}.event-summary-card{border-left:4px solid var(--accent)}.event-raw{white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.65;color:var(--text-2)}
   @media(max-width:700px){.event-person-row{grid-template-columns:1fr 1fr}.event-edit-grid{grid-template-columns:1fr}.event-editor-sheet{height:94%}}
+
+
+  .event-toolbar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 9px}
+  .event-tabs{display:flex;gap:14px;align-items:center;border-bottom:.5px solid var(--border);min-width:0;flex:1}
+  .event-tab{appearance:none;border:0;background:transparent;padding:9px 1px 8px;font-size:13px;color:var(--text-2);border-bottom:3px solid transparent}
+  .event-tab.active{color:var(--accent-text);font-weight:750;border-bottom-color:var(--accent)}
+  .event-add-btn{min-height:36px!important;padding:6px 10px!important;font-size:12px!important;white-space:nowrap}
+  .event-filter-bar{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:8px;background:rgba(255,255,255,.62);border:.5px solid var(--border);border-radius:12px;margin-bottom:7px}
+  .event-filter-bar input,.event-filter-bar select{min-height:40px;padding:7px 9px;font-size:13px;margin:0}
+  .event-filter-bar #p-search{grid-column:1 / -1}
+  .event-filter-bar .event-period-wrap{grid-column:1 / -1;display:flex;gap:6px}
+  .event-filter-bar .filter-clear{min-height:38px;padding:6px 9px}
+  .event-filter-summary{font-size:11px;color:var(--text-muted);margin:0 2px 8px}
+  .event-list-card.compact{padding:9px 10px;margin-bottom:7px}
+  .event-list-one{display:grid;grid-template-columns:82px minmax(0,1fr) auto;gap:5px 7px;align-items:center}
+  .event-list-date{grid-column:1;font-size:10px;color:var(--text-muted)}
+  .event-list-station{grid-column:2;font-size:13px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .event-list-one>.event-bad,.event-list-one>.event-good,.event-list-one>span:not([class]){grid-column:3;white-space:nowrap;font-size:12px}
+  .event-list-subject{grid-column:1 / 3;grid-row:2;font-size:13px;white-space:normal;overflow:visible}
+  .event-list-actions{grid-column:3;grid-row:2;display:flex;gap:4px;justify-self:end}
+  .event-action{min-height:30px!important;padding:4px 7px!important;font-size:11px!important;border-radius:8px!important}
+  .event-delete{background:#fff7f7!important;border:.5px solid #efb9b9!important;color:#b42318!important}
+  .event-time-text{width:78px!important;min-width:78px!important;min-height:38px!important;padding:6px 7px!important;text-align:center;font-size:13px!important;font-variant-numeric:tabular-nums}
+  .event-period-wrap select,.event-period-wrap input{min-width:0}
+  .event-improvement{min-height:100px}
 
   .card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.035);}
   .row{display:flex;align-items:center;gap:8px;}
@@ -333,12 +358,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.10.0 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.11.0 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.9.0';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.11.0';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -2687,12 +2712,14 @@ function openNoticeRelationsEditor(id){
 
 /* --- Personnel/event tab --- */
 function eventStationOptions(){
-  const rows=[];
+  const map=new Map();
   for(const row of cache.ridership){
     const r=(row.station&&row.code)?{station:row.station,code:row.code,lineCode:row.lineCode||((String(row.code).match(/^(BR|BL|R|G|O|Y)/)||[])[1]||''),lineName:row.lineName||RIDERSHIP_LINES[row.lineCode]||''}:parseRidershipStation(row.station||row.stationName||row.name||'');
-    if(r.station&&r.code&&!/^Y/.test(r.code)&&['BR','R','G','O','BL'].includes(r.lineCode)) rows.push(r);
+    if(!r.station||!r.code||/^Y/.test(r.code)||!['O','BL'].includes(r.lineCode)) continue;
+    const key=`${r.lineCode}:${String(r.code).toUpperCase()}:${r.station}`;
+    if(!map.has(key)) map.set(key,r);
   }
-  return rows.sort(compareStationsByCode);
+  return [...map.values()].sort(compareStationsByCode);
 }
 function parseEventTimeline(raw){
   const lines=String(raw||'').replace(/\r/g,'').split('\n');
@@ -2706,15 +2733,26 @@ function parseEventTimeline(raw){
 }
 function parseEventParticipants(raw){
   const lines=String(raw||'').replace(/\r/g,'').split('\n');
-  const out=[];const known=['值班站長','值班站務員','站務專員','日班保全','清潔人員','副站長','保全','清潔','站長'];
+  const out=[];
+  const roleNames=['值班站務專員','值班站務員','值班站長','站務專員','站務員','副站長','站長','保全','清潔人員','清潔'];
+  const shiftNames=['早班','日班','夜班','晚班'];
   for(const rawLine of lines){
-    const line=rawLine.trim(); if(!line||/^([01]?\d|2[0-3]):[0-5]\d\s+/.test(line)) break;
-    const m=line.match(/^(.*?)[（(](?:以下)?簡稱\s*([^）)]+)[）)]於(.+?)(?:值勤|備勤)[。．.]?$/);
+    const line=rawLine.trim();
+    if(!line) continue;
+    if(/^([01]?\d|2[0-3]):[0-5]\d\s+/.test(line)) break;
+    const m=line.match(/^(.*?)[（(](?:以下)?簡稱\s*([^）)]+)[）)]\s*於\s*(.+?)[。．.]?$/);
     if(!m) continue;
     const before=m[1].trim(),alias=m[2].trim(),location=m[3].trim();
-    let role='',name=before;
-    for(const k of known){ if(before.startsWith(k)){role=k;name=before.slice(k.length).trim();break;} }
-    out.push({role,name,alias,location});
+    let shift='',role='',name=before;
+    for(const sh of shiftNames){
+      if(name.startsWith(sh)){shift=sh;name=name.slice(sh.length).trim();break;}
+    }
+    for(const r of roleNames){
+      if(name.startsWith(r)){role=r;name=name.slice(r.length).trim();break;}
+    }
+    // If no known role matched, keep the original identity text rather than discarding the person.
+    if(!role){role=shift;shift='';name=before;}
+    out.push({shift,role:shift?`${shift}${role}`:role,name,alias,location});
   }
   return out;
 }
@@ -2722,10 +2760,10 @@ function detectStationsInEvent(raw){
   const names=[...new Set(eventStationOptions().map(r=>r.station))].filter(n=>n&&String(raw).includes(n));
   return names;
 }
-function eventLineOptions(){return ['BR','R','G','O','BL'].filter(code=>eventStationOptions().some(r=>r.lineCode===code));}
+function eventLineOptions(){return ['O','BL'].filter(code=>eventStationOptions().some(r=>r.lineCode===code));}
 function eventCategoryClass(category){return category==='待改善案例'?'event-bad':category==='良好案例'?'event-good':'';}
 function renderEventTimelineRows(timeline,editable=false){
-  return `<div class="event-timeline">${(timeline||[]).map((r,i)=>`<div class="event-time-row">${editable?`<div class="event-edit-grid"><input type="time" data-event-time="${i}" value="${escapeHtml(r.time||'')}"><textarea data-event-text="${i}">${escapeHtml(r.text||'')}</textarea></div>`:`<div class="event-time">${escapeHtml(r.time||'')}</div><div class="event-body">${escapeHtml(r.text||'')}</div>`}</div>`).join('')}</div>`;
+  return `<div class="event-timeline">${(timeline||[]).map((r,i)=>`<div class="event-time-row">${editable?`<div class="event-edit-grid"><input type="text" inputmode="numeric" autocomplete="off" maxlength="5" pattern="(?:[01]\d|2[0-3]):[0-5]\d" class="event-time-text" data-event-time="${i}" value="${escapeHtml(r.time||'')}" placeholder="18:02"><textarea data-event-text="${i}">${escapeHtml(r.text||'')}</textarea></div>`:`<div class="event-time">${escapeHtml(r.time||'')}</div><div class="event-body">${escapeHtml(r.text||'')}</div>`}</div>`).join('')}</div>`;
 }
 function renderEventParticipantRows(participants,editable=false){
   if(!(participants||[]).length)return '<p class="tiny-muted">未辨識到事件參與人員，可直接保留原始紀錄。</p>';
@@ -2740,8 +2778,16 @@ function populateEventStationSelect(overlay,lineCode,selected=''){
   const rows=eventStationOptions().filter(r=>r.lineCode===lineCode);
   stationSel.innerHTML=`<option value="">${lineCode?'請選擇車站':'請先選擇路線'}</option>${rows.map(r=>`<option value="${escapeHtml(r.station)}" data-code="${escapeHtml(r.code)}" ${r.station===selected?'selected':''}>${escapeHtml(r.station)}（${escapeHtml(r.code)}）</option>`).join('')}`;
 }
+function normalizeEventTime(value){
+  const v=String(value||'').trim().replace(/[：]/g,':');
+  const m=v.match(/^(\d{1,2}):(\d{2})$/);
+  if(!m)return v;
+  const h=Number(m[1]),min=Number(m[2]);
+  if(h>23||min>59)return v;
+  return `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+}
 function collectEventPreview(overlay,timeline,participants){
-  const editedTimeline=(timeline||[]).map((r,i)=>({time:overlay.querySelector(`[data-event-time="${i}"]`)?.value||r.time||'',text:overlay.querySelector(`[data-event-text="${i}"]`)?.value.trim()||r.text||''})).filter(r=>r.time&&r.text);
+  const editedTimeline=(timeline||[]).map((r,i)=>({time:normalizeEventTime(overlay.querySelector(`[data-event-time="${i}"]`)?.value||r.time||''),text:overlay.querySelector(`[data-event-text="${i}"]`)?.value.trim()||r.text||''})).filter(r=>r.time&&r.text);
   const editedParticipants=(participants||[]).map((p,i)=>({role:overlay.querySelector(`[data-person-role="${i}"]`)?.value.trim()||p.role||'',name:overlay.querySelector(`[data-person-name="${i}"]`)?.value.trim()||p.name||'',alias:overlay.querySelector(`[data-person-alias="${i}"]`)?.value.trim()||p.alias||'',location:overlay.querySelector(`[data-person-location="${i}"]`)?.value.trim()||p.location||''})).filter(p=>p.role||p.name||p.alias||p.location);
   return {timeline:editedTimeline,participants:editedParticipants};
 }
@@ -2755,6 +2801,7 @@ function openEventEditor(existing=null){
     <div class="field"><label>事件日期</label><input type="date" id="ep-date" value="${escapeHtml(existing?.date||new Date().toISOString().slice(0,10))}"></div>
     <div class="field"><label>事件主旨</label><input id="ep-subject" value="${escapeHtml(existing?.subject||existing?.title||'')}" placeholder="例如：4號電扶梯異常向下滑行處理事件"></div>
     <div class="field"><label>貼上／修改原始事件紀錄</label><textarea id="ep-raw" class="event-raw-input" placeholder="可先貼人員值勤說明，再貼 18:02、18:03…時間紀錄">${escapeHtml(existing?.rawText||'')}</textarea><span class="tiny-muted">人員前言會辨識「簡稱／以下簡稱＋值勤位置」；HH:MM 開頭段落會拆成時間軸。解析只在本機進行。</span></div>
+    <div class="field"><label>檢討與改善事項</label><textarea id="ep-improvement" class="event-improvement" placeholder="可填寫事件檢討、改善作法或後續追蹤事項；無則可留空。">${escapeHtml(existing?.improvement||'')}</textarea></div>
     <button class="primary" id="ep-parse" style="width:100%">${isEdit?'重新解析原始文字':'解析事件'}</button>
     <div id="ep-preview"></div>
   </div></div>`;
@@ -2772,7 +2819,7 @@ function openEventEditor(existing=null){
       const station=overlay.querySelector('#ep-station')?.value||overlay.querySelector('#ep-station-manual')?.value.trim()||''; if(!station)return alert('請先選擇或輸入車站。');
       const state=collectEventPreview(overlay,timeline,participants); if(!state.timeline.length)return alert('至少需要一筆時間紀錄。');
       const subject=overlay.querySelector('#ep-subject').value.trim()||'事件紀錄';
-      const record={...(existing||{}),recordType:'event',lineCode:overlay.querySelector('#ep-line')?.value||existing?.lineCode||'',station,category:kind,date:overlay.querySelector('#ep-date').value,subject,title:subject,rawText:overlay.querySelector('#ep-raw').value.trim(),timeline:state.timeline,participants:state.participants,updatedAt:new Date().toISOString()};
+      const record={...(existing||{}),recordType:'event',lineCode:overlay.querySelector('#ep-line')?.value||existing?.lineCode||'',station,category:kind,date:overlay.querySelector('#ep-date').value,subject,title:subject,rawText:overlay.querySelector('#ep-raw').value.trim(),improvement:overlay.querySelector('#ep-improvement').value.trim(),timeline:state.timeline,participants:state.participants,updatedAt:new Date().toISOString()};
       if(existing?.id) await dbPut('personnel',record); else {record.createdAt=new Date().toISOString();await dbAdd('personnel',record);}
       await reloadCache();overlay.remove();renderPersonnel();
     };
@@ -2789,24 +2836,103 @@ function openEventEditor(existing=null){
 function openEventDetail(id){
   const e=cache.personnel.find(x=>x.id===Number(id)&&x.recordType==='event');if(!e)return;
   const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='88';
-  overlay.innerHTML=`<div class="modal-sheet event-editor-sheet"><div class="modal-header"><b>${escapeHtml(e.station||'未指定車站')}｜<span class="${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span></b><button id="ed-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body"><div class="card event-summary-card"><div class="row between"><div><b>${escapeHtml(e.subject||e.title||'事件紀錄')}</b><p class="tiny-muted">${escapeHtml(e.date||'')}｜${escapeHtml(RIDERSHIP_LINES[e.lineCode]||'')}</p></div><button class="secondary" id="ed-edit">修改</button></div></div><div class="panel"><h3 class="panel-title">參與人員</h3>${renderEventParticipantRows(e.participants||[])}</div><div class="panel"><h3 class="panel-title">事件時間軸</h3>${renderEventTimelineRows(e.timeline||[])}</div><details><summary class="tiny-muted">原始事件紀錄</summary><div class="card event-raw">${escapeHtml(e.rawText||'')}</div></details></div></div>`;
+  overlay.innerHTML=`<div class="modal-sheet event-editor-sheet"><div class="modal-header"><b>${escapeHtml(e.station||'未指定車站')}｜<span class="${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span></b><button id="ed-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body"><div class="card event-summary-card"><div class="row between"><div><b>${escapeHtml(e.subject||e.title||'事件紀錄')}</b><p class="tiny-muted">${escapeHtml(e.date||'')}｜${escapeHtml(RIDERSHIP_LINES[e.lineCode]||'')}</p></div><button class="secondary" id="ed-edit">修改</button></div></div><div class="panel"><h3 class="panel-title">參與人員</h3>${renderEventParticipantRows(e.participants||[])}</div><div class="panel"><h3 class="panel-title">事件時間軸</h3>${renderEventTimelineRows(e.timeline||[])}</div>${e.improvement?`<div class="panel"><h3 class="panel-title">檢討與改善事項</h3><div class="event-body" style="white-space:pre-wrap">${escapeHtml(e.improvement)}</div></div>`:''}<details><summary class="tiny-muted">原始事件紀錄</summary><div class="card event-raw">${escapeHtml(e.rawText||'')}</div></details></div></div>`;
   document.getElementById('phone').appendChild(overlay);overlay.querySelector('#ed-close').onclick=()=>overlay.remove();overlay.querySelector('#ed-edit').onclick=()=>{overlay.remove();openEventEditor(e);};
 }
+let personnelView='events';
+let eventFilterLine='',eventFilterStation='',eventFilterCategory='',eventFilterPeriod='',eventFilterPeriodType='';
+function eventPeriodMatch(dateVal,period,type){
+  if(!type||!period)return true;
+  const d=String(dateVal||'');
+  if(type==='year')return d.startsWith(period+'-');
+  if(type==='month')return d.startsWith(period);
+  if(type==='date')return d===period;
+  return true;
+}
+
+
+function portableEventRecord(e){
+  const {id,...rest}=e;
+  return {...rest,recordType:'event'};
+}
+function eventRecordSignature(e){
+  return [e.date||'',e.lineCode||'',e.station||'',e.subject||e.title||'',e.rawText||''].join('||');
+}
+async function exportEventRecords(){
+  const events=cache.personnel.filter(p=>p.recordType==='event'&&['O','BL'].includes(p.lineCode||eventStationOptions().find(r=>r.station===p.station)?.lineCode||''));
+  if(!events.length)return alert('目前沒有事件資料可匯出。');
+  downloadJson({format:'station-assistant-events',version:1,exportedAt:new Date().toISOString(),events:events.map(portableEventRecord)},`站務事件資料-${new Date().toISOString().slice(0,10)}.json`);
+}
+async function importEventRecordsFile(file){
+  try{
+    const data=JSON.parse(await file.text());
+    const rows=Array.isArray(data)?data:Array.isArray(data?.events)?data.events:null;
+    if(!rows)throw new Error('檔案格式不符');
+    const existing=new Set(cache.personnel.filter(p=>p.recordType==='event').map(eventRecordSignature));
+    let added=0,skipped=0;
+    for(const raw of rows){
+      if(!raw||raw.recordType!=='event') {skipped++;continue;}
+      const hit=eventStationOptions().find(r=>r.station===raw.station);
+      const lineCode=raw.lineCode||hit?.lineCode||'';
+      if(!['O','BL'].includes(lineCode)){skipped++;continue;}
+      const copy={...raw,lineCode,recordType:'event'};delete copy.id;
+      const sig=eventRecordSignature(copy);
+      if(existing.has(sig)){skipped++;continue;}
+      existing.add(sig);await dbAdd('personnel',copy);added++;
+    }
+    await reloadCache();renderPersonnel();
+    alert(`事件資料匯入完成：新增 ${added} 件${skipped?`，略過 ${skipped} 件重複或非權管路線資料`:''}。`);
+  }catch(err){alert(`事件資料匯入失敗：${err.message||err}`);}
+}
+
 function renderPersonnel(){
   const events=cache.personnel.filter(p=>p.recordType==='event').sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const legacy=cache.personnel.filter(p=>p.recordType!=='event');
-  let html=`<button class="primary" id="event-paste-open" style="width:100%;margin-bottom:12px">＋ 貼上事件紀錄並解析</button><input type="text" id="p-search" placeholder="搜尋車站、事件主旨或內容" value="${escapeHtml(personnelKeyword)}" style="margin-bottom:10px;">`;
+  const lineOptions=[...new Map(eventStationOptions().map(r=>[r.lineCode,r.lineName||RIDERSHIP_LINES[r.lineCode]||r.lineCode])).entries()];
+  const stationOptions=eventStationOptions().filter(r=>!eventFilterLine||r.lineCode===eventFilterLine);
+  if(eventFilterStation&&!stationOptions.some(r=>r.station===eventFilterStation))eventFilterStation='';
   const kw=personnelKeyword.trim();
-  const filtered=events.filter(e=>!kw||[e.station,e.category,e.subject,e.title,e.rawText,(e.participants||[]).map(p=>`${p.role} ${p.name} ${p.alias}`).join(' ')].some(v=>String(v||'').includes(kw)));
-  if(filtered.length) filtered.forEach(e=>{html+=`<div class="card" data-event-detail="${e.id}"><div class="row between"><div><b style="font-size:14px">${escapeHtml(e.station||'未指定車站')}</b><div class="tiny-muted">${escapeHtml(e.date||'')}｜<span class="${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span></div></div><div class="row"><button class="secondary" data-edit-event="${e.id}">修改</button><button class="danger-text" data-del-event="${e.id}">刪除</button></div></div><p class="muted" style="margin:8px 0 0;font-weight:650">${escapeHtml(e.subject||e.title||'事件紀錄')}</p></div>`;});
-  else html+=`<div class="empty" style="padding:34px 20px"><p>尚無事件資料</p><span class="tiny-muted">可貼上事件紀錄，由本機解析參與人員與時間軸。</span></div>`;
-  if(legacy.length) html+=`<details style="margin-top:12px"><summary class="tiny-muted">既有人員／事件紀錄（${legacy.length}）</summary>${legacy.filter(p=>!kw||String(p.name||'').includes(kw)||String(p.event||'').includes(kw)).map(p=>`<div class="card"><div class="row between"><span style="font-weight:500;font-size:14px">${escapeHtml(p.name||'')}</span><button class="danger-text" data-del-p="${p.id}">刪除</button></div><p class="tiny-muted">${escapeHtml(p.date||'')}　${escapeHtml(p.event||'')}</p>${p.note?`<p class="muted">${escapeHtml(p.note)}</p>`:''}</div>`).join('')}</details>`;
+  const filtered=events.filter(e=>{
+    const textOk=!kw||[e.station,e.category,e.subject,e.title,e.rawText,e.improvement,(e.participants||[]).map(p=>`${p.role} ${p.name} ${p.alias}`).join(' ')].some(v=>String(v||'').includes(kw));
+    const lineOk=!eventFilterLine||e.lineCode===eventFilterLine||eventStationOptions().some(r=>r.station===e.station&&r.lineCode===eventFilterLine);
+    return textOk&&lineOk&&(!eventFilterStation||e.station===eventFilterStation)&&(!eventFilterCategory||e.category===eventFilterCategory)&&eventPeriodMatch(e.date,eventFilterPeriod,eventFilterPeriodType);
+  });
+  const conditions=[kw&&`關鍵字：${kw}`,eventFilterLine&&`路線：${RIDERSHIP_LINES[eventFilterLine]||eventFilterLine}`,eventFilterStation&&`車站：${eventFilterStation}`,eventFilterCategory&&`屬性：${eventFilterCategory}`,eventFilterPeriod&&`期間：${eventFilterPeriod}`].filter(Boolean);
+  let html=`<div class="event-toolbar-head"><div class="event-tabs"><button class="event-tab ${personnelView==='events'?'active':''}" data-personnel-view="events">事件紀錄</button><button class="event-tab ${personnelView==='people'?'active':''}" data-personnel-view="people">人員紀錄</button></div>${personnelView==='events'?'<div class="event-list-actions"><button class="secondary event-action" id="event-export">匯出</button><button class="secondary event-action" id="event-import">匯入</button><input type="file" id="event-import-file" accept="application/json,.json" style="display:none"><button class="primary event-add-btn" id="event-paste-open">＋ 新增事件</button></div>':''}</div>`;
+  if(personnelView==='people'){
+    html+=`<div class="card"><b>人員紀錄</b><p class="muted" style="margin:7px 0 0">正式人員名冊匯入與事件關聯將在後續版本啟用。目前事件內解析出的參與人員仍完整保存在各事件中。</p></div>`;
+    if(legacy.length)html+=`<details open><summary class="tiny-muted">既有人員／事件紀錄（${legacy.length}）</summary>${legacy.map(p=>`<div class="card"><div class="row between"><span style="font-weight:500;font-size:14px">${escapeHtml(p.name||'')}</span><button class="danger-text" data-del-p="${p.id}">刪除</button></div><p class="tiny-muted">${escapeHtml(p.date||'')}　${escapeHtml(p.event||'')}</p>${p.note?`<p class="muted">${escapeHtml(p.note)}</p>`:''}</div>`).join('')}</details>`;
+  }else{
+    html+=`<div class="event-filter-bar">
+        <input type="text" id="p-search" aria-label="關鍵字" placeholder="搜尋事件主旨、內容或參與人員" value="${escapeHtml(personnelKeyword)}">
+        <select id="event-filter-line" aria-label="路線"><option value="">全部路線</option>${lineOptions.map(([c,n])=>`<option value="${escapeHtml(c)}" ${eventFilterLine===c?'selected':''}>${escapeHtml(n)}</option>`).join('')}</select>
+        <select id="event-filter-station" aria-label="車站"><option value="">全部車站</option>${stationOptions.map(r=>`<option value="${escapeHtml(r.station)}" ${eventFilterStation===r.station?'selected':''}>${escapeHtml(r.station)}（${escapeHtml(r.code)}）</option>`).join('')}</select>
+        <select id="event-filter-category" aria-label="事件屬性"><option value="">全部屬性</option>${['一般事件','良好案例','待改善案例'].map(v=>`<option ${eventFilterCategory===v?'selected':''}>${v}</option>`).join('')}</select>
+        <div class="event-period-wrap"><select id="event-filter-period-type" aria-label="日期期間"><option value="">全部期間</option><option value="year" ${eventFilterPeriodType==='year'?'selected':''}>指定年度</option><option value="month" ${eventFilterPeriodType==='month'?'selected':''}>指定月份</option><option value="date" ${eventFilterPeriodType==='date'?'selected':''}>指定日期</option></select>${eventFilterPeriodType==='year'?`<select id="event-filter-period" aria-label="年度">${[...new Set(events.map(e=>String(e.date||'').slice(0,4)).filter(Boolean))].sort().reverse().map(y=>`<option value="${y}" ${eventFilterPeriod===y?'selected':''}>${y}年</option>`).join('')}</select>`:eventFilterPeriodType==='month'?`<input type="month" id="event-filter-period" value="${escapeHtml(eventFilterPeriod)}">`:eventFilterPeriodType==='date'?`<input type="date" id="event-filter-period" value="${escapeHtml(eventFilterPeriod)}">`:''}</div>
+        <button class="secondary filter-clear" id="event-filter-clear">清除</button>
+      </div>
+      <div class="event-filter-summary">共 ${filtered.length} 件${conditions.length?`｜目前條件：${escapeHtml(conditions.join('・'))}`:''}</div>`;
+    if(filtered.length) filtered.forEach(e=>{html+=`<div class="card event-list-card compact" data-event-detail="${e.id}"><div class="event-list-one"><span class="event-list-date">${escapeHtml(e.date||'')}</span><span class="event-list-station">${escapeHtml(e.station||'未指定車站')}</span><span class="${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span><span class="event-list-subject">${escapeHtml(e.subject||e.title||'事件紀錄')}</span><div class="event-list-actions"><button class="secondary event-action" data-edit-event="${e.id}">修改</button><button class="event-action event-delete" data-del-event="${e.id}">刪除</button></div></div></div>`;});
+    else html+=`<div class="empty" style="padding:34px 20px"><p>沒有符合條件的事件</p><span class="tiny-muted">可清除篩選條件，或貼上新的事件紀錄。</span></div>`;
+  }
   contentEl.innerHTML=html;
-  document.getElementById('event-paste-open').onclick=()=>openEventEditor();
-  bindImeSafeSearch(document.getElementById('p-search'),value=>{personnelKeyword=value;},renderPersonnel);
-  contentEl.querySelectorAll('[data-event-detail]').forEach(card=>card.onclick=e=>{if(e.target.closest('button'))return;openEventDetail(card.dataset.eventDetail);});
-  contentEl.querySelectorAll('[data-edit-event]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();const rec=cache.personnel.find(x=>x.id===Number(btn.dataset.editEvent));if(rec)openEventEditor(rec);});
-  contentEl.querySelectorAll('[data-del-event]').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();if(confirm('確定刪除此事件紀錄？')){await dbDelete('personnel',Number(btn.dataset.delEvent));await reloadCache();renderPersonnel();}});
+  contentEl.querySelectorAll('[data-personnel-view]').forEach(btn=>btn.onclick=()=>{personnelView=btn.dataset.personnelView;renderPersonnel();});
+  if(personnelView==='events'){
+    document.getElementById('event-paste-open').onclick=()=>openEventEditor();
+    document.getElementById('event-export').onclick=exportEventRecords;
+    document.getElementById('event-import').onclick=()=>document.getElementById('event-import-file').click();
+    document.getElementById('event-import-file').onchange=async e=>{const f=e.target.files?.[0];if(f)await importEventRecordsFile(f);e.target.value='';};
+    bindImeSafeSearch(document.getElementById('p-search'),value=>{personnelKeyword=value;},renderPersonnel);
+    document.getElementById('event-filter-line').onchange=e=>{eventFilterLine=e.target.value;eventFilterStation='';renderPersonnel();};
+    document.getElementById('event-filter-station').onchange=e=>{eventFilterStation=e.target.value;renderPersonnel();};
+    document.getElementById('event-filter-category').onchange=e=>{eventFilterCategory=e.target.value;renderPersonnel();};
+    document.getElementById('event-filter-period-type').onchange=e=>{eventFilterPeriodType=e.target.value;eventFilterPeriod='';if(eventFilterPeriodType==='year'){const years=[...new Set(events.map(x=>String(x.date||'').slice(0,4)).filter(Boolean))].sort().reverse();eventFilterPeriod=years[0]||String(new Date().getFullYear());}renderPersonnel();};
+    if(document.getElementById('event-filter-period'))document.getElementById('event-filter-period').onchange=e=>{eventFilterPeriod=e.target.value;renderPersonnel();};
+    document.getElementById('event-filter-clear').onclick=()=>{personnelKeyword='';eventFilterLine='';eventFilterStation='';eventFilterCategory='';eventFilterPeriod='';eventFilterPeriodType='';renderPersonnel();};
+    contentEl.querySelectorAll('[data-event-detail]').forEach(card=>card.onclick=e=>{if(e.target.closest('button'))return;openEventDetail(card.dataset.eventDetail);});
+    contentEl.querySelectorAll('[data-edit-event]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();const rec=cache.personnel.find(x=>x.id===Number(btn.dataset.editEvent));if(rec)openEventEditor(rec);});
+    contentEl.querySelectorAll('[data-del-event]').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();if(confirm('確定刪除此事件紀錄？')){await dbDelete('personnel',Number(btn.dataset.delEvent));await reloadCache();renderPersonnel();}});
+  }
   contentEl.querySelectorAll('[data-del-p]').forEach(btn=>btn.onclick=async()=>{if(confirm('確定刪除此筆紀錄？')){await dbDelete('personnel',Number(btn.dataset.delP));await reloadCache();renderPersonnel();}});
 }
 
@@ -3190,7 +3316,7 @@ function openRidershipEventEditor(eventId=''){
   document.getElementById('phone').appendChild(overlay);overlay.querySelector('#ree-close').onclick=()=>overlay.remove();overlay.querySelector('#ree-save').onclick=()=>{const name=overlay.querySelector('#ree-name').value.trim(),startDate=overlay.querySelector('#ree-start').value,endDate=overlay.querySelector('#ree-end').value,stationCodes=parseRidershipEventCodes(overlay.querySelector('#ree-stations').value);if(!name||!startDate||!stationCodes.length)return alert('請填寫活動名稱、開始日期及有效的車站代號。');if(endDate&&endDate<startDate)return alert('結束日期不可早於開始日期。');const duplicate=existing.some(e=>String(e.id)!==String(event.id)&&e.name.trim()===name&&e.startDate===startDate&&[...(e.stationCodes||[])].sort().join('|')===[...stationCodes].sort().join('|'));if(duplicate&&!confirm('已有相同名稱、日期及車站的活動，仍要儲存嗎？'))return;const row={...event,id:event.id||`manual-${Date.now()}`,name,startDate,endDate,stationCodes,venue:overlay.querySelector('#ree-venue').value.trim(),type:overlay.querySelector('#ree-type').value.trim(),attendance:overlay.querySelector('#ree-attendance').value.trim(),note:overlay.querySelector('#ree-note').value.trim(),sourceFile:event.sourceFile||'單筆建立',updatedAt:new Date().toISOString()};saveRidershipEvents(event.id?existing.map(e=>String(e.id)===String(event.id)?row:e):[...existing,row]);overlay.remove();renderRidership();};
 }
 function bindRidershipEventAdmin(){document.getElementById('ridership-event-add')?.addEventListener('click',()=>openRidershipEventEditor());document.querySelectorAll('[data-edit-ridership-event]').forEach(btn=>btn.onclick=()=>openRidershipEventEditor(btn.dataset.editRidershipEvent));document.querySelectorAll('[data-delete-ridership-event]').forEach(btn=>btn.onclick=()=>{const rows=ridershipEvents(),event=rows.find(e=>String(e.id)===String(btn.dataset.deleteRidershipEvent));if(event&&confirm(`確定刪除「${event.name}」嗎？`)){saveRidershipEvents(rows.filter(e=>String(e.id)!==String(event.id)));renderRidership();}});}
-/* v5.10.0：事件路線選站、參與人員解析、事件主旨與修改；保留搜尋改善。 */
+/* v5.11.0：事件限中和新蘆線／板南線；新增事件匯入匯出；同步事件主旨、修改、改善事項、日期篩選、24小時時間與人員解析。 */
 function renderRidership(){
   if(ridershipView.section==='manage')return renderRidershipLegacy();
   const records=monthlyRidershipRecords();
@@ -3264,7 +3390,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.9.0 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.10.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.9.0</dd><dt>更新日期</dt><dd>2026-09-07</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.10.0</dd><dt>本次更新</dt><dd>事件路線選站、主旨與修改；參與人員／簡稱解析；保留搜尋返回定位與已查看功能</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本以手機版 v5.9.0 為基準，資料維持本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.11.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.9.0</dd><dt>更新日期</dt><dd>2026-09-07</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>離線快取</dt><dd>v5.11.0</dd><dt>本次更新</dt><dd>事件限中和新蘆線／板南線；事件匯入匯出；主旨／修改／改善事項；日期篩選、24小時時間與人員解析；保留搜尋返回定位與已查看</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -3324,7 +3450,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.10.0・2026.09.07</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.11.0・2026.09.07</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

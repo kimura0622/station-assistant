@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.12.0"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.12.0"></script>
+<script src="./vendor/pdf.min.js?v=5.13.0"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.13.0"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -453,7 +453,7 @@
   }
   @media (max-width:520px){.procedure-card-grid{grid-template-columns:1fr 1fr;}}
 
-  /* v5.12.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
+  /* v5.13.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
   @media (max-width:899px){
     html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;}
     body{display:block!important;margin:0!important;padding:0!important;background:var(--bg)!important;min-height:100vh!important;}
@@ -478,7 +478,7 @@
   .event-participant-list{display:grid;gap:0}.event-person-card{display:grid!important;grid-template-columns:minmax(86px,130px) minmax(0,1fr);align-items:start!important;gap:10px!important;padding:10px 4px!important;border:0!important;border-bottom:.5px solid var(--border)!important;border-radius:0!important}.event-person-card:last-child{border-bottom:0!important}.event-person-detail{display:flex;gap:10px;flex-wrap:wrap;min-width:0}.event-person-detail span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}.event-person-location{color:var(--text-muted)!important}.event-person-edit-title{display:none;font-weight:750;color:var(--accent-text)}.event-more{display:none}.modal-close-btn{border:0;background:none;font-size:18px;min-width:44px;min-height:44px}
 
 
-  /* v5.12.0 mobile UX */
+  /* v5.13.0 mobile UX */
   @media(max-width:899px){
     .modal-overlay{overflow:hidden!important}.modal-sheet{max-width:100%!important;overflow:hidden!important}.modal-body{overflow-x:hidden!important;max-width:100%!important;box-sizing:border-box!important}
     .pdf-reader-shell .modal-header{padding-top:calc(10px + env(safe-area-inset-top))!important;padding-left:max(14px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important;min-height:calc(54px + env(safe-area-inset-top))!important}.pdf-reader-shell .modal-header>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px!important}.pdf-reader-shell #sop-pdf-close{min-width:44px!important;min-height:44px!important;padding:0!important;margin-left:6px!important;display:grid!important;place-items:center!important}
@@ -487,12 +487,26 @@
     .event-list-card{padding:13px 14px!important}.event-list-one{display:grid!important;grid-template-columns:1fr auto!important;gap:5px 10px!important;align-items:start!important}.event-list-date{grid-column:1;grid-row:1;color:var(--text-muted)!important}.event-list-station{grid-column:1;grid-row:2;font-size:15px!important}.event-list-one>[class*="event-bad"],.event-list-one>[class*="event-good"]{grid-column:1;grid-row:3;white-space:nowrap!important}.event-list-subject{grid-column:1/-1;grid-row:4;white-space:normal!important;overflow:visible!important;font-size:15px!important;font-weight:700!important;line-height:1.45!important;margin-top:3px}.event-list-actions{grid-column:2;grid-row:1/4;display:flex!important;gap:6px!important}.event-list-actions [data-edit-event],.event-list-actions [data-del-event]{display:none!important}.event-list-actions .event-more{display:inline-grid!important;place-items:center!important;min-width:44px!important}.event-list-actions [data-op-event]{min-width:44px!important}.event-action-sheet{padding-bottom:env(safe-area-inset-bottom)!important}
     .event-editor-sheet{width:100%!important;height:100%!important;max-height:100%!important;border-radius:0!important}.event-editor-sheet>.modal-header{padding-top:calc(10px + env(safe-area-inset-top))!important;min-height:calc(58px + env(safe-area-inset-top))!important;padding-left:max(16px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important}.event-editor-sheet>.modal-header button{min-width:44px!important;min-height:44px!important}.event-editor-sheet>.modal-body{padding:14px max(14px,env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))!important;width:100%!important;box-sizing:border-box!important}
     .event-person-row{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;border:.5px solid var(--border)!important;border-radius:13px!important;padding:12px!important;margin-bottom:10px!important;background:#fff!important;min-width:0!important}.event-person-row label{margin:0!important}.event-person-edit-title{display:block!important}.event-person-row input{width:100%!important;min-width:0!important;box-sizing:border-box!important}.event-edit-grid{grid-template-columns:1fr!important}.event-time-row .event-edit-grid input{max-width:130px!important}.event-time-row .event-edit-grid textarea{min-height:92px!important}.event-check-row{grid-template-columns:1fr!important}.event-check-duration{padding:4px 2px!important}
-    #ep-save{position:sticky!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;z-index:8!important;box-shadow:0 6px 20px rgba(0,0,0,.16)!important}
+    #ep-save{position:static!important;margin-top:12px!important;box-shadow:none!important}
     .event-participant-grid{grid-template-columns:1fr!important}.event-person-card{grid-template-columns:minmax(78px,105px) minmax(0,1fr)!important}.event-person-card b{font-size:14px!important;line-height:1.45!important}.event-person-detail{display:block!important}.event-person-detail span{display:block!important;font-size:13.5px!important;line-height:1.55!important}.event-participant-station{font-size:14px!important;font-weight:800!important;color:var(--accent-text)!important;margin:5px 0 3px!important}.event-participant-group+ .event-participant-group{margin-top:12px!important;padding-top:8px!important;border-top:.5px solid var(--border)!important}
     .op-record-row{grid-template-columns:48px minmax(0,1fr)!important;column-gap:9px!important}.op-record-time{font-size:14px!important}.op-record-body,.op-record-preamble{font-size:15px!important;line-height:1.7!important}
     .search-page-group>summary{font-size:13px!important;padding:10px!important}.search-hit-text{font-size:13.5px!important}.search-page-hits{padding:0 7px 8px!important}
   }
 
+
+  .search-page-open{border:0;background:transparent;color:var(--accent-text);font:inherit;font-weight:800;padding:0;cursor:pointer;text-align:left}.search-page-open:hover{text-decoration:underline}.search-page-toggle{margin-left:auto}.search-pdf-highlight{background:rgba(255,221,64,.58);color:transparent;border-radius:2px;box-shadow:0 0 0 1px rgba(214,169,0,.15)}
+
+  @media(max-width:899px){
+    .pdf-reader-shell>.modal-header,.event-editor-sheet>.modal-header{padding-top:max(env(safe-area-inset-top),52px)!important;min-height:calc(52px + max(env(safe-area-inset-top),52px))!important;padding-right:max(14px,env(safe-area-inset-right))!important;padding-left:max(16px,env(safe-area-inset-left))!important;align-items:flex-end!important}
+    .pdf-reader-shell>.modal-header button,.event-editor-sheet>.modal-header button{min-width:44px!important;min-height:44px!important;margin:0 0 2px 8px!important;display:grid!important;place-items:center!important}
+    .event-editor-sheet>.modal-body{padding-bottom:calc(36px + env(safe-area-inset-bottom))!important}
+    .event-subject-input{min-height:76px!important;line-height:1.5!important;resize:vertical!important}
+    #ep-date{min-height:50px!important;height:50px!important}
+    #ep-raw,#ep-op{min-height:180px!important;max-height:320px!important;line-height:1.55!important}
+    .event-detail-priority,.event-participant-group{padding-top:2px}.event-summary-card{padding:13px 14px!important}.event-summary-card .row.between{gap:8px!important}.event-summary-card .row.between>div:first-child{min-width:0!important}.event-summary-card .row.between>div:first-child>b{font-size:16px!important;line-height:1.45!important}.event-summary-card .row.between>div:last-child button{min-width:50px!important;padding:7px 10px!important}
+    .event-person-card{grid-template-columns:88px minmax(0,1fr)!important;padding:9px 2px!important}.event-person-detail span:first-child{color:var(--text-2)!important;font-weight:550!important}.event-person-location{color:var(--text-muted)!important;margin-top:1px!important}
+    .event-timeline{margin-left:5px!important;padding-left:17px!important}.event-time-row{padding:10px!important}.event-time{font-size:14px!important}.event-body{font-size:14px!important;line-height:1.6!important}
+  }
 </style>
 </head>
 <body>
@@ -509,18 +523,18 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.12.0 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.13.0 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-/* v5.12.0 2026-09-08：
+/* v5.13.0 2026-09-08：
    1) 修正文件名稱命中會把整份文件所有段落都算命中的問題；正文命中頁／段落只計實際符合；
    2) 搜尋段落點入 PDF 前以該段正文重新驗證實體 PDF 頁，避免搜尋索引與原始 PDF 定位錯位；
    3) 常用程序待確認閱讀器新增「確認頁碼正確」，確認後清除提醒並保存新版正文快照；
    4) 事件參與人員解析支援「小班＋值班站長／值班站務專員」等班別職稱；
    5) 維持修訂／異動頁排除、文字模式階層、表格與 SOP 安全更新規則。 */
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.12.0';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.13.0';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -1022,7 +1036,7 @@ function searchPageGroups(result){
 }
 function renderSearchPageGroups(result){
   const groups=searchPageGroups(result),visible=groups.slice(0,5),more=groups.slice(5);
-  const one=g=>`<details class="search-page-group"><summary><span>PDF ${g.page}</span><span>${g.hits.length} 個相關段落</span></summary><div class="search-page-hits">${g.hits.map(h=>`<button class="search-hit-row" data-open-hit="${result.docId}" data-hit-page="${g.page}" data-hit-index="${h.hitIndex}"><div class="search-hit-head">${h.clauseMarker?escapeHtml(h.clauseMarker):'相關段落'}</div><div class="search-hit-text">${h.snippetHtml}</div></button>`).join('')}</div></details>`;
+  const one=g=>`<details class="search-page-group"><summary><button type="button" class="search-page-open" data-open-page="${result.docId}" data-hit-page="${g.page}">PDF ${g.page}</button><span class="search-page-toggle">${g.hits.length} 個相關段落</span></summary><div class="search-page-hits">${g.hits.map(h=>`<button class="search-hit-row" data-open-hit="${result.docId}" data-hit-page="${g.page}" data-hit-index="${h.hitIndex}"><div class="search-hit-head">${h.clauseMarker?escapeHtml(h.clauseMarker):'相關段落'}</div><div class="search-hit-text">${h.snippetHtml}</div></button>`).join('')}</div></details>`;
   return `<div class="search-page-list">${visible.map(one).join('')}${more.length?`<details class="search-more-pages"><summary>顯示更多命中頁面（尚有 ${more.length} 頁）</summary><div class="search-page-list more">${more.map(one).join('')}</div></details>`:''}</div>`;
 }
 function renderSop(){
@@ -1098,6 +1112,15 @@ function renderSop(){
   contentEl.querySelectorAll('[data-revision-toggle]').forEach(c=>{
     c.addEventListener('click', ()=>{ sopFilter=sopFilter==='all'?'content':'all'; render(); });
   });
+  contentEl.querySelectorAll('[data-open-page]').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.preventDefault();e.stopPropagation();
+      saveSearchHistory(sopKeyword);sopSearchReturnTop=contentEl.scrollTop;
+      const docId=Number(btn.dataset.openPage),page=Number(btn.dataset.hitPage);
+      markViewedSearchResult(`sop:${docId}:${page}`);
+      openSopPdfReader(docId,page,{searchContext:true,searchTerms:parseSearchTerms(sopKeyword),onClose:()=>{renderSop();restoreSopSearchPosition();}});
+    });
+  });
   contentEl.querySelectorAll('[data-open-hit]').forEach(btn=>{
     btn.addEventListener('click',async e=>{
       e.stopPropagation();
@@ -1107,14 +1130,15 @@ function renderSop(){
       const rawText=fresh?.hitSegments?.[hitIndex]?.rawText||'';
       const actualPage=await resolveSearchHitPdfPage(docId,storedPage,rawText);
       markViewedSearchResult(`sop:${docId}:${actualPage}`);
-      openSopPdfReader(docId,actualPage,{searchContext:true,onClose:()=>{renderSop();restoreSopSearchPosition();}});
+      openSopPdfReader(docId,actualPage,{searchContext:true,searchTerms:parseSearchTerms(sopKeyword),onClose:()=>{renderSop();restoreSopSearchPosition();}});
     });
   });
   contentEl.querySelectorAll('[data-open-text]').forEach(card=>{
-    card.addEventListener('click', ()=>{
+    card.addEventListener('click', e=>{
+      if(e.target.closest('.search-page-group,.search-more-pages,button'))return;
       saveSearchHistory(sopKeyword);sopSearchReturnTop=contentEl.scrollTop;
       markViewedSearchResult(`sop:${card.dataset.openText}:${card.dataset.page}`);
-      openSopPdfReader(Number(card.dataset.openText),Number(card.dataset.page),{searchContext:true,onClose:()=>{renderSop();restoreSopSearchPosition();}});
+      openSopPdfReader(Number(card.dataset.openText),Number(card.dataset.page),{searchContext:true,searchTerms:parseSearchTerms(sopKeyword),onClose:()=>{renderSop();restoreSopSearchPosition();}});
     });
   });
   contentEl.querySelectorAll('[data-open-notice]').forEach(card=>{
@@ -1310,7 +1334,26 @@ function searchUnified(keyword){
   if(searchSource!=='sop') out=out.concat(searchNotices(keyword,plan));
   const rawTerms=parseSearchTerms(keyword.replace(QUESTION_WORDS,' ').replace(/[，。？！、；：]/g,' ')).filter(t=>t.length>1);
   out.forEach(r=>{if(r.source==='notice'){r.matchType='notice';return;}const doc=cache.sopDocs.find(d=>d.id===Number(r.docId)),page=doc?.pages?.find(p=>Number(p.absolutePage)===Number(r.absolutePage));const originalText=`${r.docName} ${page?.formattedText||page?.text||''}`;r.matchType=rawTerms.length&&rawTerms.every(term=>searchComparable(originalText).includes(searchComparable(term)))?'original':'synonym';});
-  return out.sort((a,b)=>(b.score||0)-(a.score||0));
+  const merged=new Map();
+  for(const r of out){
+    if(r.source!=='sop'){merged.set(`notice:${r.noticeId}`,r);continue;}
+    const logicalName=searchComparable(r.docName||'');
+    const key=`sop:${r.pdfFileId||''}:${logicalName}`;
+    const prev=merged.get(key);
+    if(!prev){merged.set(key,r);continue;}
+    const hits=[...(prev.hitSegments||[]),...(r.hitSegments||[])];
+    const hitMap=new Map();
+    hits.forEach(h=>{const hk=`${Number(h.absolutePage)}|${h.clauseMarker||''}|${sopMatchNormalize(h.rawText||'')}`;if(!hitMap.has(hk))hitMap.set(hk,h);});
+    const uniqueHits=[...hitMap.values()].sort((a,b)=>(b.score||0)-(a.score||0)||Number(a.absolutePage)-Number(b.absolutePage));
+    prev.hitSegments=uniqueHits;
+    prev.hitPages=[...new Set(uniqueHits.map(h=>Number(h.absolutePage)))].sort((a,b)=>a-b);
+    prev.totalSegments=uniqueHits.length;
+    prev.titleMatched=prev.titleMatched||r.titleMatched;
+    prev.titleOnly=!uniqueHits.length&&(prev.titleOnly||r.titleOnly);
+    prev.score=Math.max(prev.score||0,r.score||0);
+    if((r.score||0)>(prev.score||0)){prev.absolutePage=r.absolutePage;prev.pageNum=r.pageNum;}
+  }
+  return [...merged.values()].sort((a,b)=>(b.score||0)-(a.score||0));
 }
 async function recordUnmatchedQuery(query){
   const cleaned=String(query||'').trim();
@@ -2417,6 +2460,16 @@ async function openSopPdfReader(docId,absolutePage,options={}){
           textLayer.style.height=`${Math.floor(cssViewport.height)}px`;
           frame.appendChild(textLayer);
           await pdfjsLib.renderTextLayer({textContentSource:textContent,container:textLayer,viewport:cssViewport,textDivs:[]}).promise;
+          if(options.searchContext&&Array.isArray(options.searchTerms)&&options.searchTerms.length){
+            const terms=[...new Set(options.searchTerms.map(t=>String(t||'').trim()).filter(Boolean))].sort((a,b)=>b.length-a.length);
+            textLayer.querySelectorAll('span').forEach(span=>{
+              const text=span.textContent||'';if(!text||!terms.some(t=>text.includes(t)))return;
+              const re=new RegExp(`(${terms.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})`,'g');
+              const frag=document.createDocumentFragment();let last=0;
+              text.replace(re,(m,_g,offset)=>{if(offset>last)frag.append(document.createTextNode(text.slice(last,offset)));const mark=document.createElement('mark');mark.className='search-pdf-highlight';mark.textContent=m;frag.append(mark);last=offset+m.length;return m;});
+              if(last<text.length)frag.append(document.createTextNode(text.slice(last)));span.replaceChildren(frag);
+            });
+          }
         }
       }catch(textError){console.warn('PDF文字圖層無法建立',textError);}
       const annotationLayer=document.createElement('div');annotationLayer.className='annotation-layer';annotationLayer.dataset.annotationPage=pageNum;frame.appendChild(annotationLayer);renderAnnotationMarks(annotationLayer,pageNum);updateAnnotationState();
@@ -3118,7 +3171,7 @@ function renderEventChecksView(checks){
 }
 function buildEventStationSelectors(stations,event={}){
   const lines=eventLineOptions();
-  return `<div class="field"><label>路線</label><select id="ep-line"><option value="">請選擇路線</option>${lines.map(code=>`<option value="${code}" ${event.lineCode===code?'selected':''}>${escapeHtml(RIDERSHIP_LINES[code]||code)}</option>`).join('')}</select></div><div class="field"><label>車站</label><select id="ep-station"><option value="">請先選擇路線</option></select>${stations.length?'<span class="tiny-muted">先選路線，再顯示該線車站。</span>':'<span class="tiny-muted">目前尚無運量車站資料，可改用手動輸入。</span>'}</div>${stations.length?'':`<div class="field"><label>車站名稱</label><input id="ep-station-manual" value="${escapeHtml(event.station||'')}" placeholder="例如：三重國小站"></div>`}`;
+  return `<div class="field"><label>路線</label><select id="ep-line"><option value="">請選擇路線</option>${lines.map(code=>`<option value="${code}" ${event.lineCode===code?'selected':''}>${escapeHtml(RIDERSHIP_LINES[code]||code)}</option>`).join('')}</select></div><div class="field"><label>車站</label><select id="ep-station"><option value="">請先選擇路線</option></select>${stations.length?'':'<span class="tiny-muted">目前尚無運量車站資料，可改用手動輸入。</span>'}</div>${stations.length?'':`<div class="field"><label>車站名稱</label><input id="ep-station-manual" value="${escapeHtml(event.station||'')}" placeholder="例如：三重國小站"></div>`}`;
 }
 function populateEventStationSelect(overlay,lineCode,selected=''){
   const stationSel=overlay.querySelector('#ep-station'); if(!stationSel)return;
@@ -3146,7 +3199,7 @@ function openEventEditor(existing=null){
     ${buildEventStationSelectors(stations,existing||{})}
     <div class="field"><label>事件屬性</label><div class="event-kind-row"><button class="event-kind ${!existing||existing.category==='一般事件'?'active':''}" data-kind="一般事件">一般事件</button><button class="event-kind ${existing?.category==='良好案例'?'active':''}" data-kind="良好案例">良好案例</button><button class="event-kind ${existing?.category==='待改善案例'?'active':''}" data-kind="待改善案例">待改善</button></div></div>
     <div class="field"><label>事件日期</label><input type="date" id="ep-date" value="${escapeHtml(existing?.date||new Date().toISOString().slice(0,10))}"></div>
-    <div class="field"><label>事件主旨</label><input id="ep-subject" value="${escapeHtml(existing?.subject||existing?.title||'')}" placeholder="例如：4號電扶梯異常向下滑行處理事件"></div>
+    <div class="field"><label>事件主旨</label><textarea id="ep-subject" class="event-subject-input" rows="2" placeholder="例如：4號電扶梯異常向下滑行處理事件">${escapeHtml(existing?.subject||existing?.title||'')}</textarea></div>
     <div class="field"><label>貼上／修改原始事件紀錄</label><textarea id="ep-raw" class="event-raw-input" placeholder="可先貼人員值勤說明，再貼 18:02、18:03…時間紀錄">${escapeHtml(existing?.rawText||'')}</textarea><span class="tiny-muted">人員前言會辨識「簡稱／以下簡稱＋值勤位置」；HH:MM 開頭段落會拆成時間軸。解析只在本機進行。</span></div>
     <div class="field"><label>OP 通報紀錄</label><textarea id="ep-op" class="event-raw-input" placeholder="貼上行控針對本事件公告給相關主管／高階主管的 OP 通報原文；此欄保留原文，不進行事件解析。">${escapeHtml(existing?.opText||'')}</textarea><span class="tiny-muted">OP 與現場事件時間軸分開保存，資料僅存本機。</span></div>
     <div class="field"><label>檢討與改善事項</label><textarea id="ep-improvement" class="event-improvement" placeholder="可填寫事件檢討、改善作法或後續追蹤事項；無則可留空。">${escapeHtml(existing?.improvement||'')}</textarea></div>
@@ -3670,7 +3723,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.10.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.12.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.10.0</dd><dt>更新日期</dt><dd>2026-09-08</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>修復修訂／文件異動狀況表重新出現在一般搜尋的回歸問題；待確認常用程序新增標題唯一定位與啟動時自動重試；SOP 更新內容比對失敗時改以程序名稱安全備援；文字模式既有階層與表格解析規則維持不變</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.10.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.13.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.10.0</dd><dt>更新日期</dt><dd>2026-09-08</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>搜尋結果同一程序去重；頁碼可直接開PDF、相關段落可展開；搜尋進PDF暫時黃色標示關鍵字；全螢幕閱讀／事件視窗修正iPhone安全區；事件詳細與修改頁精修；更新桌面「務」圖示</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -3730,7 +3783,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.12.0・2026.09.08</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.13.0・2026.09.08</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

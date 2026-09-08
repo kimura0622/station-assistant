@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.11.0"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.11.0"></script>
+<script src="./vendor/pdf.min.js?v=5.12.0"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.12.0"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -453,7 +453,7 @@
   }
   @media (max-width:520px){.procedure-card-grid{grid-template-columns:1fr 1fr;}}
 
-  /* v5.11.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
+  /* v5.12.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
   @media (max-width:899px){
     html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;}
     body{display:block!important;margin:0!important;padding:0!important;background:var(--bg)!important;min-height:100vh!important;}
@@ -472,6 +472,27 @@
     .event-editor-sheet{height:94%!important;max-width:none!important;}
   }
 
+
+  /* Search hierarchy: procedure → PDF page → matched paragraphs */
+  .search-page-list{display:grid;gap:7px;margin-top:8px}.search-page-group{border:.5px solid var(--border);border-radius:10px;background:#fafbfc;overflow:hidden}.search-page-group>summary,.search-more-pages>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px;align-items:center;padding:9px 11px;font-size:12px;font-weight:750;color:var(--accent-text)}.search-page-group>summary::-webkit-details-marker,.search-more-pages>summary::-webkit-details-marker{display:none}.search-page-group>summary:after{content:'⌄';color:var(--text-muted)}.search-page-group[open]>summary:after{content:'⌃'}.search-page-hits{display:grid;gap:6px;padding:0 8px 8px}.search-more-pages{margin-top:2px}.search-more-pages>summary{justify-content:flex-start;background:#f4f7fa;border-radius:9px}.search-page-list.more{margin-top:7px}
+  .event-participant-list{display:grid;gap:0}.event-person-card{display:grid!important;grid-template-columns:minmax(86px,130px) minmax(0,1fr);align-items:start!important;gap:10px!important;padding:10px 4px!important;border:0!important;border-bottom:.5px solid var(--border)!important;border-radius:0!important}.event-person-card:last-child{border-bottom:0!important}.event-person-detail{display:flex;gap:10px;flex-wrap:wrap;min-width:0}.event-person-detail span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}.event-person-location{color:var(--text-muted)!important}.event-person-edit-title{display:none;font-weight:750;color:var(--accent-text)}.event-more{display:none}.modal-close-btn{border:0;background:none;font-size:18px;min-width:44px;min-height:44px}
+
+
+  /* v5.12.0 mobile UX */
+  @media(max-width:899px){
+    .modal-overlay{overflow:hidden!important}.modal-sheet{max-width:100%!important;overflow:hidden!important}.modal-body{overflow-x:hidden!important;max-width:100%!important;box-sizing:border-box!important}
+    .pdf-reader-shell .modal-header{padding-top:calc(10px + env(safe-area-inset-top))!important;padding-left:max(14px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important;min-height:calc(54px + env(safe-area-inset-top))!important}.pdf-reader-shell .modal-header>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px!important}.pdf-reader-shell #sop-pdf-close{min-width:44px!important;min-height:44px!important;padding:0!important;margin-left:6px!important;display:grid!important;place-items:center!important}
+    .pdf-reader-toolbar{padding-left:max(10px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important}
+    .event-toolbar-head{align-items:center!important;gap:8px}.event-add-btn{padding:8px 11px!important;min-height:40px!important;white-space:nowrap}.event-filter-bar{grid-template-columns:1fr 1fr!important;gap:8px!important;padding:10px!important}.event-filter-bar>#p-search{grid-column:1/-1!important}.event-filter-bar .event-period-wrap{grid-column:auto!important}.event-filter-bar .filter-clear{width:auto!important;justify-self:start!important;padding:7px 14px!important}
+    .event-list-card{padding:13px 14px!important}.event-list-one{display:grid!important;grid-template-columns:1fr auto!important;gap:5px 10px!important;align-items:start!important}.event-list-date{grid-column:1;grid-row:1;color:var(--text-muted)!important}.event-list-station{grid-column:1;grid-row:2;font-size:15px!important}.event-list-one>[class*="event-bad"],.event-list-one>[class*="event-good"]{grid-column:1;grid-row:3;white-space:nowrap!important}.event-list-subject{grid-column:1/-1;grid-row:4;white-space:normal!important;overflow:visible!important;font-size:15px!important;font-weight:700!important;line-height:1.45!important;margin-top:3px}.event-list-actions{grid-column:2;grid-row:1/4;display:flex!important;gap:6px!important}.event-list-actions [data-edit-event],.event-list-actions [data-del-event]{display:none!important}.event-list-actions .event-more{display:inline-grid!important;place-items:center!important;min-width:44px!important}.event-list-actions [data-op-event]{min-width:44px!important}.event-action-sheet{padding-bottom:env(safe-area-inset-bottom)!important}
+    .event-editor-sheet{width:100%!important;height:100%!important;max-height:100%!important;border-radius:0!important}.event-editor-sheet>.modal-header{padding-top:calc(10px + env(safe-area-inset-top))!important;min-height:calc(58px + env(safe-area-inset-top))!important;padding-left:max(16px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important}.event-editor-sheet>.modal-header button{min-width:44px!important;min-height:44px!important}.event-editor-sheet>.modal-body{padding:14px max(14px,env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))!important;width:100%!important;box-sizing:border-box!important}
+    .event-person-row{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;border:.5px solid var(--border)!important;border-radius:13px!important;padding:12px!important;margin-bottom:10px!important;background:#fff!important;min-width:0!important}.event-person-row label{margin:0!important}.event-person-edit-title{display:block!important}.event-person-row input{width:100%!important;min-width:0!important;box-sizing:border-box!important}.event-edit-grid{grid-template-columns:1fr!important}.event-time-row .event-edit-grid input{max-width:130px!important}.event-time-row .event-edit-grid textarea{min-height:92px!important}.event-check-row{grid-template-columns:1fr!important}.event-check-duration{padding:4px 2px!important}
+    #ep-save{position:sticky!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;z-index:8!important;box-shadow:0 6px 20px rgba(0,0,0,.16)!important}
+    .event-participant-grid{grid-template-columns:1fr!important}.event-person-card{grid-template-columns:minmax(78px,105px) minmax(0,1fr)!important}.event-person-card b{font-size:14px!important;line-height:1.45!important}.event-person-detail{display:block!important}.event-person-detail span{display:block!important;font-size:13.5px!important;line-height:1.55!important}.event-participant-station{font-size:14px!important;font-weight:800!important;color:var(--accent-text)!important;margin:5px 0 3px!important}.event-participant-group+ .event-participant-group{margin-top:12px!important;padding-top:8px!important;border-top:.5px solid var(--border)!important}
+    .op-record-row{grid-template-columns:48px minmax(0,1fr)!important;column-gap:9px!important}.op-record-time{font-size:14px!important}.op-record-body,.op-record-preamble{font-size:15px!important;line-height:1.7!important}
+    .search-page-group>summary{font-size:13px!important;padding:10px!important}.search-hit-text{font-size:13.5px!important}.search-page-hits{padding:0 7px 8px!important}
+  }
+
 </style>
 </head>
 <body>
@@ -488,18 +509,18 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.11.0 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.12.0 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-/* v5.11.0 2026-09-08：
+/* v5.12.0 2026-09-08：
    1) 修正文件名稱命中會把整份文件所有段落都算命中的問題；正文命中頁／段落只計實際符合；
    2) 搜尋段落點入 PDF 前以該段正文重新驗證實體 PDF 頁，避免搜尋索引與原始 PDF 定位錯位；
    3) 常用程序待確認閱讀器新增「確認頁碼正確」，確認後清除提醒並保存新版正文快照；
    4) 事件參與人員解析支援「小班＋值班站長／值班站務專員」等班別職稱；
    5) 維持修訂／異動頁排除、文字模式階層、表格與 SOP 安全更新規則。 */
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.11.0';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.12.0';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -990,6 +1011,20 @@ async function resolveSearchHitPdfPage(docId,storedPage,rawText){
     try{await pdf?.destroy?.();}catch(_){}
   }
 }
+function searchPageGroups(result){
+  const map=new Map();
+  (result.hitSegments||[]).forEach((hit,index)=>{
+    const page=Number(hit.absolutePage);
+    if(!map.has(page))map.set(page,[]);
+    map.get(page).push({...hit,hitIndex:index});
+  });
+  return [...map.entries()].map(([page,hits])=>({page,hits:hits.sort((a,b)=>String(a.clauseMarker||'').localeCompare(String(b.clauseMarker||''),'zh-Hant',{numeric:true}))})).sort((a,b)=>a.page-b.page);
+}
+function renderSearchPageGroups(result){
+  const groups=searchPageGroups(result),visible=groups.slice(0,5),more=groups.slice(5);
+  const one=g=>`<details class="search-page-group"><summary><span>PDF ${g.page}</span><span>${g.hits.length} 個相關段落</span></summary><div class="search-page-hits">${g.hits.map(h=>`<button class="search-hit-row" data-open-hit="${result.docId}" data-hit-page="${g.page}" data-hit-index="${h.hitIndex}"><div class="search-hit-head">${h.clauseMarker?escapeHtml(h.clauseMarker):'相關段落'}</div><div class="search-hit-text">${h.snippetHtml}</div></button>`).join('')}</div></details>`;
+  return `<div class="search-page-list">${visible.map(one).join('')}${more.length?`<details class="search-more-pages"><summary>顯示更多命中頁面（尚有 ${more.length} 頁）</summary><div class="search-page-list more">${more.map(one).join('')}</div></details>`:''}</div>`;
+}
 function renderSop(){
   const results = sopKeyword.trim() ? searchUnified(sopKeyword.trim()) : null;
   const recentSearches=getSearchHistory();
@@ -1034,7 +1069,7 @@ function renderSop(){
           ${r.source==='sop'?`<button class="favorite-btn" data-fav-type="sop" data-fav-id="${r.docId}" data-fav-page="${r.absolutePage||''}" data-fav-title="${escapeHtml(r.docName)}">${isFav?'★':'☆'}</button>`:''}
         </div>
         <div class="search-group-meta"><span class="match-label ${r.matchType==='synonym'?'synonym':r.matchType==='notice'?'notice':''}">${r.matchType==='notice'?'通告符合':r.matchType==='synonym'?'同義詞符合':'原文符合'}</span>${r.titleMatched?'<span class="tiny-muted">文件名稱符合</span>':''}${r.source==='sop'?`<span class="search-group-count">${r.titleOnly?'文件名稱符合｜正文無直接命中':`正文命中 ${r.hitPages?.length||0} 頁｜${r.totalSegments||0} 個段落`}</span>`:''}</div>
-        ${r.source==='sop'?(r.titleOnly?`<p class="tiny-muted" style="margin:8px 0 2px;">文件名稱符合，但正文沒有直接命中；點卡片可開啟本程序。</p>`:`<div class="search-hit-list">${(r.hitSegments||[]).slice(0,4).map((h,hi)=>`<button class="search-hit-row" data-open-hit="${r.docId}" data-hit-page="${h.absolutePage}" data-hit-index="${hi}"><div class="search-hit-head">PDF ${h.absolutePage}${h.clauseMarker?`｜${escapeHtml(h.clauseMarker)}`:''}</div><div class="search-hit-text">${h.snippetHtml}</div></button>`).join('')}</div>${(r.totalSegments||0)>4?`<p class="search-more-hits">＋另外 ${(r.totalSegments||0)-4} 個相關段落</p>`:''}`):`${r.snippetsHtml.map(s=>`<p class="search-snippet">${s}</p>`).join('')}`}
+        ${r.source==='sop'?(r.titleOnly?`<p class="tiny-muted" style="margin:8px 0 2px;">文件名稱符合，但正文沒有直接命中；點卡片可開啟本程序。</p>`:renderSearchPageGroups(r)):`${r.snippetsHtml.map(s=>`<p class="search-snippet">${s}</p>`).join('')}`}
         <button class="mini-action" data-teach-query="${escapeHtml(sopKeyword)}" style="margin-top:8px;">＋新增口語說法</button>
       </div>`;
     });
@@ -1072,14 +1107,14 @@ function renderSop(){
       const rawText=fresh?.hitSegments?.[hitIndex]?.rawText||'';
       const actualPage=await resolveSearchHitPdfPage(docId,storedPage,rawText);
       markViewedSearchResult(`sop:${docId}:${actualPage}`);
-      openSopPdfReader(docId,actualPage,{onClose:()=>{renderSop();restoreSopSearchPosition();}});
+      openSopPdfReader(docId,actualPage,{searchContext:true,onClose:()=>{renderSop();restoreSopSearchPosition();}});
     });
   });
   contentEl.querySelectorAll('[data-open-text]').forEach(card=>{
     card.addEventListener('click', ()=>{
       saveSearchHistory(sopKeyword);sopSearchReturnTop=contentEl.scrollTop;
       markViewedSearchResult(`sop:${card.dataset.openText}:${card.dataset.page}`);
-      openSopPdfReader(Number(card.dataset.openText),Number(card.dataset.page),{onClose:()=>{renderSop();restoreSopSearchPosition();}});
+      openSopPdfReader(Number(card.dataset.openText),Number(card.dataset.page),{searchContext:true,onClose:()=>{renderSop();restoreSopSearchPosition();}});
     });
   });
   contentEl.querySelectorAll('[data-open-notice]').forEach(card=>{
@@ -1193,25 +1228,19 @@ const QUESTION_WORDS=/如何|怎麼辦|怎麼|怎樣|遭遇|遇到|發生|應如
 const ACTION_ALIASES=['處理','處置','應變','排除','救援','通報','停機','管制','確認'];
 let lastSearchPlan=null;
 function buildSmartSearchPlan(keyword){
-  const normalized=searchComparable(keyword);
-  const groups=[];
   const customGroups=cache.synonymGroups.map(g=>[g.canonical,...(g.aliases||[])].filter(Boolean));
-  [...SMART_CONCEPTS,...customGroups].forEach(aliases=>{
-    if(aliases[0]==='真實火警'&&/(?:非真實火警|火警誤報|誤報|假火警)/.test(normalized)) return;
-    if(aliases.some(alias=>normalized.includes(searchComparable(alias)))) groups.push(aliases);
+  const rawTerms=parseSearchTerms(keyword.replace(QUESTION_WORDS,' ').replace(/[，。？！、；：]/g,' ')).filter(term=>term.length>=2&&!ACTION_ALIASES.includes(term));
+  const terms=rawTerms.length?rawTerms:parseSearchTerms(keyword).filter(term=>term.length>=2);
+  const groups=terms.map(term=>{
+    const key=searchComparable(term);
+    const custom=customGroups.find(group=>group.some(alias=>searchComparable(alias)===key));
+    return custom||[term];
   });
-  const rawTerms=parseSearchTerms(keyword.replace(QUESTION_WORDS,' ').replace(/[，。？！、；：]/g,' '));
-  rawTerms.forEach(term=>{
-    if(term.length<2||ACTION_ALIASES.includes(term)) return;
-    if(!groups.some(group=>group.some(alias=>searchComparable(alias).includes(searchComparable(term))||searchComparable(term).includes(searchComparable(alias))))) groups.push([term]);
-  });
-  if(!groups.length){
-    parseSearchTerms(keyword).forEach(term=>groups.push([term]));
-  }
   const expanded=[...new Set(groups.flat())];
+  const normalized=searchComparable(keyword);
   const intent=ACTION_ALIASES.filter(word=>normalized.includes(searchComparable(word)));
-  if(/如何|怎麼|處理方式|怎麼辦/.test(keyword)&&!intent.length) intent.push('處理','處置','應變');
-  return {groups,expanded,intent,isSmart:expanded.some(t=>!normalized.includes(searchComparable(t)))||/如何|怎麼|怎樣|請問/.test(keyword)};
+  const usedCustom=groups.some((g,i)=>g.length>1);
+  return {groups,expanded,intent,isSmart:usedCustom,usedCustom};
 }
 function groupMatches(text,group){
   const comparable=searchComparable(text);
@@ -2290,10 +2319,13 @@ async function openSopPdfReader(docId,absolutePage,options={}){
   if(!rec?.data) return alert('找不到原始PDF，請至資料管理確認檔案是否仍存在。');
   const displayName=resolvedDocName(doc);
   const bounds=getSopPageBounds({type:'sop',docId:doc.id,absolutePage});
-  let currentPage=Math.min(bounds.max,Math.max(bounds.min,Number(absolutePage)||bounds.min));
+  const bodyPages=(doc.pages||[]).filter(p=>p.type!=='cover'&&!isRevisionLikePage(p)).map(p=>Number(p.absolutePage)).filter(Number.isFinite).sort((a,b)=>a-b);
+  const bodyBounds=bodyPages.length?{min:bodyPages[0],max:bodyPages[bodyPages.length-1]}:bounds;
+  const activeBounds=options.searchContext?bodyBounds:bounds;
+  let currentPage=Math.min(activeBounds.max,Math.max(activeBounds.min,Number(absolutePage)||activeBounds.min));
   const hasSavedRange=Number.isFinite(Number(options.startPage))&&Number.isFinite(Number(options.endPage));
-  let rangeStart=hasSavedRange?Math.max(bounds.min,Number(options.startPage)):Math.max(bounds.min,currentPage-1);
-  let rangeEnd=hasSavedRange?Math.min(bounds.max,Number(options.endPage)):Math.min(bounds.max,currentPage+1);
+  let rangeStart=hasSavedRange?Math.max(bounds.min,Number(options.startPage)):Math.max(activeBounds.min,currentPage-1);
+  let rangeEnd=hasSavedRange?Math.min(bounds.max,Number(options.endPage)):Math.min(activeBounds.max,currentPage+1);
   if(rangeStart>rangeEnd){rangeStart=currentPage;rangeEnd=currentPage;}
   currentPage=Math.min(rangeEnd,Math.max(rangeStart,currentPage));
   const overlay=document.createElement('div');
@@ -3055,14 +3087,14 @@ function eventCategoryClass(category){return category==='待改善案例'?'event
 function renderEventTimelineRows(timeline,editable=false){
   return `<div class="event-timeline">${(timeline||[]).map((r,i)=>`<div class="event-time-row">${editable?`<div class="event-edit-grid"><input type="text" inputmode="numeric" autocomplete="off" maxlength="5" pattern="(?:[01]\d|2[0-3]):[0-5]\d" class="event-time-text" data-event-time="${i}" value="${escapeHtml(r.time||'')}" placeholder="18:02"><textarea data-event-text="${i}">${escapeHtml(r.text||'')}</textarea></div>`:`<div class="event-time">${escapeHtml(r.time||'')}</div><div class="event-body">${escapeHtml(r.text||'')}</div>`}</div>`).join('')}</div>`;
 }
-function renderEventParticipantRows(participants,editable=false){
+function renderEventParticipantRows(participants,editable=false,defaultStation=''){
   if(!(participants||[]).length)return '<p class="tiny-muted">未辨識到事件參與人員，可直接保留原始紀錄。</p>';
   if(editable){
-    return `<div class="event-participants editing">${participants.map((p,i)=>`<div class="event-person-row"><input data-person-station="${i}" value="${escapeHtml(p.station||'')}" placeholder="車站"><input data-person-role="${i}" value="${escapeHtml(p.role||'')}" placeholder="身分"><input data-person-name="${i}" value="${escapeHtml(p.name||'')}" placeholder="姓名"><input data-person-alias="${i}" value="${escapeHtml(p.alias||'')}" placeholder="事件內簡稱"><input data-person-location="${i}" value="${escapeHtml(p.location||'')}" placeholder="初始位置／狀態"></div>`).join('')}</div>`;
+    return `<div class="event-participants editing">${participants.map((p,i)=>`<div class="event-person-row"><div class="event-person-edit-title">參與人員 ${i+1}</div><label>車站<input data-person-station="${i}" value="${escapeHtml(p.station||defaultStation||'')}" placeholder="車站"></label><label>身分<input data-person-role="${i}" value="${escapeHtml(p.role||'')}" placeholder="例如：值班站長"></label><label>姓名<input data-person-name="${i}" value="${escapeHtml(p.name||'')}" placeholder="姓名"></label><label>事件內簡稱<input data-person-alias="${i}" value="${escapeHtml(p.alias||'')}" placeholder="例如：副站長"></label><label>初始位置／狀態<input data-person-location="${i}" value="${escapeHtml(p.location||'')}" placeholder="例如：站長室"></label></div>`).join('')}</div>`;
   }
   const groups=new Map();
-  participants.forEach(p=>{const key=p.station||'未指定車站';if(!groups.has(key))groups.set(key,[]);groups.get(key).push(p);});
-  return `<div class="event-participants">${[...groups.entries()].map(([station,rows])=>`<div class="event-participant-group"><div class="event-participant-station">${escapeHtml(station)}</div><div class="event-participant-grid">${rows.map(p=>`<div class="event-person-card"><b>${escapeHtml(p.alias||p.role||'參與人員')}</b><span>${escapeHtml([p.role,p.name].filter(Boolean).join(' '))}${p.location?`｜${escapeHtml(p.location)}`:''}</span></div>`).join('')}</div></div>`).join('')}</div>`;
+  participants.forEach(p=>{const key=p.station||defaultStation||'未指定車站';if(!groups.has(key))groups.set(key,[]);groups.get(key).push(p);});
+  return `<div class="event-participants">${[...groups.entries()].map(([station,rows])=>`<div class="event-participant-group"><div class="event-participant-station">${escapeHtml(station)}</div><div class="event-participant-list">${rows.map(p=>`<div class="event-person-card"><b>${escapeHtml(p.alias||p.role||'參與人員')}</b><div class="event-person-detail"><span>${escapeHtml([p.role,p.name].filter(Boolean).join(' '))}</span>${p.location?`<span class="event-person-location">${escapeHtml(p.location)}</span>`:''}</div></div>`).join('')}</div></div>`).join('')}</div>`;
 }
 function eventSeconds(v){
   const m=String(v||'').trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);if(!m)return null;
@@ -3138,7 +3170,7 @@ function openEventEditor(existing=null){
     const raw=overlay.querySelector('#ep-raw').value.trim();
     const station=overlay.querySelector('#ep-station')?.value||overlay.querySelector('#ep-station-manual')?.value.trim()||'';
     const detected=detectStationsInEvent(raw),other=detected.filter(n=>n!==station);
-    overlay.querySelector('#ep-preview').innerHTML=`<div class="card event-summary-card" style="margin-top:12px"><b>解析結果</b><p class="tiny-muted">${escapeHtml(station||'未選車站')}｜<span class="${eventCategoryClass(kind)}">${escapeHtml(kind)}</span></p>${detected.includes(station)?'<span class="viewed-badge">✓ 內文車站符合</span>':''}${other.length?`<p class="tiny-muted">內文另有出現：${escapeHtml(other.join('、'))}，請確認是否為支援／通報車站。</p>`:''}</div><div class="panel"><div class="row between"><h3 class="panel-title" style="margin:0">參與人員／事件內簡稱</h3><button class="secondary" id="event-person-add" style="min-height:34px;padding:5px 10px">＋ 新增參與人員</button></div>${renderEventParticipantRows(participants,true)}</div><div class="panel"><h3 class="panel-title">事件時間軸</h3>${renderEventTimelineRows(timeline,true)}</div><button class="primary" id="ep-save" style="width:100%;margin-bottom:10px">${isEdit?'儲存修改':'確認存入'}</button>`;
+    overlay.querySelector('#ep-preview').innerHTML=`<div class="card event-summary-card" style="margin-top:12px"><b>解析結果</b><p class="tiny-muted">${escapeHtml(station||'未選車站')}｜<span class="${eventCategoryClass(kind)}">${escapeHtml(kind)}</span></p>${detected.includes(station)?'<span class="viewed-badge">✓ 內文車站符合</span>':''}${other.length?`<p class="tiny-muted">內文另有出現：${escapeHtml(other.join('、'))}，請確認是否為支援／通報車站。</p>`:''}</div><div class="panel"><div class="row between"><h3 class="panel-title" style="margin:0">參與人員／事件內簡稱</h3><button class="secondary" id="event-person-add" style="min-height:34px;padding:5px 10px">＋ 新增參與人員</button></div>${renderEventParticipantRows(participants,true,station)}</div><div class="panel"><h3 class="panel-title">事件時間軸</h3>${renderEventTimelineRows(timeline,true)}</div><button class="primary" id="ep-save" style="width:100%;margin-bottom:10px">${isEdit?'儲存修改':'確認存入'}</button>`;
     const addPersonBtn=overlay.querySelector('#event-person-add');
     if(addPersonBtn)addPersonBtn.onclick=()=>{
       const state=collectEventPreview(overlay,timeline,participants);
@@ -3189,7 +3221,7 @@ function openEventDetail(id){
     <div class="card event-summary-card"><div class="row between"><div><b>${escapeHtml(e.subject||e.title||'事件紀錄')}</b><p class="tiny-muted">${escapeHtml(e.date||'')}｜${escapeHtml(RIDERSHIP_LINES[e.lineCode]||'')}${escapeHtml(eventInvolvedStationsText(e))}</p></div><div class="row" style="gap:7px"><button class="secondary op-detail-btn ${e.opText?'has-data':''}" id="ed-op" title="${e.opText?'查看 OP 通報紀錄':'尚無 OP 通報紀錄'}">OP</button><button class="secondary" id="ed-edit">修改</button></div></div></div>
     ${(e.checks||[]).length?`<div class="panel event-detail-priority"><h3 class="panel-title">事件檢核</h3>${renderEventChecksView(e.checks)}</div>`:''}
     ${e.improvement?`<div class="panel event-detail-priority"><h3 class="panel-title">檢討與改善事項</h3><div class="event-body" style="white-space:pre-wrap">${escapeHtml(e.improvement)}</div></div>`:''}
-    <div class="panel"><h3 class="panel-title">參與人員</h3>${renderEventParticipantRows(e.participants||[])}</div>
+    <div class="panel"><h3 class="panel-title">參與人員</h3>${renderEventParticipantRows(e.participants||[],false,e.station||'')}</div>
     <div class="panel"><h3 class="panel-title">事件時間軸</h3>${renderEventTimelineRows(e.timeline||[])}</div>
     <details><summary class="tiny-muted">原始事件紀錄</summary><div class="card event-raw">${escapeHtml(e.rawText||'')}</div></details>
   </div></div>`;
@@ -3210,6 +3242,15 @@ function eventPeriodMatch(dateVal,period,type){
   return true;
 }
 
+function openEventActionMenu(id){
+  const e=cache.personnel.find(x=>x.id===Number(id)&&x.recordType==='event');if(!e)return;
+  const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='97';
+  overlay.innerHTML=`<div class="modal-sheet event-action-sheet" style="height:auto"><div class="modal-header"><b>${escapeHtml(e.subject||e.title||'事件操作')}</b><button id="eam-close" class="modal-close-btn">✕</button></div><div class="modal-body"><button class="secondary" id="eam-edit" style="width:100%;margin-bottom:9px">修改事件</button><button class="secondary" id="eam-delete" style="width:100%;color:var(--danger)">刪除事件</button></div></div>`;
+  document.getElementById('phone').appendChild(overlay);
+  overlay.querySelector('#eam-close').onclick=()=>overlay.remove();
+  overlay.querySelector('#eam-edit').onclick=()=>{overlay.remove();openEventEditor(e);};
+  overlay.querySelector('#eam-delete').onclick=async()=>{if(!confirm('確定刪除這筆事件？'))return;await dbDelete('personnel',e.id);await reloadCache();overlay.remove();renderPersonnel();};
+}
 function renderPersonnel(){
   const events=cache.personnel.filter(p=>p.recordType==='event').sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const legacy=cache.personnel.filter(p=>p.recordType!=='event');
@@ -3237,7 +3278,7 @@ function renderPersonnel(){
         <button class="secondary filter-clear" id="event-filter-clear">清除</button>
       </div>
       <div class="event-filter-summary">共 ${filtered.length} 件${conditions.length?`｜目前條件：${escapeHtml(conditions.join('・'))}`:''}</div>`;
-    if(filtered.length) filtered.forEach(e=>{html+=`<div class="card event-list-card compact" data-event-detail="${e.id}"><div class="event-list-one"><span class="event-list-date">${escapeHtml(e.date||'')}</span><span class="event-list-station">${escapeHtml(e.station||'未指定車站')}</span><span class="${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span><span class="event-list-subject">${escapeHtml(e.subject||e.title||'事件紀錄')}</span><div class="event-list-actions"><button class="secondary event-action ${e.opText?'op-has-data':''}" data-op-event="${e.id}" title="${e.opText?'查看 OP 通報紀錄':'尚無 OP 通報紀錄'}">OP</button><button class="secondary event-action" data-edit-event="${e.id}">修改</button><button class="event-action event-delete" data-del-event="${e.id}">刪除</button></div></div></div>`;});
+    if(filtered.length) filtered.forEach(e=>{html+=`<div class="card event-list-card compact" data-event-detail="${e.id}"><div class="event-list-one"><span class="event-list-date">${escapeHtml(e.date||'')}</span><span class="event-list-station">${escapeHtml(e.station||'未指定車站')}</span><span class="${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span><span class="event-list-subject">${escapeHtml(e.subject||e.title||'事件紀錄')}</span><div class="event-list-actions"><button class="secondary event-action ${e.opText?'op-has-data':''}" data-op-event="${e.id}" title="${e.opText?'查看 OP 通報紀錄':'尚無 OP 通報紀錄'}">OP</button><button class="secondary event-action" data-edit-event="${e.id}">修改</button><button class="event-action event-delete" data-del-event="${e.id}">刪除</button><button class="secondary event-action event-more" data-more-event="${e.id}" aria-label="更多操作">⋯</button></div></div></div>`;});
     else html+=`<div class="empty" style="padding:34px 20px"><p>沒有符合條件的事件</p><span class="tiny-muted">可清除篩選條件，或貼上新的事件紀錄。</span></div>`;
   }
   contentEl.innerHTML=html;
@@ -3254,6 +3295,7 @@ function renderPersonnel(){
     contentEl.querySelectorAll('[data-event-detail]').forEach(card=>card.onclick=e=>{if(e.target.closest('button'))return;openEventDetail(card.dataset.eventDetail);});
     contentEl.querySelectorAll('[data-op-event]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();const rec=cache.personnel.find(x=>x.id===Number(btn.dataset.opEvent));if(rec)openEventOp(rec);});
     contentEl.querySelectorAll('[data-edit-event]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();const rec=cache.personnel.find(x=>x.id===Number(btn.dataset.editEvent));if(rec)openEventEditor(rec);});
+    contentEl.querySelectorAll('[data-more-event]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openEventActionMenu(Number(btn.dataset.moreEvent));});
     contentEl.querySelectorAll('[data-del-event]').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();if(confirm('確定刪除此事件紀錄？')){await dbDelete('personnel',Number(btn.dataset.delEvent));await reloadCache();renderPersonnel();}});
   }
   contentEl.querySelectorAll('[data-del-p]').forEach(btn=>btn.onclick=async()=>{if(confirm('確定刪除此筆紀錄？')){await dbDelete('personnel',Number(btn.dataset.delP));await reloadCache();renderPersonnel();}});
@@ -3628,7 +3670,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.10.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.11.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.10.0</dd><dt>更新日期</dt><dd>2026-09-08</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>修復修訂／文件異動狀況表重新出現在一般搜尋的回歸問題；待確認常用程序新增標題唯一定位與啟動時自動重試；SOP 更新內容比對失敗時改以程序名稱安全備援；文字模式既有階層與表格解析規則維持不變</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.10.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.12.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.10.0</dd><dt>更新日期</dt><dd>2026-09-08</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>修復修訂／文件異動狀況表重新出現在一般搜尋的回歸問題；待確認常用程序新增標題唯一定位與啟動時自動重試；SOP 更新內容比對失敗時改以程序名稱安全備援；文字模式既有階層與表格解析規則維持不變</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -3688,7 +3730,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.11.0・2026.09.08</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.12.0・2026.09.08</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

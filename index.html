@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.17.0"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.17.0"></script>
+<script src="./vendor/pdf.min.js?v=5.18.0"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.18.0"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -453,7 +453,7 @@
   }
   @media (max-width:520px){.procedure-card-grid{grid-template-columns:1fr 1fr;}}
 
-  /* v5.17.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
+  /* v5.18.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
   @media (max-width:899px){
     html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;}
     body{display:block!important;margin:0!important;padding:0!important;background:var(--bg)!important;min-height:100vh!important;}
@@ -478,7 +478,7 @@
   .event-participant-list{display:grid;gap:0}.event-person-card{display:grid!important;grid-template-columns:minmax(86px,130px) minmax(0,1fr);align-items:start!important;gap:10px!important;padding:10px 4px!important;border:0!important;border-bottom:.5px solid var(--border)!important;border-radius:0!important}.event-person-card:last-child{border-bottom:0!important}.event-person-detail{display:flex;gap:10px;flex-wrap:wrap;min-width:0}.event-person-detail span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}.event-person-location{color:var(--text-muted)!important}.event-person-edit-title{display:none;font-weight:750;color:var(--accent-text)}.event-more{display:none}.modal-close-btn{border:0;background:none;font-size:18px;min-width:44px;min-height:44px}
 
 
-  /* v5.17.0 mobile UX */
+  /* v5.18.0 mobile UX */
   @media(max-width:899px){
     .modal-overlay{overflow:hidden!important}.modal-sheet{max-width:100%!important;overflow:hidden!important}.modal-body{overflow-x:hidden!important;max-width:100%!important;box-sizing:border-box!important}
     .pdf-reader-shell .modal-header{padding-top:calc(10px + env(safe-area-inset-top))!important;padding-left:max(14px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important;min-height:calc(54px + env(safe-area-inset-top))!important}.pdf-reader-shell .modal-header>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px!important}.pdf-reader-shell #sop-pdf-close{min-width:44px!important;min-height:44px!important;padding:0!important;margin-left:6px!important;display:grid!important;place-items:center!important}
@@ -517,7 +517,7 @@
   .search-page-group{margin-left:0;margin-right:0}
 
 
-  /* v5.17.0 iPhone 全頁面版面校正：safe-area 只計算一次，底部導覽不再漂浮或遮住內容 */
+  /* v5.18.0 iPhone 全頁面版面校正：safe-area 只計算一次，底部導覽不再漂浮或遮住內容 */
   @media(max-width:899px){
     :root{--mobile-nav-h:68px;--mobile-top-h:56px;}
     html,body{width:100%;height:100%;height:100dvh;overflow:hidden!important;}
@@ -559,18 +559,18 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.17.0 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.18.0 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-/* v5.17.0 2026-09-09：
+/* v5.18.0 2026-09-09：
    1) 修正文件名稱命中會把整份文件所有段落都算命中的問題；正文命中頁／段落只計實際符合；
    2) 搜尋段落點入 PDF 前以該段正文重新驗證實體 PDF 頁，避免搜尋索引與原始 PDF 定位錯位；
    3) 常用程序待確認閱讀器新增「確認頁碼正確」，確認後清除提醒並保存新版正文快照；
    4) 事件參與人員解析支援「小班＋值班站長／值班站務專員」等班別職稱；
    5) 維持修訂／異動頁排除、文字模式階層、表格與 SOP 安全更新規則。 */
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.17.0';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.18.0';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -3924,7 +3924,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.16.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.17.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.16.0</dd><dt>更新日期</dt><dd>2026-09-09</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>全頁面校正 iPhone safe-area、頂部狀態列與底部功能列；所有主要關閉按鈕統一 44×44 觸控區；資料管理視窗不再被功能列遮住；工作資料移轉加入事件與人員；App 圖示「務」改為與「蔵」相近的字型比例與垂直基準。保留 v5.16.0 大型 PDF 低記憶體匯入修正。</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.16.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.18.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.16.0</dd><dt>更新日期</dt><dd>2026-09-09</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>全頁面校正 iPhone safe-area、頂部狀態列與底部功能列；所有主要關閉按鈕統一 44×44 觸控區；資料管理視窗不再被功能列遮住；工作資料移轉加入事件與人員；App 圖示「務」改為與「蔵」相近的字型比例與垂直基準。保留 v5.16.0 大型 PDF 低記憶體匯入修正。</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -3984,7 +3984,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" class="modal-close-btn" aria-label="關閉">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.17.0・2026.09.09</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.18.0・2026.09.09</p>
       <p class="muted">「工作資料」包含常用程序、通告、事件與人員，可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出工作資料</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入工作資料</button>

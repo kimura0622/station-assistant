@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.13.0"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.13.0"></script>
+<script src="./vendor/pdf.min.js?v=5.14.0"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.14.0"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -453,7 +453,7 @@
   }
   @media (max-width:520px){.procedure-card-grid{grid-template-columns:1fr 1fr;}}
 
-  /* v5.13.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
+  /* v5.14.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
   @media (max-width:899px){
     html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;}
     body{display:block!important;margin:0!important;padding:0!important;background:var(--bg)!important;min-height:100vh!important;}
@@ -478,7 +478,7 @@
   .event-participant-list{display:grid;gap:0}.event-person-card{display:grid!important;grid-template-columns:minmax(86px,130px) minmax(0,1fr);align-items:start!important;gap:10px!important;padding:10px 4px!important;border:0!important;border-bottom:.5px solid var(--border)!important;border-radius:0!important}.event-person-card:last-child{border-bottom:0!important}.event-person-detail{display:flex;gap:10px;flex-wrap:wrap;min-width:0}.event-person-detail span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}.event-person-location{color:var(--text-muted)!important}.event-person-edit-title{display:none;font-weight:750;color:var(--accent-text)}.event-more{display:none}.modal-close-btn{border:0;background:none;font-size:18px;min-width:44px;min-height:44px}
 
 
-  /* v5.13.0 mobile UX */
+  /* v5.14.0 mobile UX */
   @media(max-width:899px){
     .modal-overlay{overflow:hidden!important}.modal-sheet{max-width:100%!important;overflow:hidden!important}.modal-body{overflow-x:hidden!important;max-width:100%!important;box-sizing:border-box!important}
     .pdf-reader-shell .modal-header{padding-top:calc(10px + env(safe-area-inset-top))!important;padding-left:max(14px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important;min-height:calc(54px + env(safe-area-inset-top))!important}.pdf-reader-shell .modal-header>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px!important}.pdf-reader-shell #sop-pdf-close{min-width:44px!important;min-height:44px!important;padding:0!important;margin-left:6px!important;display:grid!important;place-items:center!important}
@@ -494,7 +494,7 @@
   }
 
 
-  .search-page-open{border:0;background:transparent;color:var(--accent-text);font:inherit;font-weight:800;padding:0;cursor:pointer;text-align:left}.search-page-open:hover{text-decoration:underline}.search-page-toggle{margin-left:auto}.search-pdf-highlight{background:rgba(255,221,64,.58);color:transparent;border-radius:2px;box-shadow:0 0 0 1px rgba(214,169,0,.15)}
+  .search-page-open{border:0;background:transparent;color:var(--accent-text);font:inherit;font-weight:800;padding:0;cursor:pointer;text-align:left}.search-page-open:hover{text-decoration:underline}.search-page-toggle{margin-left:auto}.pdf-search-highlight-layer{position:absolute;inset:0;pointer-events:none;z-index:3}.search-pdf-highlight{position:absolute;background:rgba(255,221,64,.38);border-radius:2px;box-shadow:0 0 0 1px rgba(214,169,0,.10);pointer-events:none}
 
   @media(max-width:899px){
     .pdf-reader-shell>.modal-header,.event-editor-sheet>.modal-header{padding-top:max(env(safe-area-inset-top),52px)!important;min-height:calc(52px + max(env(safe-area-inset-top),52px))!important;padding-right:max(14px,env(safe-area-inset-right))!important;padding-left:max(16px,env(safe-area-inset-left))!important;align-items:flex-end!important}
@@ -523,18 +523,18 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.13.0 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.14.0 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-/* v5.13.0 2026-09-08：
+/* v5.14.0 2026-09-09：
    1) 修正文件名稱命中會把整份文件所有段落都算命中的問題；正文命中頁／段落只計實際符合；
    2) 搜尋段落點入 PDF 前以該段正文重新驗證實體 PDF 頁，避免搜尋索引與原始 PDF 定位錯位；
    3) 常用程序待確認閱讀器新增「確認頁碼正確」，確認後清除提醒並保存新版正文快照；
    4) 事件參與人員解析支援「小班＋值班站長／值班站務專員」等班別職稱；
    5) 維持修訂／異動頁排除、文字模式階層、表格與 SOP 安全更新規則。 */
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.13.0';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.14.0';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -1082,7 +1082,7 @@ function renderSop(){
           ${isViewed?'<span class="viewed-badge">已查看</span>':''}
           ${r.source==='sop'?`<button class="favorite-btn" data-fav-type="sop" data-fav-id="${r.docId}" data-fav-page="${r.absolutePage||''}" data-fav-title="${escapeHtml(r.docName)}">${isFav?'★':'☆'}</button>`:''}
         </div>
-        <div class="search-group-meta"><span class="match-label ${r.matchType==='synonym'?'synonym':r.matchType==='notice'?'notice':''}">${r.matchType==='notice'?'通告符合':r.matchType==='synonym'?'同義詞符合':'原文符合'}</span>${r.titleMatched?'<span class="tiny-muted">文件名稱符合</span>':''}${r.source==='sop'?`<span class="search-group-count">${r.titleOnly?'文件名稱符合｜正文無直接命中':`正文命中 ${r.hitPages?.length||0} 頁｜${r.totalSegments||0} 個段落`}</span>`:''}</div>
+        <div class="search-group-meta"><span class="match-label ${r.matchType==='synonym'?'synonym':r.matchType==='notice'?'notice':''}">${r.matchType==='notice'?'通告符合':r.matchType==='synonym'?'同義詞符合':'原文符合'}</span>${r.titleMatched?'<span class="tiny-muted">文件名稱符合</span>':''}${r.source==='sop'?`<span class="search-group-count">${r.titleOnly?'文件名稱符合｜正文無直接命中':`${r.matchLevel==='paragraph'?'同段符合':r.matchLevel==='page'?'同頁符合':'同程序符合'}｜正文命中 ${r.hitPages?.length||0} 頁｜${r.totalSegments||0} 個段落`}</span>`:''}</div>
         ${r.source==='sop'?(r.titleOnly?`<p class="tiny-muted" style="margin:8px 0 2px;">文件名稱符合，但正文沒有直接命中；點卡片可開啟本程序。</p>`:renderSearchPageGroups(r)):`${r.snippetsHtml.map(s=>`<p class="search-snippet">${s}</p>`).join('')}`}
         <button class="mini-action" data-teach-query="${escapeHtml(sopKeyword)}" style="margin-top:8px;">＋新增口語說法</button>
       </div>`;
@@ -1253,9 +1253,13 @@ const ACTION_ALIASES=['處理','處置','應變','排除','救援','通報','停
 let lastSearchPlan=null;
 function buildSmartSearchPlan(keyword){
   const customGroups=cache.synonymGroups.map(g=>[g.canonical,...(g.aliases||[])].filter(Boolean));
-  const rawTerms=parseSearchTerms(keyword.replace(QUESTION_WORDS,' ').replace(/[，。？！、；：]/g,' ')).filter(term=>term.length>=2&&!ACTION_ALIASES.includes(term));
-  const terms=rawTerms.length?rawTerms:parseSearchTerms(keyword).filter(term=>term.length>=2);
+  const cleaned=String(keyword||'').replace(QUESTION_WORDS,' ').replace(/[，。？！、；：]/g,' ').trim();
+  const hasExplicitSpace=/\s/.test(cleaned);
+  // 搜尋規則：無空格＝完整詞組；有空格＝各詞 AND。只有使用者自行設定的同義詞才會擴充。
+  const rawTerms=hasExplicitSpace?parseSearchTerms(cleaned).filter(term=>term.length>=2):[cleaned].filter(term=>term.length>=2);
+  const terms=rawTerms.length?rawTerms:parseSearchTerms(String(keyword||'')).filter(term=>term.length>=2);
   const groups=terms.map(term=>{
+    if(!hasExplicitSpace) return [term];
     const key=searchComparable(term);
     const custom=customGroups.find(group=>group.some(alias=>searchComparable(alias)===key));
     return custom||[term];
@@ -1263,8 +1267,8 @@ function buildSmartSearchPlan(keyword){
   const expanded=[...new Set(groups.flat())];
   const normalized=searchComparable(keyword);
   const intent=ACTION_ALIASES.filter(word=>normalized.includes(searchComparable(word)));
-  const usedCustom=groups.some((g,i)=>g.length>1);
-  return {groups,expanded,intent,isSmart:usedCustom,usedCustom};
+  const usedCustom=hasExplicitSpace&&groups.some(g=>g.length>1);
+  return {groups,expanded,intent,isSmart:usedCustom,usedCustom,mode:hasExplicitSpace?'and':'phrase',terms};
 }
 function groupMatches(text,group){
   const comparable=searchComparable(text);
@@ -1280,28 +1284,42 @@ function searchSop(keyword,plan){
   cache.sopDocs.forEach(doc=>{
     const displayName=resolvedDocName(doc);
     const titleMatches=plan.groups.map(group=>groupMatches(displayName,group));
-    // 一般作業查詢預設完全排除封面、文件異動狀況表與修訂紀錄；原始 PDF 本身不變。
+    // 一般作業查詢排除封面、文件異動狀況表與修訂紀錄；原始 PDF 本身保留。
     const pages=(doc.pages||[]).filter(p=>p.type!=='cover' && !(sopFilter==='content' && isRevisionLikePage(p)));
-    const hits=[];
+    const rows=[];
     pages.forEach(p=>{
-      const paragraphs=parseSopParagraphs(p.formattedText||p.text);
-      paragraphs.forEach(paragraph=>{
-        const clauseMatches=plan.groups.map(group=>groupMatches(paragraph.text,group));
-        if(!clauseMatches.every(Boolean)) return;
-        const matchedAliases=plan.expanded.filter(alias=>groupMatches(paragraph.text,[alias]));
-        let score=clauseMatches.filter(Boolean).length*10+titleMatches.filter(Boolean).length*4;
-        score+=plan.intent.filter(word=>groupMatches(paragraph.text,[word])).length*2;
-        if(paragraph.marker)score+=2;
-        hits.push({
-          absolutePage:Number(p.absolutePage),pageNum:p.pageNum,clauseMarker:paragraph.marker||'',
-          score,rawText:paragraph.text,
-          snippetHtml:highlightedClause(paragraph.text,matchedAliases.length?matchedAliases:plan.expanded)
-        });
+      parseSopParagraphs(p.formattedText||p.text).forEach(paragraph=>{
+        const matches=plan.groups.map(group=>groupMatches(paragraph.text,group));
+        rows.push({p,paragraph,matches});
+      });
+    });
+    const docCoverage=plan.groups.map((group,gi)=>titleMatches[gi]||rows.some(r=>r.matches[gi]));
+    if(!docCoverage.every(Boolean))return; // AND：同一程序至少必須同時具備所有關鍵字
+    const pageCoverage=new Map();
+    pages.forEach(p=>{
+      const pageRows=rows.filter(r=>Number(r.p.absolutePage)===Number(p.absolutePage));
+      pageCoverage.set(Number(p.absolutePage),plan.groups.map((g,gi)=>titleMatches[gi]||pageRows.some(r=>r.matches[gi])));
+    });
+    const hits=[];
+    rows.forEach(({p,paragraph,matches})=>{
+      const sameParagraph=matches.every(Boolean);
+      const samePage=(pageCoverage.get(Number(p.absolutePage))||[]).every(Boolean);
+      // 詞組搜尋只接受原文連續命中；AND 搜尋依「同段→同頁→同程序」分級。
+      if(plan.mode==='phrase'&&!sameParagraph)return;
+      if(plan.mode==='and'&&!matches.some(Boolean))return;
+      const level=sameParagraph?'paragraph':samePage?'page':'procedure';
+      const matchedAliases=plan.expanded.filter(alias=>groupMatches(paragraph.text,[alias]));
+      let score=(level==='paragraph'?60:level==='page'?40:20)+matches.filter(Boolean).length*8+titleMatches.filter(Boolean).length*3;
+      if(paragraph.marker)score+=2;
+      hits.push({
+        absolutePage:Number(p.absolutePage),pageNum:p.pageNum,clauseMarker:paragraph.marker||'',
+        score,rawText:paragraph.text,matchLevel:level,
+        snippetHtml:highlightedClause(paragraph.text,matchedAliases.length?matchedAliases:plan.expanded)
       });
     });
     const titleOnly=!hits.length&&titleMatches.every(Boolean)&&pages.length;
     if(!hits.length&&!titleOnly)return;
-    if(hits.length)hits.sort((a,b)=>b.score-a.score||a.absolutePage-b.absolutePage);
+    hits.sort((a,b)=>b.score-a.score||a.absolutePage-b.absolutePage);
     const uniquePages=[...new Set(hits.map(h=>h.absolutePage))];
     const best=hits[0]||pages[0];
     out.push({
@@ -1309,6 +1327,7 @@ function searchSop(keyword,plan){
       pageNum:best.pageNum,absolutePage:Number(best.absolutePage),clauseMarker:best.clauseMarker||'',
       titleMatched:titleMatches.some(Boolean),titleOnly,score:hits[0]?.score||20,
       hitPages:uniquePages,hitSegments:hits,totalSegments:hits.length,
+      matchLevel:hits.some(h=>h.matchLevel==='paragraph')?'paragraph':hits.some(h=>h.matchLevel==='page')?'page':'procedure',
       snippetsHtml:hits.slice(0,3).map(h=>h.snippetHtml)
     });
   });
@@ -2462,12 +2481,25 @@ async function openSopPdfReader(docId,absolutePage,options={}){
           await pdfjsLib.renderTextLayer({textContentSource:textContent,container:textLayer,viewport:cssViewport,textDivs:[]}).promise;
           if(options.searchContext&&Array.isArray(options.searchTerms)&&options.searchTerms.length){
             const terms=[...new Set(options.searchTerms.map(t=>String(t||'').trim()).filter(Boolean))].sort((a,b)=>b.length-a.length);
+            // 以 DOM Range 的實際字形矩形建立獨立覆蓋層，避免 PDF.js transform 造成黃色框漂移或誤標。
+            const hl=document.createElement('div');hl.className='pdf-search-highlight-layer';frame.appendChild(hl);
+            const frameRect=frame.getBoundingClientRect();
             textLayer.querySelectorAll('span').forEach(span=>{
-              const text=span.textContent||'';if(!text||!terms.some(t=>text.includes(t)))return;
-              const re=new RegExp(`(${terms.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})`,'g');
-              const frag=document.createDocumentFragment();let last=0;
-              text.replace(re,(m,_g,offset)=>{if(offset>last)frag.append(document.createTextNode(text.slice(last,offset)));const mark=document.createElement('mark');mark.className='search-pdf-highlight';mark.textContent=m;frag.append(mark);last=offset+m.length;return m;});
-              if(last<text.length)frag.append(document.createTextNode(text.slice(last)));span.replaceChildren(frag);
+              const node=[...span.childNodes].find(n=>n.nodeType===Node.TEXT_NODE);if(!node)return;
+              const raw=node.nodeValue||'';if(!raw)return;
+              const lower=raw.toLocaleLowerCase();
+              terms.forEach(term=>{
+                const needle=term.toLocaleLowerCase();let from=0,idx;
+                while(needle&&(idx=lower.indexOf(needle,from))>=0){
+                  const range=document.createRange();range.setStart(node,idx);range.setEnd(node,idx+term.length);
+                  [...range.getClientRects()].forEach(rect=>{
+                    if(rect.width<1||rect.height<1)return;
+                    const box=document.createElement('i');box.className='search-pdf-highlight';
+                    box.style.left=`${rect.left-frameRect.left}px`;box.style.top=`${rect.top-frameRect.top}px`;box.style.width=`${rect.width}px`;box.style.height=`${rect.height}px`;hl.appendChild(box);
+                  });
+                  from=idx+Math.max(1,term.length);
+                }
+              });
             });
           }
         }
@@ -2509,6 +2541,8 @@ async function openSopPdfReader(docId,absolutePage,options={}){
     await dbPut('favorites',{...favorite,pageReviewRequired:false,pageReviewStatus:'',pageMatchScore:null,pageMatchMethod:'manual-confirm',sourceTextSnapshot:snapshot||favorite.sourceTextSnapshot||'',sourceSnapshotStartPage:Number(favorite.startPage||favorite.absolutePage),sourceSnapshotEndPage:Number(favorite.endPage||favorite.absolutePage),sourceSnapshotAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
     await reloadCache();
     overlay.querySelector('#sop-pdf-confirm-review')?.remove();
+    // 確認後立即刷新背後的常用程序卡，不需切換頁面才消除提醒。
+    if(currentTab==='sop') renderSop();
     alert('已確認頁碼，常用程序的待確認狀態已清除。');
   });
   overlay.querySelector('#sop-pdf-annotate').addEventListener('click',()=>{
@@ -2737,8 +2771,9 @@ function locateFavoriteInNewDoc(favorite,oldDoc,newDoc){
       const content=sopContentSimilarity(source,text);
       const anchorHits=anchors.filter(a=>norm.includes(a)).length;
       const anchorRatio=anchors.length?anchorHits/anchors.length:0;
-      const score=Math.min(1,content*.82+anchorRatio*.18+((norm.includes(sourceNorm)||sourceNorm.includes(norm))?.04:0));
-      candidates.push({score,content,anchorHits,startPage:Number(chunk[0].absolutePage),endPage:Number(chunk[chunk.length-1].absolutePage),method:'body-snapshot'});
+      const lengthRatio=Math.min(norm.length,sourceNorm.length)/Math.max(norm.length,sourceNorm.length);
+      const score=Math.min(1,content*.58+anchorRatio*.34+lengthRatio*.08+((norm.includes(sourceNorm)||sourceNorm.includes(norm))?.04:0));
+      candidates.push({score,content,anchorHits,startPage:Number(chunk[0].absolutePage),endPage:Number(chunk[chunk.length-1].absolutePage),method:'front-mid-end-anchors'});
     }
   }
   candidates.sort((a,b)=>b.score-a.score);
@@ -2814,7 +2849,7 @@ async function commitSopReplacement(targetPdfId,tempPdfId,newDocs,sopType){
     const loc=u.location||{status:'unmatched'};let f={...u.favorite,updatedAt:new Date().toISOString()};
     if(loc.status==='auto'||loc.status==='changed'){
       const oldStart=Number(u.favorite.startPage||u.favorite.absolutePage),oldAnchor=Number(u.favorite.absolutePage||oldStart),offset=Math.max(0,oldAnchor-oldStart);
-      f.startPage=loc.startPage;f.endPage=loc.endPage;f.absolutePage=Math.min(loc.endPage,loc.startPage+offset);f.pageReviewRequired=true;f.pageReviewStatus=loc.status;f.pageMatchScore=Math.round((loc.score||0)*1000)/1000;f.pageMatchMethod=loc.method||'body-snapshot';f.pageMatchOldRange=`${u.favorite.startPage||u.favorite.absolutePage}-${u.favorite.endPage||u.favorite.absolutePage}`;f.pageMatchNewRange=`${loc.startPage}-${loc.endPage}`;
+      f.startPage=loc.startPage;f.endPage=loc.endPage;f.absolutePage=Math.min(loc.endPage,loc.startPage+offset);f.pageReviewRequired=true;f.pageReviewStatus=loc.status;f.pageMatchScore=Math.round((loc.score||0)*1000)/1000;f.pageMatchMethod=loc.method||'front-mid-end-anchors';f.pageMatchOldRange=`${u.favorite.startPage||u.favorite.absolutePage}-${u.favorite.endPage||u.favorite.absolutePage}`;f.pageMatchNewRange=`${loc.startPage}-${loc.endPage}`;
       const nextSnapshot=favoriteRangeSnapshot(f,u.newDoc,loc.startPage,loc.endPage);f.sourceTextSnapshot=nextSnapshot||u.sourceSnapshot||'';f.sourceSnapshotStartPage=loc.startPage;f.sourceSnapshotEndPage=loc.endPage;f.sourceSnapshotAt=new Date().toISOString();
       await dbPut('favorites',f);await shiftFavoriteAnnotations(u.favorite,loc.startPage-oldStart,u.newMin,u.newMax);
     }else{
@@ -3633,7 +3668,7 @@ function renderRidership(){
   });
 }
 
-/* v2.19.0｜2026-09-08：修正事件車站下拉因多月份運量資料造成重複車站。 */
+/* v2.19.0｜2026-09-09：修正事件車站下拉因多月份運量資料造成重複車站。 */
 /* v2.12.1：修正運量分布比例條顯示。 */
 function ridershipEvents(){try{const rows=JSON.parse(localStorage.getItem(RIDERSHIP_EVENTS_KEY)||'[]');return Array.isArray(rows)?rows:[];}catch{return [];}}
 function saveRidershipEvents(rows){localStorage.setItem(RIDERSHIP_EVENTS_KEY,JSON.stringify(rows));}
@@ -3723,7 +3758,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.10.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.13.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.10.0</dd><dt>更新日期</dt><dd>2026-09-08</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>搜尋結果同一程序去重；頁碼可直接開PDF、相關段落可展開；搜尋進PDF暫時黃色標示關鍵字；全螢幕閱讀／事件視窗修正iPhone安全區；事件詳細與修改頁精修；更新桌面「務」圖示</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.10.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.14.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.10.0</dd><dt>更新日期</dt><dd>2026-09-09</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>搜尋規則改為「無空格＝完整詞組、有空格＝AND」，AND依同段／同頁／同程序分級；PDF搜尋黃色標示改用實際字形座標精準定位；常用程序改版定位強化為前／中／後三錨點＋全文相似度；確認頁碼後常用程序卡立即刷新；保留既有iPhone安全區、事件版面與「務」圖示</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -3783,7 +3818,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.13.0・2026.09.08</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.14.0・2026.09.09</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

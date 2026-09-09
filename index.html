@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.16.0"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.16.0"></script>
+<script src="./vendor/pdf.min.js?v=5.17.0"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.17.0"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -453,7 +453,7 @@
   }
   @media (max-width:520px){.procedure-card-grid{grid-template-columns:1fr 1fr;}}
 
-  /* v5.16.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
+  /* v5.17.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
   @media (max-width:899px){
     html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;}
     body{display:block!important;margin:0!important;padding:0!important;background:var(--bg)!important;min-height:100vh!important;}
@@ -478,7 +478,7 @@
   .event-participant-list{display:grid;gap:0}.event-person-card{display:grid!important;grid-template-columns:minmax(86px,130px) minmax(0,1fr);align-items:start!important;gap:10px!important;padding:10px 4px!important;border:0!important;border-bottom:.5px solid var(--border)!important;border-radius:0!important}.event-person-card:last-child{border-bottom:0!important}.event-person-detail{display:flex;gap:10px;flex-wrap:wrap;min-width:0}.event-person-detail span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}.event-person-location{color:var(--text-muted)!important}.event-person-edit-title{display:none;font-weight:750;color:var(--accent-text)}.event-more{display:none}.modal-close-btn{border:0;background:none;font-size:18px;min-width:44px;min-height:44px}
 
 
-  /* v5.16.0 mobile UX */
+  /* v5.17.0 mobile UX */
   @media(max-width:899px){
     .modal-overlay{overflow:hidden!important}.modal-sheet{max-width:100%!important;overflow:hidden!important}.modal-body{overflow-x:hidden!important;max-width:100%!important;box-sizing:border-box!important}
     .pdf-reader-shell .modal-header{padding-top:calc(10px + env(safe-area-inset-top))!important;padding-left:max(14px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important;min-height:calc(54px + env(safe-area-inset-top))!important}.pdf-reader-shell .modal-header>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px!important}.pdf-reader-shell #sop-pdf-close{min-width:44px!important;min-height:44px!important;padding:0!important;margin-left:6px!important;display:grid!important;place-items:center!important}
@@ -516,6 +516,33 @@
   .desktop-search-status,.search-page-list,.search-page-group,.search-page-hits{width:100%;max-width:100%}
   .search-page-group{margin-left:0;margin-right:0}
 
+
+  /* v5.17.0 iPhone 全頁面版面校正：safe-area 只計算一次，底部導覽不再漂浮或遮住內容 */
+  @media(max-width:899px){
+    :root{--mobile-nav-h:68px;--mobile-top-h:56px;}
+    html,body{width:100%;height:100%;height:100dvh;overflow:hidden!important;}
+    body{min-height:0!important;height:100dvh!important;padding:0!important;}
+    #phone{position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;min-height:0!important;display:grid!important;grid-template-rows:calc(var(--mobile-top-h) + env(safe-area-inset-top)) minmax(0,1fr) calc(var(--mobile-nav-h) + env(safe-area-inset-bottom))!important;grid-template-columns:1fr!important;overflow:hidden!important;}
+    #topbar{position:relative!important;grid-row:1!important;height:auto!important;min-height:0!important;padding:max(env(safe-area-inset-top),12px) max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))!important;display:flex!important;align-items:center!important;z-index:10!important;}
+    #topbar h1{font-size:17px!important;line-height:1.25!important;}
+    #content{grid-row:2!important;min-height:0!important;overflow-y:auto!important;padding:14px max(14px,env(safe-area-inset-right)) 18px max(14px,env(safe-area-inset-left))!important;-webkit-overflow-scrolling:touch!important;}
+    #tabbar{position:relative!important;grid-row:3!important;left:auto!important;right:auto!important;bottom:auto!important;height:auto!important;min-height:0!important;padding:0 0 env(safe-area-inset-bottom) 0!important;z-index:18!important;align-items:stretch!important;}
+    .tab-btn{min-height:var(--mobile-nav-h)!important;padding:5px 1px 4px!important;}
+    /* modal 永遠蓋在底部導覽列上方；bottom sheet 可完整捲到最後一項 */
+    .modal-overlay{position:fixed!important;inset:0!important;z-index:60!important;padding:0!important;align-items:flex-end!important;}
+    .modal-sheet{max-height:calc(100dvh - max(env(safe-area-inset-top),12px))!important;}
+    .modal-header{flex-shrink:0!important;padding:10px max(10px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left))!important;min-height:58px!important;}
+    .modal-header button[id$="close"],.modal-header .modal-close-btn,.modal-header button[aria-label="關閉"]{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;padding:0!important;margin-left:8px!important;display:grid!important;place-items:center!important;font-size:25px!important;line-height:1!important;border-radius:12px!important;}
+    .modal-body{min-height:0!important;padding-bottom:calc(24px + env(safe-area-inset-bottom))!important;overscroll-behavior:contain!important;}
+    #dm-overlay .modal-sheet{max-height:calc(100dvh - max(env(safe-area-inset-top),12px) - 10px)!important;}
+    #dm-overlay .modal-body{padding-bottom:calc(32px + env(safe-area-inset-bottom))!important;}
+    /* 全螢幕閱讀器／事件編輯器：頂端與狀態列分離，取消舊版重複 52px safe-area */
+    .pdf-reader-shell,.event-editor-sheet{height:100%!important;max-height:100%!important;border-radius:0!important;}
+    .pdf-reader-shell>.modal-header,.event-editor-sheet>.modal-header{padding:max(env(safe-area-inset-top),12px) max(10px,env(safe-area-inset-right)) 8px max(16px,env(safe-area-inset-left))!important;min-height:calc(56px + max(env(safe-area-inset-top),12px))!important;align-items:flex-end!important;}
+    .pdf-reader-shell>.modal-header button,.event-editor-sheet>.modal-header button{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;font-size:25px!important;margin:0 0 1px 8px!important;padding:0!important;display:grid!important;place-items:center!important;}
+    .event-editor-sheet>.modal-body{padding-bottom:calc(28px + env(safe-area-inset-bottom))!important;}
+  }
+
 </style>
 </head>
 <body>
@@ -532,18 +559,18 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.16.0 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.17.0 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-/* v5.16.0 2026-09-09：
+/* v5.17.0 2026-09-09：
    1) 修正文件名稱命中會把整份文件所有段落都算命中的問題；正文命中頁／段落只計實際符合；
    2) 搜尋段落點入 PDF 前以該段正文重新驗證實體 PDF 頁，避免搜尋索引與原始 PDF 定位錯位；
    3) 常用程序待確認閱讀器新增「確認頁碼正確」，確認後清除提醒並保存新版正文快照；
    4) 事件參與人員解析支援「小班＋值班站長／值班站務專員」等班別職稱；
    5) 維持修訂／異動頁排除、文字模式階層、表格與 SOP 安全更新規則。 */
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.14.0';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.17.0';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -1695,9 +1722,21 @@ function portableProcedureV3(f){
   const copy={...f,portableId:f.id,sourceDocumentKey:doc?transferDocumentKey(doc,pdf):'',sourceNoticeKey:notice?transferNoticeKey(notice):''};
   delete copy.id;delete copy.docId;delete copy.noticeId;return copy;
 }
+function transferEventKey(e){
+  const explicit=String(e.transferId||e.uuid||e.eventId||'').trim();
+  if(explicit)return `id:${explicit}`;
+  return ['event',e.date||'',e.lineCode||'',e.station||'',transferText(e.title||e.subject||''),transferText(e.rawText||'')].join('|');
+}
+function transferPersonnelKey(p){
+  const explicit=String(p.transferId||p.uuid||p.personId||'').trim();
+  if(explicit)return `id:${explicit}`;
+  return ['person',transferText(p.name||''),transferText(p.role||p.position||''),transferText(p.station||''),transferText(p.lineCode||'')].join('|');
+}
+function portableWorkRecord(row){const copy={...row};delete copy.id;return copy;}
 async function exportProcedures(){
   const procedures=sortedProcedures();
-  if(!procedures.length&&!cache.announcements.length)return alert('目前沒有常用程序或通告可匯出。');
+  const events=cache.personnel.filter(r=>r.recordType==='event'),personnel=cache.personnel.filter(r=>r.recordType!=='event');
+  if(!procedures.length&&!cache.announcements.length&&!events.length&&!personnel.length)return alert('目前沒有工作資料可匯出。');
   const docIds=new Set(procedures.filter(p=>p.type==='sop').map(p=>Number(p.docId)));
   cache.announcements.forEach(n=>(n.relations||[]).forEach(r=>docIds.add(Number(r.docId))));
   const documents=cache.sopDocs.filter(d=>docIds.has(Number(d.id))).map(doc=>{const pdf=cache.pdfFiles.find(p=>p.id===Number(doc.pdfFileId));return {portableId:doc.id,documentKey:transferDocumentKey(doc,pdf),documentName:resolvedDocName(doc),pdfFileName:pdf?.fileName||'',pdfFingerprint:transferBufferFingerprint(pdf?.data)};});
@@ -1706,26 +1745,26 @@ async function exportProcedures(){
   const announcements=cache.announcements.map(n=>{const copy={...n,portableId:n.id,noticeKey:transferNoticeKey(n),pdfData:n.pdfData?bufToBase64(n.pdfData):null,
     relationDocumentKeys:(n.relations||[]).map(r=>{const d=cache.sopDocs.find(x=>x.id===Number(r.docId)),p=d?cache.pdfFiles.find(x=>x.id===Number(d.pdfFileId)):null;return d?{documentKey:transferDocumentKey(d,p),startPage:r.startPage||null,endPage:r.endPage||r.startPage||null}:null;}).filter(Boolean),
     procedurePortableIds:(n.procedureIds||[]).map(id=>Number(id))};delete copy.id;delete copy.relations;delete copy.procedureIds;return copy;});
-  downloadJson({format:'station-assistant-transfer',version:4,mode:'lightweight',exportedAt:new Date().toISOString(),source:'pc',documents,procedures:procedures.map(portableProcedureV3),annotations,announcements},`常用程序與通告輕量移轉-${new Date().toISOString().slice(0,10)}.json`);
+  downloadJson({format:'station-assistant-transfer',version:5,mode:'lightweight',exportedAt:new Date().toISOString(),source:'mobile',documents,procedures:procedures.map(portableProcedureV3),annotations,announcements,events:events.map(portableWorkRecord),personnel:personnel.map(portableWorkRecord)},`工作資料移轉-${new Date().toISOString().slice(0,10)}.json`);
 }
-async function transferSnapshot(){const out={};for(const name of ['pdfFiles','sopDocs','favorites','annotations','announcements'])out[name]=await dbGetAll(name);return out;}
+async function transferSnapshot(){const out={};for(const name of ['pdfFiles','sopDocs','favorites','annotations','announcements','personnel'])out[name]=await dbGetAll(name);return out;}
 async function restoreTransferSnapshot(snapshot){for(const name of Object.keys(snapshot)){await dbClear(name);for(const row of snapshot[name])await dbAdd(name,row);}await reloadCache();}
 function chooseImportMode(fileData,stats){
   return new Promise(resolve=>{const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='95';
-    overlay.innerHTML=`<div class="modal-sheet" style="height:auto;max-width:540px"><div class="modal-header"><b>匯入常用程序與通告</b><button id="pi-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body"><p style="line-height:1.75;margin-top:0">常用程序 <b>${stats.procedures}</b> 筆｜SOP 識別 <b>${stats.documents}</b> 份｜通告 <b>${stats.notices}</b> 筆｜通告 PDF <b>${stats.noticePdfs}</b> 份｜標註 <b>${stats.annotations}</b> 筆｜關聯 <b>${stats.relations}</b> 組</p><div class="import-report">輕量移轉不包含 SOP PDF 與正文。${stats.missingDocs.length?`<br><b style="color:var(--danger)">找不到相同 SOP：${stats.missingDocs.map(escapeHtml).join('、')}</b><br>相關常用程序、標註與 SOP 關聯將安全略過。`:'<br>所有 SOP 均可與本機文件配對。'}<br>匯入前會建立暫存快照；如發生錯誤，將自動回復。</div><button class="primary" id="pi-merge" style="width:100%;margin:12px 0 9px">合併匯入（建議）</button><button class="secondary" id="pi-replace" style="width:100%;color:var(--danger)">取代移轉資料</button></div></div>`;
+    overlay.innerHTML=`<div class="modal-sheet" style="height:auto;max-width:540px"><div class="modal-header"><b>匯入工作資料</b><button id="pi-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body"><p style="line-height:1.75;margin-top:0">常用程序 <b>${stats.procedures}</b> 筆｜SOP 識別 <b>${stats.documents}</b> 份｜通告 <b>${stats.notices}</b> 筆｜通告 PDF <b>${stats.noticePdfs}</b> 份｜標註 <b>${stats.annotations}</b> 筆｜關聯 <b>${stats.relations}</b> 組｜事件 <b>${stats.events||0}</b> 筆｜人員 <b>${stats.personnel||0}</b> 筆</p><div class="import-report">輕量移轉不包含 SOP PDF 與正文。${stats.missingDocs.length?`<br><b style="color:var(--danger)">找不到相同 SOP：${stats.missingDocs.map(escapeHtml).join('、')}</b><br>相關常用程序、標註與 SOP 關聯將安全略過。`:'<br>所有 SOP 均可與本機文件配對。'}<br>匯入前會建立暫存快照；如發生錯誤，將自動回復。</div><button class="primary" id="pi-merge" style="width:100%;margin:12px 0 9px">合併匯入（建議）</button><button class="secondary" id="pi-replace" style="width:100%;color:var(--danger)">取代移轉資料</button></div></div>`;
     (document.getElementById('phone')||document.body).appendChild(overlay);overlay.querySelector('#pi-close').onclick=()=>{overlay.remove();resolve(null)};overlay.querySelector('#pi-merge').onclick=()=>{overlay.remove();resolve('merge')};overlay.querySelector('#pi-replace').onclick=()=>{overlay.remove();resolve('replace')};});
 }
 async function importProceduresFile(file){
   let data;try{data=JSON.parse(await file.text())}catch{return alert('無法讀取移轉檔，請選擇由本程式匯出的 JSON 檔。')}
   if(data?.format==='station-assistant-procedures')return importProceduresFileLegacy(file);
-  if(data?.format!=='station-assistant-transfer'||![3,4].includes(Number(data.version))||!Array.isArray(data.procedures)||!Array.isArray(data.announcements))return alert('這不是相容的「常用程序與通告移轉」檔。');
+  if(data?.format!=='station-assistant-transfer'||![3,4,5].includes(Number(data.version))||!Array.isArray(data.procedures)||!Array.isArray(data.announcements))return alert('這不是相容的「工作資料移轉」檔。');
   const localDocumentKeys=new Set(cache.sopDocs.map(d=>{const p=cache.pdfFiles.find(x=>x.id===Number(d.pdfFileId));return transferDocumentKey(d,p);}));
   const missingDocs=(data.documents||[]).filter(d=>!localDocumentKeys.has(d.documentKey)&&!(Number(data.version)===3&&(data.pdfFiles||[]).some(p=>Number(p.portableId)===Number(d.portablePdfId)))).map(d=>d.documentName||d.name||d.pdfFileName||'未命名 SOP');
-  const stats={procedures:data.procedures.length,documents:(data.documents||[]).length,notices:data.announcements.length,noticePdfs:data.announcements.filter(n=>n.pdfData).length,annotations:(data.annotations||[]).length,relations:data.announcements.reduce((s,n)=>s+(n.relationDocumentKeys||[]).length+(n.procedurePortableIds||[]).length,0),missingDocs};
+  const stats={procedures:data.procedures.length,documents:(data.documents||[]).length,notices:data.announcements.length,noticePdfs:data.announcements.filter(n=>n.pdfData).length,annotations:(data.annotations||[]).length,relations:data.announcements.reduce((s,n)=>s+(n.relationDocumentKeys||[]).length+(n.procedurePortableIds||[]).length,0),events:(data.events||[]).length,personnel:(data.personnel||[]).length,missingDocs};
   const mode=await chooseImportMode(data,stats);if(!mode)return;const snapshot=await transferSnapshot();
-  const result={pdfAdded:0,docAdded:0,procedureAdded:0,procedureUpdated:0,annotationAdded:0,noticeAdded:0,noticeUpdated:0,unmatched:0};
+  const result={pdfAdded:0,docAdded:0,procedureAdded:0,procedureUpdated:0,annotationAdded:0,noticeAdded:0,noticeUpdated:0,eventAdded:0,eventUpdated:0,personnelAdded:0,personnelUpdated:0,unmatched:0};
   try{
-    if(mode==='replace'){await dbClear('favorites');await dbClear('annotations');await dbClear('announcements');await reloadCache();}
+    if(mode==='replace'){await dbClear('favorites');await dbClear('annotations');await dbClear('announcements');await dbClear('personnel');await reloadCache();}
     const pdfIdMap=new Map();
     for(const source of data.pdfFiles||[]){const sourceData=base64ToBuf(source.data);let current=cache.pdfFiles.find(p=>transferText(p.fileName)===transferText(source.fileName)&&transferBufferFingerprint(p.data)===transferBufferFingerprint(sourceData));if(!current){const copy={...source,data:sourceData};delete copy.portableId;current={...copy,id:await dbAdd('pdfFiles',copy)};cache.pdfFiles.push(current);result.pdfAdded++;}pdfIdMap.set(Number(source.portableId),current.id);}
     const documentIdMap=new Map();
@@ -1737,7 +1776,11 @@ async function importProceduresFile(file){
     const noticeIdMap=new Map(),existingNotices=new Map(cache.announcements.map(n=>[transferNoticeKey(n),n]));
     for(const source of data.announcements){const key=source.noticeKey||transferNoticeKey(source),copy={...source,pdfData:source.pdfData?base64ToBuf(source.pdfData):null};delete copy.portableId;delete copy.noticeKey;delete copy.relationDocumentKeys;delete copy.procedurePortableIds;copy.relations=(source.relationDocumentKeys||[]).map(r=>documentIdMap.has(r.documentKey)?{docId:documentIdMap.get(r.documentKey),startPage:r.startPage||null,endPage:r.endPage||r.startPage||null}:null).filter(Boolean);copy.procedureIds=(source.procedurePortableIds||[]).map(id=>procedureIdMap.get(Number(id))).filter(Boolean);let current=existingNotices.get(key);if(current){Object.assign(current,copy,{id:current.id,updatedAt:new Date().toISOString()});await dbPut('announcements',current);result.noticeUpdated++;}else{current={...copy,id:await dbAdd('announcements',copy)};cache.announcements.push(current);existingNotices.set(key,current);result.noticeAdded++;}noticeIdMap.set(Number(source.portableId),current.id);}
     for(const source of data.procedures.filter(p=>p.type==='notice')){const favoriteId=procedureIdMap.get(Number(source.portableId)),noticeId=noticeIdMap.get(Number((data.announcements.find(n=>(n.noticeKey||transferNoticeKey(n))===source.sourceNoticeKey)||{}).portableId));if(favoriteId&&noticeId){const f=cache.favorites.find(x=>x.id===favoriteId);f.noticeId=noticeId;await dbPut('favorites',f);}}
-    await reloadCache();render();alert(`匯入完成：常用程序新增 ${result.procedureAdded}、沿用 ${result.procedureUpdated}；標註新增 ${result.annotationAdded}；通告新增 ${result.noticeAdded}、更新 ${result.noticeUpdated}；SOP PDF 新增 ${result.pdfAdded}。${result.unmatched?`\n未能配對 ${result.unmatched} 項，已安全略過。`:''}`);
+    const existingEvents=new Map(cache.personnel.filter(r=>r.recordType==='event').map(r=>[transferEventKey(r),r]));
+    for(const source of data.events||[]){const copy={...source,recordType:'event'},key=transferEventKey(copy),current=existingEvents.get(key);if(current){Object.assign(current,copy,{id:current.id});await dbPut('personnel',current);result.eventUpdated++;}else{copy.id=await dbAdd('personnel',copy);cache.personnel.push(copy);existingEvents.set(key,copy);result.eventAdded++;}}
+    const existingPeople=new Map(cache.personnel.filter(r=>r.recordType!=='event').map(r=>[transferPersonnelKey(r),r]));
+    for(const source of data.personnel||[]){const copy={...source},key=transferPersonnelKey(copy),current=existingPeople.get(key);if(current){Object.assign(current,copy,{id:current.id});await dbPut('personnel',current);result.personnelUpdated++;}else{copy.id=await dbAdd('personnel',copy);cache.personnel.push(copy);existingPeople.set(key,copy);result.personnelAdded++;}}
+    await reloadCache();render();alert(`匯入完成：常用程序新增 ${result.procedureAdded}、沿用 ${result.procedureUpdated}；標註新增 ${result.annotationAdded}；通告新增 ${result.noticeAdded}、更新 ${result.noticeUpdated}；SOP PDF 新增 ${result.pdfAdded}；事件新增 ${result.eventAdded}、更新 ${result.eventUpdated}；人員新增 ${result.personnelAdded}、更新 ${result.personnelUpdated}。${result.unmatched?`\n未能配對 ${result.unmatched} 項，已安全略過。`:''}`);
   }catch(error){await restoreTransferSnapshot(snapshot);render();alert(`匯入失敗，已回復匯入前資料。\n${error.message||error}`);}
 }
 let procedureDragEndedAt=0;
@@ -3881,7 +3924,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.15.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.16.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.15.0</dd><dt>更新日期</dt><dd>2026-09-09</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>搜尋結果固定依4類SOP既定順序與PDF頁碼排列；移除命中統計與符合層級說明；結果版面基準線統一；搜尋段落進PDF後可定位到該頁條文附近。同步電腦版AND搜尋收斂、PDF乾淨原稿搜尋提示、常用程序三錨點定位與確認即時刷新。</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.16.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.17.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.16.0</dd><dt>更新日期</dt><dd>2026-09-09</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>全頁面校正 iPhone safe-area、頂部狀態列與底部功能列；所有主要關閉按鈕統一 44×44 觸控區；資料管理視窗不再被功能列遮住；工作資料移轉加入事件與人員；App 圖示「務」改為與「蔵」相近的字型比例與垂直基準。保留 v5.16.0 大型 PDF 低記憶體匯入修正。</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -3939,12 +3982,12 @@ async function importData(file){
 function openDataMgmt(){
   const html = `<div class="modal-overlay" id="dm-overlay"><div class="modal-sheet" style="height:auto;">
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
-      <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
+      <button id="dm-close" class="modal-close-btn" aria-label="關閉">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.16.0・2026.09.09</p>
-      <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
-      <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
-      <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.17.0・2026.09.09</p>
+      <p class="muted">「工作資料」包含常用程序、通告、事件與人員，可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
+      <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出工作資料</button>
+      <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入工作資料</button>
       <input type="file" id="dm-transfer-input" accept="application/json,.json" style="display:none">
       <p class="tiny-muted">裝置復原用</p>
       <button class="secondary" id="dm-export" style="width:100%;margin-bottom:10px;">匯出完整資料備份</button>

@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.14.0"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.14.0"></script>
+<script src="./vendor/pdf.min.js?v=5.16.0"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.16.0"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -453,7 +453,7 @@
   }
   @media (max-width:520px){.procedure-card-grid{grid-template-columns:1fr 1fr;}}
 
-  /* v5.15.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
+  /* v5.16.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
   @media (max-width:899px){
     html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;}
     body{display:block!important;margin:0!important;padding:0!important;background:var(--bg)!important;min-height:100vh!important;}
@@ -478,7 +478,7 @@
   .event-participant-list{display:grid;gap:0}.event-person-card{display:grid!important;grid-template-columns:minmax(86px,130px) minmax(0,1fr);align-items:start!important;gap:10px!important;padding:10px 4px!important;border:0!important;border-bottom:.5px solid var(--border)!important;border-radius:0!important}.event-person-card:last-child{border-bottom:0!important}.event-person-detail{display:flex;gap:10px;flex-wrap:wrap;min-width:0}.event-person-detail span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}.event-person-location{color:var(--text-muted)!important}.event-person-edit-title{display:none;font-weight:750;color:var(--accent-text)}.event-more{display:none}.modal-close-btn{border:0;background:none;font-size:18px;min-width:44px;min-height:44px}
 
 
-  /* v5.15.0 mobile UX */
+  /* v5.16.0 mobile UX */
   @media(max-width:899px){
     .modal-overlay{overflow:hidden!important}.modal-sheet{max-width:100%!important;overflow:hidden!important}.modal-body{overflow-x:hidden!important;max-width:100%!important;box-sizing:border-box!important}
     .pdf-reader-shell .modal-header{padding-top:calc(10px + env(safe-area-inset-top))!important;padding-left:max(14px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important;min-height:calc(54px + env(safe-area-inset-top))!important}.pdf-reader-shell .modal-header>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px!important}.pdf-reader-shell #sop-pdf-close{min-width:44px!important;min-height:44px!important;padding:0!important;margin-left:6px!important;display:grid!important;place-items:center!important}
@@ -532,12 +532,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.15.0 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.16.0 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-/* v5.15.0 2026-09-09：
+/* v5.16.0 2026-09-09：
    1) 修正文件名稱命中會把整份文件所有段落都算命中的問題；正文命中頁／段落只計實際符合；
    2) 搜尋段落點入 PDF 前以該段正文重新驗證實體 PDF 頁，避免搜尋索引與原始 PDF 定位錯位；
    3) 常用程序待確認閱讀器新增「確認頁碼正確」，確認後清除提醒並保存新版正文快照；
@@ -836,24 +836,65 @@ function extractFormattedText(textContent,pageHeight){
   flushLine();
   return layoutLines.filter(Boolean).join('\n');
 }
+function lightweightPageLabelItems(textContent,pageHeight){
+  // 大型 PDF 匯入只保留頁尾可能的頁碼候選，不保存整頁 positionedText。
+  // 文字模式若日後需要表格／座標，再由該文件第一次開啟文字模式時延後建立。
+  return (textContent?.items||[]).map(it=>({
+    text:(it.str||'').trim(),
+    x:it.transform?it.transform[4]:0,
+    y:it.transform?it.transform[5]:0,
+    width:Math.abs(it.width||0),
+    height:Math.abs(it.height||it.transform?.[3]||10)
+  })).filter(it=>it.text && (!pageHeight || it.y<=pageHeight*.20) && /^(?:\d{1,4}|[ivxlcdm]{1,6})$/i.test(it.text.replace(/[－—–\-_.頁第]/g,'')));
+}
+function yieldMobileImport(){
+  return new Promise(resolve=>setTimeout(resolve,0));
+}
 async function parsePdfArrayBuffer(buf,onProgress=()=>{}){
-  const pdf = await pdfjsLib.getDocument({data:buf.slice(0)}).promise;
-  const pages = [];
-  onProgress(0,pdf.numPages);
-  for(let i=1;i<=pdf.numPages;i++){
-    try{
-      const page = await pdf.getPage(i), tc = await page.getTextContent(), viewport = page.getViewport({scale:1});
-      const text = tc.items.map(it=>it.str).join(' '), formattedText=extractFormattedText(tc,viewport.height);
-      const tableLayout=await extractPdfTableLayout(page,tc,viewport);
-      const positionedText = positionedPdfItems(tc);
-      pages.push({absolutePage:i,text,formattedText,positionedText,pageWidth:viewport.width,pageHeight:viewport.height,tableLayout,tableLayoutVersion:3});
-    }catch(error){
-      console.warn(`PDF 第 ${i} 頁文字解析失敗`,error);
-      pages.push({absolutePage:i,text:'',formattedText:'',positionedText:[],pageWidth:0,pageHeight:0,parseError:String(error?.message||error)});
+  // 手機大型 PDF 低記憶體模式：
+  // 1. 不在匯入階段分析表格/operator list；
+  // 2. 不保存整頁 positionedText，只保存頁尾頁碼候選；
+  // 3. 每頁 cleanup，固定批次讓出主執行緒；
+  // 4. 解析完成 destroy PDF，再由 File 重新讀取一份原始檔存入 IndexedDB。
+  let pdf=null;
+  const pages=[];
+  try{
+    pdf=await pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise;
+    onProgress(0,pdf.numPages);
+    for(let i=1;i<=pdf.numPages;i++){
+      let page=null,tc=null;
+      try{
+        page=await pdf.getPage(i);
+        tc=await page.getTextContent({disableCombineTextItems:false});
+        const viewport=page.getViewport({scale:1});
+        const text=tc.items.map(it=>it.str).join(' ');
+        const formattedText=extractFormattedText(tc,viewport.height);
+        const positionedText=lightweightPageLabelItems(tc,viewport.height);
+        pages.push({
+          absolutePage:i,text,formattedText,positionedText,
+          pageWidth:viewport.width,pageHeight:viewport.height,
+          tableLayout:null,tableLayoutVersion:0,lazyLayout:true
+        });
+      }catch(error){
+        console.warn(`PDF 第 ${i} 頁文字解析失敗`,error);
+        pages.push({
+          absolutePage:i,text:'',formattedText:'',positionedText:[],
+          pageWidth:0,pageHeight:0,tableLayout:null,tableLayoutVersion:0,lazyLayout:true,
+          parseError:String(error?.message||error)
+        });
+      }finally{
+        try{page?.cleanup?.();}catch(_){}
+        tc=null;page=null;
+      }
+      onProgress(i,pdf.numPages);
+      // Safari / iOS 大檔案長時間同步解析容易累積記憶體與阻塞；每 12 頁主動讓出。
+      if(i%12===0) await yieldMobileImport();
     }
-    onProgress(i,pdf.numPages);
+    return pages;
+  }finally{
+    try{await pdf?.cleanup?.();}catch(_){}
+    try{await pdf?.destroy?.();}catch(_){}
   }
-  return markCrossPageTables(pages);
 }
 function romanToInt(s){
   const vals={i:1,v:5,x:10,l:50,c:100,d:500,m:1000};
@@ -1889,23 +1930,29 @@ async function handlePdfImport(file,options={}){
     if(el) el.textContent=`已執行 ${Math.floor(sec/60)}分${String(sec%60).padStart(2,'0')}秒`;
   },1000);
   try{
-    const buf = await file.arrayBuffer();
-    const pages = await parsePdfArrayBuffer(buf,(current,total)=>{
+    let parseBuf = await file.arrayBuffer();
+    const pages = await parsePdfArrayBuffer(parseBuf,(current,total)=>{
       const pct=total?Math.max(1,Math.round(current/total*100)):1;
       const bar=document.getElementById('pc-progress-bar');
       const main=document.getElementById('pc-progress-main');
       if(bar) bar.style.width=`${pct}%`;
       if(main) main.textContent=current===0
-        ? `共 ${total.toLocaleString()} 頁，準備開始`
+        ? `共 ${total.toLocaleString()} 頁，低記憶體模式準備開始`
         : `第 ${current.toLocaleString()}／${total.toLocaleString()} 頁（${pct}%）`;
     });
+    // 解析用 ArrayBuffer 不再與保存用原始 PDF 同時常駐。
+    parseBuf=null;
+    await yieldMobileImport();
     const main=document.getElementById('pc-progress-main');
-    if(main) main.textContent='解析完成，正在辨識文件並儲存…';
+    if(main) main.textContent='解析完成，正在辨識文件…';
     const docs = segmentDocuments(pages);
+    if(main) main.textContent='正在讀取原始 PDF 並儲存到本機…';
+    const storageBuf=await file.arrayBuffer();
     const pdfFileId = await dbAdd('pdfFiles', {
-      fileName:file.name, displayName:file.name.replace(/\.pdf$/i,''), data:buf,
+      fileName:file.name, displayName:file.name.replace(/\.pdf$/i,''), data:storageBuf,
       uploadedAt:new Date().toISOString(), pageCount:pages.length, documentCount:0,
-      fileSize:file.size, status:'待確認', sopType:options.sopType||'', tempUpdateOf:options.replacePdfId||null
+      fileSize:file.size, status:'待確認', sopType:options.sopType||'', tempUpdateOf:options.replacePdfId||null,
+      importMode:'mobile-low-memory-v2'
     });
     clearInterval(timer);
     showImportReview(docs, pdfFileId, options);
@@ -2269,17 +2316,33 @@ async function ensureDocumentLayoutText(doc){
   </div></div>`;
   document.getElementById('phone').appendChild(loading);
   try{
-    const pdf=await pdfjsLib.getDocument({data:rec.data.slice(0)}).promise;
-    for(const p of doc.pages){
-      const pdfPage=await pdf.getPage(p.absolutePage);
-      const tc=await pdfPage.getTextContent();
-      const viewport=pdfPage.getViewport({scale:1});
-      p.formattedText=extractFormattedText(tc,viewport.height);
-      p.tableLayout=await extractPdfTableLayout(pdfPage,tc,viewport);
-      p.tableLayoutVersion=3;
+    let pdf=null;
+    try{
+      pdf=await pdfjsLib.getDocument({data:rec.data.slice(0)}).promise;
+      let processed=0;
+      for(const p of doc.pages){
+        if(p.formattedText&&p.tableLayoutVersion===3)continue;
+        let pdfPage=null;
+        try{
+          pdfPage=await pdf.getPage(p.absolutePage);
+          const tc=await pdfPage.getTextContent();
+          const viewport=pdfPage.getViewport({scale:1});
+          p.formattedText=extractFormattedText(tc,viewport.height);
+          p.tableLayout=await extractPdfTableLayout(pdfPage,tc,viewport);
+          p.tableLayoutVersion=3;
+          p.lazyLayout=false;
+        }finally{
+          try{pdfPage?.cleanup?.();}catch(_){}
+        }
+        processed++;
+        if(processed%8===0)await yieldMobileImport();
+      }
+      markCrossPageTables(doc.pages);
+      await dbPut('sopDocs',doc);
+    }finally{
+      try{await pdf?.cleanup?.();}catch(_){}
+      try{await pdf?.destroy?.();}catch(_){}
     }
-    markCrossPageTables(doc.pages);
-    await dbPut('sopDocs',doc);
   }finally{
     loading.remove();
   }
@@ -3818,7 +3881,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.14.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.15.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.14.0</dd><dt>更新日期</dt><dd>2026-09-09</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>搜尋結果固定依4類SOP既定順序與PDF頁碼排列；移除命中統計與符合層級說明；結果版面基準線統一；搜尋段落進PDF後可定位到該頁條文附近。同步電腦版AND搜尋收斂、PDF乾淨原稿搜尋提示、常用程序三錨點定位與確認即時刷新。</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.15.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.16.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.15.0</dd><dt>更新日期</dt><dd>2026-09-09</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>搜尋結果固定依4類SOP既定順序與PDF頁碼排列；移除命中統計與符合層級說明；結果版面基準線統一；搜尋段落進PDF後可定位到該頁條文附近。同步電腦版AND搜尋收斂、PDF乾淨原稿搜尋提示、常用程序三錨點定位與確認即時刷新。</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -3878,7 +3941,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" style="background:none;border:none;font-size:18px;">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.15.0・2026.09.09</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.16.0・2026.09.09</p>
       <p class="muted">匯出資料後可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出常用程序與通告</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入常用程序與通告</button>

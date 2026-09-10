@@ -1,14 +1,15 @@
-const CACHE_NAME = 'station-assistant-mobile-github-v5.18.0';
+const CACHE_NAME = 'station-assistant-mobile-github-v5.20.1';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './vendor/pdf.min.js?v=5.18.0',
-  './vendor/pdf.worker.min.js?v=5.18.0',
-  './vendor/xlsx.full.min.js?v=5.18.0',
+  './vendor/pdf.min.js?v=5.19.0',
+  './vendor/pdf.worker.min.js?v=5.19.0',
+  './vendor/xlsx.full.min.js?v=5.19.0',
   './icons/icon-180.png',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './assets/procedure-icons-v1.png'
 ];
 
 self.addEventListener('install', event => {

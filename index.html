@@ -11,8 +11,8 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <title>站務工作助手｜手機離線版</title>
-<script src="./vendor/pdf.min.js?v=5.18.0"></script>
-<script src="./vendor/xlsx.full.min.js?v=5.18.0"></script>
+<script src="./vendor/pdf.min.js?v=5.19.0"></script>
+<script src="./vendor/xlsx.full.min.js?v=5.19.0"></script>
 <style>
   :root{
     --bg:#f1f4f8; --card:#ffffff; --border:#dce3ec; --border-strong:#bcc8d7;
@@ -453,7 +453,7 @@
   }
   @media (max-width:520px){.procedure-card-grid{grid-template-columns:1fr 1fr;}}
 
-  /* v5.18.0 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
+  /* v5.20.1 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
   @media (max-width:899px){
     html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;}
     body{display:block!important;margin:0!important;padding:0!important;background:var(--bg)!important;min-height:100vh!important;}
@@ -478,7 +478,7 @@
   .event-participant-list{display:grid;gap:0}.event-person-card{display:grid!important;grid-template-columns:minmax(86px,130px) minmax(0,1fr);align-items:start!important;gap:10px!important;padding:10px 4px!important;border:0!important;border-bottom:.5px solid var(--border)!important;border-radius:0!important}.event-person-card:last-child{border-bottom:0!important}.event-person-detail{display:flex;gap:10px;flex-wrap:wrap;min-width:0}.event-person-detail span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}.event-person-location{color:var(--text-muted)!important}.event-person-edit-title{display:none;font-weight:750;color:var(--accent-text)}.event-more{display:none}.modal-close-btn{border:0;background:none;font-size:18px;min-width:44px;min-height:44px}
 
 
-  /* v5.18.0 mobile UX */
+  /* v5.20.1 mobile UX */
   @media(max-width:899px){
     .modal-overlay{overflow:hidden!important}.modal-sheet{max-width:100%!important;overflow:hidden!important}.modal-body{overflow-x:hidden!important;max-width:100%!important;box-sizing:border-box!important}
     .pdf-reader-shell .modal-header{padding-top:calc(10px + env(safe-area-inset-top))!important;padding-left:max(14px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important;min-height:calc(54px + env(safe-area-inset-top))!important}.pdf-reader-shell .modal-header>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px!important}.pdf-reader-shell #sop-pdf-close{min-width:44px!important;min-height:44px!important;padding:0!important;margin-left:6px!important;display:grid!important;place-items:center!important}
@@ -517,7 +517,7 @@
   .search-page-group{margin-left:0;margin-right:0}
 
 
-  /* v5.18.0 iPhone 全頁面版面校正：safe-area 只計算一次，底部導覽不再漂浮或遮住內容 */
+  /* v5.20.1 iPhone 全頁面版面校正：safe-area 只計算一次，底部導覽不再漂浮或遮住內容 */
   @media(max-width:899px){
     :root{--mobile-nav-h:68px;--mobile-top-h:56px;}
     html,body{width:100%;height:100%;height:100dvh;overflow:hidden!important;}
@@ -543,6 +543,14 @@
     .event-editor-sheet>.modal-body{padding-bottom:calc(28px + env(safe-area-inset-bottom))!important;}
   }
 
+
+/* vNext 常用程序工作索引 */
+.procedure-workbench{margin-top:14px}.procedure-recent-block{margin:12px 0 14px}.procedure-workbench-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.procedure-workbench-title h2{font-size:16px;margin:0}.procedure-filter-head-actions{display:flex;align-items:center;gap:8px}.procedure-recent-strip{display:flex;gap:8px;overflow-x:auto;padding:1px 0 4px;scrollbar-width:none}.procedure-recent-strip::-webkit-scrollbar{display:none}.procedure-recent-card{display:flex;align-items:center;gap:8px;flex:0 0 170px;min-width:0;text-align:left;border:.5px solid var(--border);background:#fff;border-radius:12px;padding:9px 10px;cursor:pointer;color:var(--text)}.procedure-recent-icon{width:34px;height:34px;flex:0 0 34px}.procedure-recent-card span:last-child{min-width:0}.procedure-recent-card b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.procedure-recent-card small{display:block;font-size:10px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.procedure-category-filter{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.procedure-category-filter::-webkit-scrollbar{display:none}.procedure-category-chip{border:1px solid transparent;background:var(--chip-bg,#eef2f6);color:var(--chip-color,var(--text-2));border-radius:999px;padding:0 12px;height:36px;display:inline-flex;align-items:center;justify-content:center;line-height:1;white-space:nowrap;cursor:pointer;font-size:14px;font-weight:650}.procedure-category-chip.active{background:var(--chip-color,var(--accent));color:#fff;border-color:var(--chip-color,var(--accent))}.procedure-category-chip b{font-size:13px;margin-left:5px;font-weight:700;line-height:1}.procedure-compact-grid{display:grid;grid-template-columns:1fr;gap:8px}.procedure-compact-card{--category-color:#68778A;position:relative;display:flex;align-items:stretch;min-width:0;min-height:68px;background:#fff;border:.5px solid var(--border);border-radius:11px;box-shadow:0 1px 3px rgba(0,0,0,.035);overflow:hidden}.procedure-compact-card:before{content:'';width:4px;flex:0 0 4px;background:var(--category-color)}.procedure-main-open{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;border:0;background:none;padding:8px 0 8px 9px;cursor:pointer;color:var(--text)}.procedure-svg-icon{width:42px;height:42px;flex:0 0 42px}.procedure-compact-copy{min-width:0}.procedure-compact-copy b{display:block;font-size:14px;line-height:1.3;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.procedure-compact-copy small{display:block;color:var(--text-2);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.procedure-compact-side{display:flex;align-items:center;gap:5px;padding-right:6px;flex:0 0 auto}.procedure-compact-card .procedure-card-menu{position:static;width:34px;height:34px;background:transparent}.procedure-review-badge{font-size:10px!important;max-width:116px;text-align:center}.category-manager-sheet{height:auto;max-height:min(82dvh,760px);max-width:620px}.category-manager-row{display:grid;grid-template-columns:14px minmax(0,1fr) auto auto;gap:7px;align-items:center;padding:9px 0;border-bottom:.5px solid var(--border)}.category-manager-swatch{width:12px;height:34px;border-radius:999px;background:var(--category-color)}.category-manager-copy b{display:block}.category-manager-copy small{display:block;font-size:11px;color:var(--text-muted);margin-top:2px}.category-color-picker{display:flex;gap:9px;flex-wrap:wrap}.category-color-choice{width:34px;height:34px;min-height:0;border:3px solid transparent;border-radius:50%;cursor:pointer}.category-color-choice.selected{border-color:#111;box-shadow:0 0 0 2px #fff inset}.empty-category{padding:18px;text-align:center;color:var(--text-muted);background:#f7f8fa;border-radius:12px}.procedure-icon-groups{display:flex;flex-direction:column;gap:14px}.procedure-icon-group-title{font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:7px}.procedure-icon-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.procedure-icon-choice{aspect-ratio:1;border:1px solid var(--border);background:#fff;border-radius:11px;padding:4px;cursor:pointer}.procedure-icon-choice.selected{border:2px solid var(--accent);background:#eef7ff}.procedure-png-icon{display:block;width:100%;height:100%;background-image:url('./assets/procedure-icons-v1.png');background-size:800% 600%;background-repeat:no-repeat;background-position:var(--icon-pos-x,0%) var(--icon-pos-y,0%)}
+@media(max-width:900px){.procedure-recent-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.category-icon-picker{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:620px){.procedure-workbench-toolbar{display:block}.procedure-workbench-toolbar .secondary{margin-top:8px;width:100%}.procedure-recent-strip{display:flex;overflow-x:auto;gap:8px;padding-bottom:3px}.procedure-recent-card{flex:0 0 132px}.procedure-compact-grid{grid-template-columns:1fr}.procedure-compact-card{min-height:72px}.procedure-svg-icon{width:38px;height:38px;flex-basis:38px}.procedure-compact-side .procedure-category-mini{display:none}.category-manager-row{grid-template-columns:36px minmax(0,1fr) auto auto}.category-manager-row [data-cat-up],.category-manager-row [data-cat-down]{display:none}.category-icon-picker{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+#phone.data-modal-open #tabbar{visibility:hidden!important;pointer-events:none!important;}
+#phone.data-modal-open #content{padding-bottom:0!important;}
 </style>
 </head>
 <body>
@@ -559,18 +567,18 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.18.0 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.20.1 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-/* v5.18.0 2026-09-09：
+/* v5.20.1 2026-09-10：
    1) 修正文件名稱命中會把整份文件所有段落都算命中的問題；正文命中頁／段落只計實際符合；
    2) 搜尋段落點入 PDF 前以該段正文重新驗證實體 PDF 頁，避免搜尋索引與原始 PDF 定位錯位；
    3) 常用程序待確認閱讀器新增「確認頁碼正確」，確認後清除提醒並保存新版正文快照；
    4) 事件參與人員解析支援「小班＋值班站長／值班站務專員」等班別職稱；
    5) 維持修訂／異動頁排除、文字模式階層、表格與 SOP 安全更新規則。 */
-pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.18.0';
+pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.19.0';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
@@ -653,6 +661,137 @@ let noticePage = 1;
 const NOTICE_PAGE_SIZE = 20;
 const SEARCH_HISTORY_KEY='stationAssistantSearchHistory';
 const PROCEDURE_COLORS=['blue','green','orange','purple','red','gray'];
+
+const PROCEDURE_CATEGORY_KEY='stationAssistantProcedureCategoriesV1';
+const PROCEDURE_RECENT_KEY='stationAssistantRecentProceduresV1';
+let procedureCategoryFilter='all';
+let procedureListQuery='';
+const PROCEDURE_ICON_LIBRARY=[
+  ['train','電聯車'],
+  ['door','車門故障清車'],
+  ['train_alert','行車異常'],
+  ['train_clean','列車清潔'],
+  ['fire','車站火警'],
+  ['extinguisher','滅火器'],
+  ['fire_alarm','火警警報'],
+  ['evacuation','疏散避難'],
+  ['elevator','電梯困人'],
+  ['escalator','電扶梯停機'],
+  ['escalator_alert','電扶梯異常'],
+  ['elevator_maint','電梯維修'],
+  ['ticket','票卡作業'],
+  ['gate','閘門異常'],
+  ['no_money','無錢購票'],
+  ['child_ticket','兒童票證'],
+  ['passenger','旅客諮詢'],
+  ['crowd','車站人潮'],
+  ['accessible','無障礙服務'],
+  ['lost_found','遺失物'],
+  ['medical','旅客受傷'],
+  ['ambulance','送醫'],
+  ['aed','AED'],
+  ['stretcher','傷患搬運'],
+  ['wrench','設備維修'],
+  ['gear','設備異常'],
+  ['power','電力異常'],
+  ['leak','漏水'],
+  ['station_clean','車站清潔'],
+  ['trash','垃圾處理'],
+  ['spray','消毒'],
+  ['environment','環境維護'],
+  ['camera','監視器'],
+  ['security','保全'],
+  ['radio','無線電'],
+  ['phone','電話'],
+  ['rain','雨天應變'],
+  ['typhoon','防颱'],
+  ['heat','高溫'],
+  ['cold','低溫'],
+  ['document','SOP'],
+  ['notice','通告'],
+  ['record','修訂紀錄'],
+  ['manual','作業手冊'],
+  ['broadcast','車站廣播'],
+  ['alert','異常通報'],
+  ['more','其他作業'],
+  ['custom','自訂類別']
+];
+const PROCEDURE_ICON_GROUPS=[
+  ['列車／行車',['train','door','train_alert','train_clean']],
+  ['消防／安全',['fire','extinguisher','fire_alarm','evacuation']],
+  ['電梯／電扶梯',['elevator','escalator','escalator_alert','elevator_maint']],
+  ['票證／閘門',['ticket','gate','no_money','child_ticket']],
+  ['旅客服務',['passenger','crowd','accessible','lost_found']],
+  ['醫療／緊急救援',['medical','ambulance','aed','stretcher']],
+  ['設備／維修',['wrench','gear','power','leak']],
+  ['環境／清潔',['station_clean','trash','spray','environment']],
+  ['保全／監控',['camera','security','radio','phone']],
+  ['天氣／防災',['rain','typhoon','heat','cold']],
+  ['文件／作業',['document','notice','record','manual']],
+  ['其他',['broadcast','alert','more','custom']]
+];
+const PROCEDURE_CATEGORY_COLORS={blue:'#0A78D1',green:'#2E9B63',orange:'#E88A1A',purple:'#7754C8',red:'#D94B4B',gray:'#68778A',teal:'#168C99'};
+function getProcedureCategories(){
+  try{return JSON.parse(localStorage.getItem(PROCEDURE_CATEGORY_KEY)||'[]').filter(c=>c&&c.id&&c.name).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));}catch{return []}
+}
+function saveProcedureCategories(rows){localStorage.setItem(PROCEDURE_CATEGORY_KEY,JSON.stringify(rows.map((c,i)=>({...c,order:i+1}))));}
+function procedureCategoryById(id){return getProcedureCategories().find(c=>String(c.id)===String(id));}
+function procedureCategoryColor(cat){return PROCEDURE_CATEGORY_COLORS[cat?.color]||PROCEDURE_CATEGORY_COLORS.gray;}
+/* Station Assistant 圖示母版 v1.0：採已確認的彩色情境 PNG，手機版以單一 sprite 資產載入。 */
+function procedureIconSvg(name){
+  const pos={'train':[0,0],'door':[14.285714,0],'train_alert':[28.571429,0],'train_clean':[42.857143,0],'fire':[57.142857,0],'extinguisher':[71.428571,0],'fire_alarm':[85.714286,0],'evacuation':[100.0,0],'elevator':[0,20.0],'escalator':[14.285714,20.0],'escalator_alert':[28.571429,20.0],'elevator_maint':[42.857143,20.0],'ticket':[57.142857,20.0],'gate':[71.428571,20.0],'no_money':[85.714286,20.0],'child_ticket':[100.0,20.0],'passenger':[0,40.0],'crowd':[14.285714,40.0],'accessible':[28.571429,40.0],'lost_found':[42.857143,40.0],'medical':[57.142857,40.0],'ambulance':[71.428571,40.0],'aed':[85.714286,40.0],'stretcher':[100.0,40.0],'wrench':[0,60.0],'gear':[14.285714,60.0],'power':[28.571429,60.0],'leak':[42.857143,60.0],'station_clean':[57.142857,60.0],'trash':[71.428571,60.0],'spray':[85.714286,60.0],'environment':[100.0,60.0],'camera':[0,80.0],'security':[14.285714,80.0],'radio':[28.571429,80.0],'phone':[42.857143,80.0],'rain':[57.142857,80.0],'typhoon':[71.428571,80.0],'heat':[85.714286,80.0],'cold':[100.0,80.0],'document':[0,100.0],'notice':[14.285714,100.0],'record':[28.571429,100.0],'manual':[42.857143,100.0],'broadcast':[57.142857,100.0],'alert':[71.428571,100.0],'more':[85.714286,100.0],'custom':[100.0,100.0]};
+  const p=pos[name]||pos.document;
+  return `<span class="procedure-png-icon" aria-hidden="true" style="--icon-pos-x:${p[0]}%;--icon-pos-y:${p[1]}%"></span>`;
+}
+function suggestProcedureIcon(title){ return 'document'; }
+function getRecentProcedureIds(){try{return JSON.parse(localStorage.getItem(PROCEDURE_RECENT_KEY)||'[]').map(Number).filter(Number.isFinite).slice(0,8)}catch{return[]}}
+function noteRecentProcedure(id){const n=Number(id);if(!Number.isFinite(n))return;localStorage.setItem(PROCEDURE_RECENT_KEY,JSON.stringify([n,...getRecentProcedureIds().filter(x=>x!==n)].slice(0,8)));}
+function procedureSourceShortName(source){
+  const text=String(source||'').trim();
+  if(!text)return 'SOP';
+  if(/高運量.*行車運轉/.test(text))return '行車運轉工作說明書';
+  if(/站務設備操作手冊/.test(text))return '設備操作手冊';
+  if(/防颱防洪/.test(text))return '防颱防洪工作說明書';
+  if(/站務工作說明書/.test(text))return '站務工作說明書';
+  return text.length>18?`${text.slice(0,18)}…`:text;
+}
+function procedureDisplayMeta(f){
+  const cat=procedureCategoryById(f.categoryId),color=procedureCategoryColor(cat),icon=(f.iconManual===true&&f.iconKey)?f.iconKey:'document';
+  const doc=f.type==='sop'?cache.sopDocs.find(d=>Number(d.id)===Number(f.docId)):null;
+  const sourceFull=f.type==='notice'?'通告':(doc?resolvedDocName(doc):(f.sourceTitle||'SOP'));
+  const source=procedureSourceShortName(sourceFull);
+  const start=Number(f.startPage||f.absolutePage),end=Number(f.endPage||f.startPage||f.absolutePage);
+  const page=Number.isFinite(start)?`PDF ${start}${Number.isFinite(end)&&end!==start?`–${end}`:''}`:'';
+  return {cat,color,icon,source,sourceFull,page};
+}
+function renderProcedureCompactCard(f,{recent=false}={}){
+  const m=procedureDisplayMeta(f);
+  const sourceLine=[m.source,m.page].filter(Boolean).join(' · ');
+  if(recent)return `<button class="procedure-recent-card" data-procedure-open="${f.id}" title="${escapeHtml(f.title)}"><span class="procedure-recent-icon">${procedureIconSvg(m.icon)}</span><span><b>${escapeHtml(f.title)}</b>${sourceLine?`<small>${escapeHtml(sourceLine)}</small>`:''}</span></button>`;
+  return `<article class="procedure-compact-card" data-procedure-card="${f.id}" draggable="true" style="--category-color:${m.color}">
+    <button class="procedure-main-open" data-procedure-open="${f.id}" title="${escapeHtml(m.sourceFull)}${m.page?` · ${escapeHtml(m.page)}`:''}">
+      <span class="procedure-svg-icon">${procedureIconSvg(m.icon)}</span>
+      <span class="procedure-compact-copy"><b>${escapeHtml(f.title)}</b><small>${escapeHtml(sourceLine||m.source)}</small></span>
+    </button>
+    <span class="procedure-compact-side">${f.pageReviewRequired?`<span class="procedure-review-badge ${f.pageReviewStatus||''}">${f.pageReviewStatus==='auto'?'自動移轉｜請確認':f.pageReviewStatus==='changed'?'內容有異動｜請確認':f.pageReviewStatus==='unmatched'?'無法定位｜請重新設定':'請確認頁碼'}</span>`:''}<button class="procedure-card-menu" data-procedure-menu="${f.id}" aria-label="設定常用程序">⋯</button></span>
+  </article>`;
+}
+function openProcedureCategoryManager(){
+  const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='96';
+  const draw=()=>{const rows=getProcedureCategories();overlay.innerHTML=`<div class="modal-sheet category-manager-sheet"><div class="modal-header"><b>常用程序分類</b><button class="modal-close-btn" id="category-close">✕</button></div><div class="modal-body"><p class="muted" style="margin-top:0">分類只設定名稱、識別色與排列順序；程序圖示預設為 SOP 文件圖示，需要時可在各程序的「⋯」→「圖示設定」手動指定。刪除分類不會刪除常用程序，程序會回到未分類。</p><div id="category-list">${rows.map((c,i)=>`<div class="category-manager-row"><span class="category-manager-swatch" style="--category-color:${procedureCategoryColor(c)}"></span><div class="category-manager-copy"><b>${escapeHtml(c.name)}</b><small>識別色</small></div><button class="mini-action" data-cat-edit="${c.id}">編輯</button><button class="mini-action danger-text" data-cat-delete="${c.id}">刪除</button></div>`).join('')||'<div class="empty-category">尚未建立分類；既有常用程序會顯示為未分類。</div>'}</div><button class="primary" id="category-add" style="width:100%;margin-top:12px">＋ 新增分類</button></div></div>`;
+    overlay.querySelector('#category-close').onclick=()=>overlay.remove();
+    overlay.querySelector('#category-add').onclick=()=>editProcedureCategory(null,draw);
+    overlay.querySelectorAll('[data-cat-edit]').forEach(b=>b.onclick=()=>editProcedureCategory(b.dataset.catEdit,draw));
+    overlay.querySelectorAll('[data-cat-delete]').forEach(b=>b.onclick=async()=>{const id=b.dataset.catDelete;if(!confirm('刪除此分類？常用程序會保留並改為未分類。'))return;saveProcedureCategories(getProcedureCategories().filter(c=>String(c.id)!==String(id)));for(const f of cache.favorites.filter(x=>String(x.categoryId)===String(id))){delete f.categoryId;await dbPut('favorites',f)}await reloadCache();draw();});
+  };draw();(document.getElementById('phone')||document.body).appendChild(overlay);
+}
+function editProcedureCategory(id,done){
+  const existing=procedureCategoryById(id);let selectedColor=existing?.color||'blue';const o=document.createElement('div');o.className='modal-overlay';o.style.zIndex='98';
+  o.innerHTML=`<div class="modal-sheet" style="height:auto;max-width:520px"><div class="modal-header"><b>${existing?'編輯':'新增'}分類</b><button class="modal-close-btn" id="cat-edit-close">✕</button></div><div class="modal-body"><div class="field"><label>分類名稱</label><input id="cat-name" maxlength="12" value="${escapeHtml(existing?.name||'')}"></div><div class="field"><label>識別色</label><div class="category-color-picker">${Object.entries(PROCEDURE_CATEGORY_COLORS).map(([key,value])=>`<button class="category-color-choice ${key===selectedColor?'selected':''}" data-cat-color="${key}" style="background:${value}" aria-label="${key}"></button>`).join('')}</div></div><div class="row"><button class="secondary" id="cat-edit-cancel" style="flex:1">取消</button><button class="primary" id="cat-edit-save" style="flex:1">儲存</button></div></div></div>`;
+  (document.getElementById('phone')||document.body).appendChild(o);o.querySelector('#cat-edit-close').onclick=o.querySelector('#cat-edit-cancel').onclick=()=>o.remove();
+  o.querySelectorAll('[data-cat-color]').forEach(b=>b.onclick=()=>{selectedColor=b.dataset.catColor;o.querySelectorAll('[data-cat-color]').forEach(x=>x.classList.toggle('selected',x===b))});
+  o.querySelector('#cat-edit-save').onclick=()=>{const name=o.querySelector('#cat-name').value.trim();if(!name)return alert('請輸入分類名稱');const rows=getProcedureCategories(),row={id:existing?.id||`cat-${Date.now()}`,name,color:selectedColor,order:existing?.order||rows.length+1};const idx=rows.findIndex(c=>c.id===row.id);if(idx>=0)rows[idx]=row;else rows.push(row);saveProcedureCategories(rows);o.remove();done?.()};
+}
 
 const titleMap = {sop:'作業查詢', ridership:'運量查詢', personnel:'特殊事件／人員', library:'資料管理', settings:'設定'};
 
@@ -1242,6 +1381,7 @@ function renderSop(){
     const item=cache.favorites.find(x=>x.id===Number(card.dataset.procedureCard));
     if(item) openSavedItem(item);
   }));
+  bindProcedureWorkbench();
   bindProcedureCardSorting();
   contentEl.querySelectorAll('[data-procedure-menu]').forEach(btn=>btn.addEventListener('click',e=>{
     e.stopPropagation();openProcedureCardMenu(Number(btn.dataset.procedureMenu));
@@ -1576,7 +1716,7 @@ function openProcedureNameDialog(item,existing=null){
       <div class="modal-header"><span style="font-weight:650;">${existing?'重新命名':'新增常用程序'}</span></div>
       <div class="modal-body">
         <div class="field"><label>常用程序名稱</label><input id="procedure-name-input" maxlength="30" value="${escapeHtml(defaultName)}" placeholder="例如：電梯困人"></div>
-        <div class="field"><label>卡片顏色</label><div class="color-options">${PROCEDURE_COLORS.map(color=>`<button type="button" class="color-choice procedure-${color} ${color===selectedColor?'selected':''}" data-procedure-color="${color}" aria-label="${color}"></button>`).join('')}</div></div>
+        <div class="field"><label>分類</label><select id="procedure-category-select"><option value="">未分類</option>${getProcedureCategories().map(c=>`<option value="${c.id}" ${String(existing?.categoryId||item.categoryId||'')===String(c.id)?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}</select><p class="tiny-muted" style="margin:5px 0 0">分類只控制識別色；程序圖示請由「圖示設定」另外指定。</p></div>
         <p class="tiny-muted" style="line-height:1.6;margin:0;">來源：${escapeHtml(sourceTitle)}${item.type==='sop'&&item.absolutePage?`｜命中PDF第${item.absolutePage}頁`:''}</p>
         ${item.type==='sop'?`<div class="procedure-range-grid">
           <div class="field" style="margin:0;"><label>起始PDF頁</label><input type="number" id="procedure-start-page" min="${bounds.min}" max="${bounds.max}" value="${defaultStart}"></div>
@@ -1599,6 +1739,7 @@ function openProcedureNameDialog(item,existing=null){
     overlay.querySelector('#procedure-name-cancel').addEventListener('click',()=>close(false));
     overlay.querySelector('#procedure-name-save').addEventListener('click',async()=>{
       const title=input.value.trim();
+      const categoryId=overlay.querySelector('#procedure-category-select')?.value||'';
       if(!title) return alert('請輸入常用程序名稱');
       let rangeData={};
       if(item.type==='sop'){
@@ -1614,10 +1755,10 @@ function openProcedureNameDialog(item,existing=null){
       const sourceTextSnapshot=sourceDoc?favoriteRangeSnapshot({...item,...existing,...rangeData},sourceDoc,rangeData.startPage,rangeData.endPage):'';
       const snapshotMeta=sourceDoc?{sourceTextSnapshot,sourceSnapshotStartPage:rangeData.startPage,sourceSnapshotEndPage:rangeData.endPage,sourceSnapshotAt:new Date().toISOString()}:{};
       if(existing){
-        await dbPut('favorites',{...existing,...rangeData,...snapshotMeta,title,sourceTitle,color:selectedColor,pageReviewRequired:false,pageReviewStatus:'',pageMatchScore:null,pageMatchMethod:'manual-confirm',updatedAt:new Date().toISOString()});
+        await dbPut('favorites',{...existing,...rangeData,...snapshotMeta,title,sourceTitle,color:selectedColor,categoryId,pageReviewRequired:false,pageReviewStatus:'',pageMatchScore:null,pageMatchMethod:'manual-confirm',updatedAt:new Date().toISOString()});
       }else{
         const maxOrder=Math.max(0,...cache.favorites.map(f=>Number(f.sortOrder)||0));
-        await dbAdd('favorites',{...item,...rangeData,...snapshotMeta,title,sourceTitle,color:selectedColor,sortOrder:maxOrder+1,createdAt:new Date().toISOString()});
+        await dbAdd('favorites',{...item,...rangeData,...snapshotMeta,title,sourceTitle,color:selectedColor,categoryId,iconKey:'document',iconManual:false,sortOrder:maxOrder+1,createdAt:new Date().toISOString()});
       }
       await reloadCache();
       close(true);
@@ -1625,6 +1766,7 @@ function openProcedureNameDialog(item,existing=null){
   });
 }
 function openSavedItem(item){
+  if(item?.id)noteRecentProcedure(item.id);
   if(item.type==='notice') openNoticeReader(item.noticeId);
   else openSopPdfReader(item.docId,item.startPage||item.absolutePage,{startPage:item.startPage,endPage:item.endPage,favoriteId:cache.favorites.includes(item)?item.id:undefined});
 }
@@ -1636,18 +1778,20 @@ function documentVersionSummary(doc){
   return [version&&`版別 ${version}`,date&&`首次發行 ${date}`].filter(Boolean).join('｜');
 }
 function renderShortcutSection(){
-  const rows=sortedProcedures();
-  let html=`<div class="procedure-heading"><div><h2>常用程序</h2><span class="tiny-muted">${rows.length?`${rows.length} 個項目`:'尚未建立'}</span></div><div class="procedure-heading-actions"><button class="secondary" id="procedure-export">整合匯出</button><button class="secondary" id="procedure-import">整合匯入</button><input type="file" id="procedure-import-file" accept="application/json,.json" style="display:none"></div></div>`;
-  if(!rows.length) html+=`<div class="card"><p class="muted" style="margin:0;">在搜尋結果或 PDF 閱讀器點選「加入常用」，程序會直接顯示在這裡。</p></div>`;
-  else html+='<div class="procedure-card-grid">';
-  rows.forEach(f=>{
-    html+=`<article class="procedure-card procedure-${PROCEDURE_COLORS.includes(f.color)?f.color:'blue'}" data-procedure-card="${f.id}" draggable="true" title="拖曳可調整順序">
-      <button class="procedure-card-menu" data-procedure-menu="${f.id}" aria-label="設定">⋯</button>
-      <p class="procedure-card-name">${escapeHtml(f.title)}</p>${f.pageReviewRequired?`<span class="procedure-review-badge ${f.pageReviewStatus==='auto'?'auto':f.pageReviewStatus==='changed'?'changed':f.pageReviewStatus==='unmatched'?'unmatched':''}" title="${escapeHtml([f.pageMatchOldRange&&`舊版 ${f.pageMatchOldRange}`,f.pageMatchNewRange&&`新版 ${f.pageMatchNewRange}`,Number.isFinite(Number(f.pageMatchScore))&&`比對 ${Math.round(Number(f.pageMatchScore)*100)}%`].filter(Boolean).join('｜'))}">${f.pageReviewStatus==='auto'?'自動移轉｜請確認':f.pageReviewStatus==='changed'?'內容有異動｜請確認':f.pageReviewStatus==='unmatched'?'無法定位｜請重新設定':'請確認頁碼'}</span>`:''}
-    </article>`;
-  });
-  if(rows.length)html+='</div>';
-  return html;
+  const allRows=sortedProcedures();
+  const categories=getProcedureCategories();
+  let rows=allRows.filter(f=>procedureCategoryFilter==='all'?true:procedureCategoryFilter==='uncategorized'?!f.categoryId:String(f.categoryId)===String(procedureCategoryFilter));
+  const recent=getRecentProcedureIds().map(id=>allRows.find(f=>Number(f.id)===id)).filter(Boolean);
+  const uncategorized=allRows.filter(f=>!f.categoryId).length;
+  const chip=(id,label,count,color,active)=>`<button class="procedure-category-chip ${active?'active':''}" data-procedure-category="${id}" style="--chip-color:${color};--chip-bg:${color}18">${escapeHtml(label)} <b>${count}</b></button>`;
+  const chips=[chip('all','全部',allRows.length,PROCEDURE_CATEGORY_COLORS.blue,procedureCategoryFilter==='all'),...categories.map(c=>chip(c.id,c.name,allRows.filter(f=>String(f.categoryId)===String(c.id)).length,procedureCategoryColor(c),String(procedureCategoryFilter)===String(c.id))),...(uncategorized?[chip('uncategorized','未分類',uncategorized,PROCEDURE_CATEGORY_COLORS.gray,procedureCategoryFilter==='uncategorized')]:[])];
+  let html=`<section class="procedure-workbench">`;
+  if(recent.length)html+=`<div class="procedure-recent-block"><div class="procedure-workbench-title"><h2>最近使用</h2></div><div class="procedure-recent-strip">${recent.map(f=>renderProcedureCompactCard(f,{recent:true})).join('')}</div></div>`;
+  html+=`<div class="procedure-workbench-title"><h2>分類篩選</h2><div class="procedure-filter-head-actions"><button class="secondary" id="procedure-category-manage">管理分類</button></div></div><div class="procedure-category-filter">${chips.join('')}</div><div class="procedure-workbench-title"><h2>常用程序 <span class="procedure-count">${rows.length}</span></h2></div>`;
+  if(!allRows.length)html+=`<div class="card"><p class="muted" style="margin:0">在搜尋結果或 PDF 閱讀器點選「加入常用」，程序會顯示在這裡。</p></div>`;
+  else if(!rows.length)html+=`<div class="card"><p class="muted" style="margin:0">目前篩選條件沒有常用程序。</p></div>`;
+  else html+=`<div class="procedure-compact-grid">${rows.map(f=>renderProcedureCompactCard(f)).join('')}</div>`;
+  return html+'</section>';
 }
 
 function procedurePortableRecord(f){
@@ -1745,7 +1889,7 @@ async function exportProcedures(){
   const announcements=cache.announcements.map(n=>{const copy={...n,portableId:n.id,noticeKey:transferNoticeKey(n),pdfData:n.pdfData?bufToBase64(n.pdfData):null,
     relationDocumentKeys:(n.relations||[]).map(r=>{const d=cache.sopDocs.find(x=>x.id===Number(r.docId)),p=d?cache.pdfFiles.find(x=>x.id===Number(d.pdfFileId)):null;return d?{documentKey:transferDocumentKey(d,p),startPage:r.startPage||null,endPage:r.endPage||r.startPage||null}:null;}).filter(Boolean),
     procedurePortableIds:(n.procedureIds||[]).map(id=>Number(id))};delete copy.id;delete copy.relations;delete copy.procedureIds;return copy;});
-  downloadJson({format:'station-assistant-transfer',version:5,mode:'lightweight',exportedAt:new Date().toISOString(),source:'mobile',documents,procedures:procedures.map(portableProcedureV3),annotations,announcements,events:events.map(portableWorkRecord),personnel:personnel.map(portableWorkRecord)},`工作資料移轉-${new Date().toISOString().slice(0,10)}.json`);
+  downloadJson({format:'station-assistant-transfer',version:6,mode:'lightweight',exportedAt:new Date().toISOString(),source:'mobile',documents,procedures:procedures.map(portableProcedureV3),annotations,announcements,events:events.map(portableWorkRecord),personnel:personnel.map(portableWorkRecord),procedureCategories:getProcedureCategories()},`工作資料移轉-${new Date().toISOString().slice(0,10)}.json`);
 }
 async function transferSnapshot(){const out={};for(const name of ['pdfFiles','sopDocs','favorites','annotations','announcements','personnel'])out[name]=await dbGetAll(name);return out;}
 async function restoreTransferSnapshot(snapshot){for(const name of Object.keys(snapshot)){await dbClear(name);for(const row of snapshot[name])await dbAdd(name,row);}await reloadCache();}
@@ -1757,7 +1901,7 @@ function chooseImportMode(fileData,stats){
 async function importProceduresFile(file){
   let data;try{data=JSON.parse(await file.text())}catch{return alert('無法讀取移轉檔，請選擇由本程式匯出的 JSON 檔。')}
   if(data?.format==='station-assistant-procedures')return importProceduresFileLegacy(file);
-  if(data?.format!=='station-assistant-transfer'||![3,4,5].includes(Number(data.version))||!Array.isArray(data.procedures)||!Array.isArray(data.announcements))return alert('這不是相容的「工作資料移轉」檔。');
+  if(data?.format!=='station-assistant-transfer'||![3,4,5,6].includes(Number(data.version))||!Array.isArray(data.procedures)||!Array.isArray(data.announcements))return alert('這不是相容的「工作資料移轉」檔。');
   const localDocumentKeys=new Set(cache.sopDocs.map(d=>{const p=cache.pdfFiles.find(x=>x.id===Number(d.pdfFileId));return transferDocumentKey(d,p);}));
   const missingDocs=(data.documents||[]).filter(d=>!localDocumentKeys.has(d.documentKey)&&!(Number(data.version)===3&&(data.pdfFiles||[]).some(p=>Number(p.portableId)===Number(d.portablePdfId)))).map(d=>d.documentName||d.name||d.pdfFileName||'未命名 SOP');
   const stats={procedures:data.procedures.length,documents:(data.documents||[]).length,notices:data.announcements.length,noticePdfs:data.announcements.filter(n=>n.pdfData).length,annotations:(data.annotations||[]).length,relations:data.announcements.reduce((s,n)=>s+(n.relationDocumentKeys||[]).length+(n.procedurePortableIds||[]).length,0),events:(data.events||[]).length,personnel:(data.personnel||[]).length,missingDocs};
@@ -1780,10 +1924,17 @@ async function importProceduresFile(file){
     for(const source of data.events||[]){const copy={...source,recordType:'event'},key=transferEventKey(copy),current=existingEvents.get(key);if(current){Object.assign(current,copy,{id:current.id});await dbPut('personnel',current);result.eventUpdated++;}else{copy.id=await dbAdd('personnel',copy);cache.personnel.push(copy);existingEvents.set(key,copy);result.eventAdded++;}}
     const existingPeople=new Map(cache.personnel.filter(r=>r.recordType!=='event').map(r=>[transferPersonnelKey(r),r]));
     for(const source of data.personnel||[]){const copy={...source},key=transferPersonnelKey(copy),current=existingPeople.get(key);if(current){Object.assign(current,copy,{id:current.id});await dbPut('personnel',current);result.personnelUpdated++;}else{copy.id=await dbAdd('personnel',copy);cache.personnel.push(copy);existingPeople.set(key,copy);result.personnelAdded++;}}
+    if(Array.isArray(data.procedureCategories))saveProcedureCategories(data.procedureCategories);
     await reloadCache();render();alert(`匯入完成：常用程序新增 ${result.procedureAdded}、沿用 ${result.procedureUpdated}；標註新增 ${result.annotationAdded}；通告新增 ${result.noticeAdded}、更新 ${result.noticeUpdated}；SOP PDF 新增 ${result.pdfAdded}；事件新增 ${result.eventAdded}、更新 ${result.eventUpdated}；人員新增 ${result.personnelAdded}、更新 ${result.personnelUpdated}。${result.unmatched?`\n未能配對 ${result.unmatched} 項，已安全略過。`:''}`);
   }catch(error){await restoreTransferSnapshot(snapshot);render();alert(`匯入失敗，已回復匯入前資料。\n${error.message||error}`);}
 }
 let procedureDragEndedAt=0;
+function bindProcedureWorkbench(){
+  const search=document.getElementById('procedure-list-search');if(search)search.addEventListener('input',e=>{procedureListQuery=e.target.value;render();requestAnimationFrame(()=>document.getElementById('procedure-list-search')?.focus())});
+  document.getElementById('procedure-category-manage')?.addEventListener('click',openProcedureCategoryManager);
+  contentEl.querySelectorAll('[data-procedure-category]').forEach(b=>b.addEventListener('click',()=>{procedureCategoryFilter=b.dataset.procedureCategory;render()}));
+  contentEl.querySelectorAll('[data-procedure-open]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const f=cache.favorites.find(x=>Number(x.id)===Number(b.dataset.procedureOpen));if(f){noteRecentProcedure(f.id);openSavedItem(f)}}));
+}
 function bindProcedureCardSorting(){
   const cards=[...contentEl.querySelectorAll('[data-procedure-card]')];
   let draggedId=null;
@@ -1824,13 +1975,23 @@ async function reorderProcedures(draggedId,targetId){
   }
   await reloadCache();
 }
+function openProcedureIconDialog(item){
+  const selected=(item.iconManual===true&&item.iconKey)?item.iconKey:'document';
+  const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='90';
+  const groups=PROCEDURE_ICON_GROUPS.map(([group,keys])=>`<div class="procedure-icon-group"><div class="procedure-icon-group-title">${group}</div><div class="procedure-icon-picker">${keys.map(key=>`<button type="button" class="procedure-icon-choice ${key===selected?'selected':''}" data-procedure-icon="${key}">${procedureIconSvg(key)}</button>`).join('')}</div></div>`).join('');
+  overlay.innerHTML=`<div class="modal-sheet" style="height:auto;max-width:720px"><div class="modal-header"><b>圖示設定</b><button class="modal-close-btn" id="procedure-icon-close">✕</button></div><div class="modal-body"><p class="tiny-muted" style="margin-top:0">未指定時一律使用 SOP 文件圖示。圖示依功能由上至下分區，一次呈現。</p><div class="procedure-icon-groups">${groups}</div></div></div>`;
+  (document.getElementById('phone')||document.body).appendChild(overlay);
+  overlay.querySelector('#procedure-icon-close').onclick=()=>overlay.remove();
+  overlay.querySelectorAll('[data-procedure-icon]').forEach(btn=>btn.onclick=async()=>{item.iconKey=btn.dataset.procedureIcon;item.iconManual=true;await dbPut('favorites',item);await reloadCache();overlay.remove();render();});
+}
 function openProcedureCardMenu(id){
   const item=cache.favorites.find(f=>f.id===Number(id));if(!item)return;
   const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='88';
-  overlay.innerHTML=`<div class="modal-sheet" style="height:auto;max-width:460px;"><div class="modal-header"><span style="font-weight:650;">${escapeHtml(item.title)}</span><button id="procedure-menu-close" style="border:0;background:none;font-size:18px;">✕</button></div><div class="modal-body"><button class="secondary" id="procedure-menu-edit" style="width:100%;margin-bottom:9px;">名稱、頁碼與顏色設定</button><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px;"><button class="secondary" id="procedure-menu-earlier">向前移動</button><button class="secondary" id="procedure-menu-later">向後移動</button></div><button class="secondary" id="procedure-menu-delete" style="width:100%;color:var(--danger);">刪除常用程序</button></div></div>`;
-  document.getElementById('phone').appendChild(overlay);
+  overlay.innerHTML=`<div class="modal-sheet" style="height:auto;max-width:460px;"><div class="modal-header"><span style="font-weight:650;">${escapeHtml(item.title)}</span><button id="procedure-menu-close" style="border:0;background:none;font-size:18px;">✕</button></div><div class="modal-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px;"><button class="secondary" id="procedure-menu-edit">名稱、分類與頁碼設定</button><button class="secondary" id="procedure-menu-icon">圖示設定</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px;"><button class="secondary" id="procedure-menu-earlier">向前移動</button><button class="secondary" id="procedure-menu-later">向後移動</button></div><button class="secondary" id="procedure-menu-delete" style="width:100%;color:var(--danger);">刪除常用程序</button></div></div>`;
+  (document.getElementById('phone')||document.body).appendChild(overlay);
   overlay.querySelector('#procedure-menu-close').addEventListener('click',()=>overlay.remove());
   overlay.querySelector('#procedure-menu-edit').addEventListener('click',async()=>{overlay.remove();if(await openProcedureNameDialog(item,item))render();});
+  overlay.querySelector('#procedure-menu-icon')?.addEventListener('click',()=>{overlay.remove();openProcedureIconDialog(item);});
   overlay.querySelector('#procedure-menu-earlier').addEventListener('click',async()=>{await moveProcedure(item.id,-1);overlay.remove();render();});
   overlay.querySelector('#procedure-menu-later').addEventListener('click',async()=>{await moveProcedure(item.id,1);overlay.remove();render();});
   overlay.querySelector('#procedure-menu-delete').addEventListener('click',async()=>{if(!confirm('確定移除這個常用程序嗎？相關通告的關聯也會一併解除。'))return;await deleteFavoriteAndNoticeLinks(item.id);await reloadCache();overlay.remove();render();});
@@ -3834,7 +3995,7 @@ function renderRidership(){
   });
 }
 
-/* v2.19.0｜2026-09-09：修正事件車站下拉因多月份運量資料造成重複車站。 */
+/* v2.19.0｜2026-09-10：修正事件車站下拉因多月份運量資料造成重複車站。 */
 /* v2.12.1：修正運量分布比例條顯示。 */
 function ridershipEvents(){try{const rows=JSON.parse(localStorage.getItem(RIDERSHIP_EVENTS_KEY)||'[]');return Array.isArray(rows)?rows:[];}catch{return [];}}
 function saveRidershipEvents(rows){localStorage.setItem(RIDERSHIP_EVENTS_KEY,JSON.stringify(rows));}
@@ -3921,13 +4082,14 @@ function renderSettings(){
       <div class="stat-card"><div class="stat-label">運量年度</div><div class="stat-value" style="font-size:17px">${years.length?years.join('、'):'—'}</div><div class="stat-note">已匯入年度</div></div>
     </div>
     <div class="settings-list">
-      <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div>
+      <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div><div class="card settings-card" id="settings-categories"><p class="panel-title">常用程序分類</p><p class="panel-note">自訂分類名稱、捷運作業 SVG 圖示、識別色與順序。</p><span class="badge">${getProcedureCategories().length} 個分類</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">本版本延續手機版 v5.16.0 資料結構，資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.18.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.16.0</dd><dt>更新日期</dt><dd>2026-09-09</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>全頁面校正 iPhone safe-area、頂部狀態列與底部功能列；所有主要關閉按鈕統一 44×44 觸控區；資料管理視窗不再被功能列遮住；工作資料移轉加入事件與人員；App 圖示「務」改為與「蔵」相近的字型比例與垂直基準。保留 v5.16.0 大型 PDF 低記憶體匯入修正。</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.20.1 測試版</dd><dt>基準版本</dt><dd>手機版 v5.19.0</dd><dt>更新日期</dt><dd>2026-09-10</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>資料管理一致性修正：工作資料匯出／匯入按鈕改為同層級中性樣式，名稱統一為「匯出工作資料／匯入工作資料」；保留事件、人員、自訂分類與常用程序圖示設定的跨裝置移轉。</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
+  document.getElementById('settings-categories')?.addEventListener('click',openProcedureCategoryManager);
   document.getElementById('settings-clear-history').onclick=e=>{e.stopPropagation();if(confirm('確定清除所有搜尋歷史嗎？')){setSearchHistory([]);renderSettings();}};
 }
 
@@ -3955,7 +4117,7 @@ async function exportData(){
       return r;
     });
   }
-  dump._localData={ridershipEvents:ridershipEvents()};
+  dump._localData={ridershipEvents:ridershipEvents(),procedureCategories:getProcedureCategories(),recentProcedures:getRecentProcedureIds()};
   const blob = new Blob([JSON.stringify(dump)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -3976,17 +4138,20 @@ async function importData(file){
     }
   }
   if(Array.isArray(dump._localData?.ridershipEvents))saveRidershipEvents(dump._localData.ridershipEvents);
+  if(Array.isArray(dump._localData?.procedureCategories))saveProcedureCategories(dump._localData.procedureCategories);
+  if(Array.isArray(dump._localData?.recentProcedures))localStorage.setItem(PROCEDURE_RECENT_KEY,JSON.stringify(dump._localData.recentProcedures));
   await reloadCache();
   render();
 }
 function openDataMgmt(){
+  document.getElementById('phone')?.classList.add('data-modal-open');
   const html = `<div class="modal-overlay" id="dm-overlay"><div class="modal-sheet" style="height:auto;">
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" class="modal-close-btn" aria-label="關閉">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.18.0・2026.09.09</p>
-      <p class="muted">「工作資料」包含常用程序、通告、事件與人員，可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
-      <button class="primary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出工作資料</button>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.20.1・2026.09.10</p>
+      <p class="muted">「工作資料」包含常用程序、通告、事件、人員與自訂分類，可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
+      <button class="secondary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出工作資料</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入工作資料</button>
       <input type="file" id="dm-transfer-input" accept="application/json,.json" style="display:none">
       <p class="tiny-muted">裝置復原用</p>
@@ -3996,7 +4161,7 @@ function openDataMgmt(){
     </div>
   </div></div>`;
   contentEl.insertAdjacentHTML('beforeend', html);
-  document.getElementById('dm-close').addEventListener('click', ()=>document.getElementById('dm-overlay').remove());
+  document.getElementById('dm-close').addEventListener('click', ()=>{document.getElementById('dm-overlay').remove();document.getElementById('phone')?.classList.remove('data-modal-open');});
   document.getElementById('dm-transfer-export').addEventListener('click', exportProcedures);
   document.getElementById('dm-transfer-import').addEventListener('click', ()=>document.getElementById('dm-transfer-input').click());
   document.getElementById('dm-transfer-input').addEventListener('change', async e=>{const file=e.target.files?.[0];if(file)await importProceduresFile(file);e.target.value='';});
@@ -4008,6 +4173,7 @@ function openDataMgmt(){
     if(confirm('匯入的資料會加進目前資料庫（不會清除既有資料），確定匯入嗎？')){
       await importData(file);
       document.getElementById('dm-overlay').remove();
+      document.getElementById('phone')?.classList.remove('data-modal-open');
     }
   });
 }

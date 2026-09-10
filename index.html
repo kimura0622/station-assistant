@@ -453,7 +453,7 @@
   }
   @media (max-width:520px){.procedure-card-grid{grid-template-columns:1fr 1fr;}}
 
-  /* v5.20.2 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
+  /* v5.20.3 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
   @media (max-width:899px){
     html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;}
     body{display:block!important;margin:0!important;padding:0!important;background:var(--bg)!important;min-height:100vh!important;}
@@ -478,7 +478,7 @@
   .event-participant-list{display:grid;gap:0}.event-person-card{display:grid!important;grid-template-columns:minmax(86px,130px) minmax(0,1fr);align-items:start!important;gap:10px!important;padding:10px 4px!important;border:0!important;border-bottom:.5px solid var(--border)!important;border-radius:0!important}.event-person-card:last-child{border-bottom:0!important}.event-person-detail{display:flex;gap:10px;flex-wrap:wrap;min-width:0}.event-person-detail span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}.event-person-location{color:var(--text-muted)!important}.event-person-edit-title{display:none;font-weight:750;color:var(--accent-text)}.event-more{display:none}.modal-close-btn{border:0;background:none;font-size:18px;min-width:44px;min-height:44px}
 
 
-  /* v5.20.2 mobile UX */
+  /* v5.20.3 mobile UX */
   @media(max-width:899px){
     .modal-overlay{overflow:hidden!important}.modal-sheet{max-width:100%!important;overflow:hidden!important}.modal-body{overflow-x:hidden!important;max-width:100%!important;box-sizing:border-box!important}
     .pdf-reader-shell .modal-header{padding-top:calc(10px + env(safe-area-inset-top))!important;padding-left:max(14px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important;min-height:calc(54px + env(safe-area-inset-top))!important}.pdf-reader-shell .modal-header>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px!important}.pdf-reader-shell #sop-pdf-close{min-width:44px!important;min-height:44px!important;padding:0!important;margin-left:6px!important;display:grid!important;place-items:center!important}
@@ -517,7 +517,7 @@
   .search-page-group{margin-left:0;margin-right:0}
 
 
-  /* v5.20.2 iPhone 全頁面版面校正：safe-area 只計算一次，底部導覽不再漂浮或遮住內容 */
+  /* v5.20.3 iPhone 全頁面版面校正：safe-area 只計算一次，底部導覽不再漂浮或遮住內容 */
   @media(max-width:899px){
     :root{--mobile-nav-h:68px;--mobile-top-h:56px;}
     html,body{width:100%;height:100%;height:100dvh;overflow:hidden!important;}
@@ -545,7 +545,7 @@
 
 
 /* vNext 常用程序工作索引 */
-.procedure-workbench{margin-top:14px}.procedure-recent-block{margin:12px 0 14px}.procedure-workbench-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.procedure-workbench-title h2{font-size:16px;margin:0}.procedure-filter-head-actions{display:flex;align-items:center;gap:8px}.procedure-recent-strip{display:flex;gap:8px;overflow-x:auto;padding:1px 0 4px;scrollbar-width:none}.procedure-recent-strip::-webkit-scrollbar{display:none}.procedure-recent-card{display:flex;align-items:center;gap:8px;flex:0 0 170px;min-width:0;text-align:left;border:.5px solid var(--border);background:#fff;border-radius:12px;padding:9px 10px;cursor:pointer;color:var(--text)}.procedure-recent-icon{width:34px;height:34px;flex:0 0 34px}.procedure-recent-card span:last-child{min-width:0}.procedure-recent-card b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.procedure-recent-card small{display:block;font-size:10px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.procedure-category-filter{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.procedure-category-filter::-webkit-scrollbar{display:none}.procedure-category-chip{border:1px solid transparent;background:var(--chip-bg,#eef2f6);color:var(--chip-color,var(--text-2));border-radius:999px;padding:0 12px;height:36px;display:inline-flex;align-items:center;justify-content:center;line-height:1;white-space:nowrap;cursor:pointer;font-size:14px;font-weight:650}.procedure-category-chip.active{background:var(--chip-color,var(--accent));color:#fff;border-color:var(--chip-color,var(--accent))}.procedure-category-chip b{font-size:13px;margin-left:5px;font-weight:700;line-height:1}.procedure-compact-grid{display:grid;grid-template-columns:1fr;gap:8px}.procedure-compact-card{--category-color:#68778A;position:relative;display:flex;align-items:stretch;min-width:0;min-height:68px;background:#fff;border:.5px solid var(--border);border-radius:11px;box-shadow:0 1px 3px rgba(0,0,0,.035);overflow:hidden}.procedure-compact-card:before{content:'';width:4px;flex:0 0 4px;background:var(--category-color)}.procedure-main-open{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;border:0;background:none;padding:8px 0 8px 9px;cursor:pointer;color:var(--text)}.procedure-svg-icon{width:42px;height:42px;flex:0 0 42px}.procedure-compact-copy{min-width:0}.procedure-compact-copy b{display:block;font-size:14px;line-height:1.3;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.procedure-compact-copy small{display:block;color:var(--text-2);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.procedure-compact-side{display:flex;align-items:center;gap:5px;padding-right:6px;flex:0 0 auto}.procedure-compact-card .procedure-card-menu{position:static;width:34px;height:34px;background:transparent}.procedure-review-badge{font-size:10px!important;max-width:116px;text-align:center}.category-manager-sheet{height:auto;max-height:min(82dvh,760px);max-width:620px}.category-manager-row{display:grid;grid-template-columns:14px minmax(0,1fr) auto auto;gap:7px;align-items:center;padding:9px 0;border-bottom:.5px solid var(--border)}.category-manager-swatch{width:12px;height:34px;border-radius:999px;background:var(--category-color)}.category-manager-copy b{display:block}.category-manager-copy small{display:block;font-size:11px;color:var(--text-muted);margin-top:2px}.category-color-picker{display:flex;gap:9px;flex-wrap:wrap}.category-color-choice{width:34px;height:34px;min-height:0;border:3px solid transparent;border-radius:50%;cursor:pointer}.category-color-choice.selected{border-color:#111;box-shadow:0 0 0 2px #fff inset}.empty-category{padding:18px;text-align:center;color:var(--text-muted);background:#f7f8fa;border-radius:12px}.procedure-icon-groups{display:flex;flex-direction:column;gap:14px}.procedure-icon-group-title{font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:7px}.procedure-icon-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.procedure-icon-choice{aspect-ratio:1;border:1px solid var(--border);background:#fff;border-radius:11px;padding:4px;cursor:pointer}.procedure-icon-choice.selected{border:2px solid var(--accent);background:#eef7ff}.procedure-png-icon{display:block;width:100%;height:100%;background-image:url('./assets/procedure-icons-v1.png');background-size:800% 600%;background-repeat:no-repeat;background-position:var(--icon-pos-x,0%) var(--icon-pos-y,0%)}
+.procedure-workbench{margin-top:14px}.procedure-recent-block{margin:12px 0 14px}.procedure-workbench-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.procedure-workbench-title h2{font-size:16px;margin:0}.procedure-filter-head-actions{display:flex;align-items:center;gap:8px}.procedure-recent-strip{display:flex;gap:8px;overflow-x:auto;padding:1px 0 4px;scrollbar-width:none}.procedure-recent-strip::-webkit-scrollbar{display:none}.procedure-recent-card{display:flex;align-items:center;gap:8px;flex:0 0 170px;min-width:0;text-align:left;border:.5px solid var(--border);background:#fff;border-radius:12px;padding:9px 10px;cursor:pointer;color:var(--text)}.procedure-recent-icon{width:34px;height:34px;flex:0 0 34px}.procedure-recent-card span:last-child{min-width:0}.procedure-recent-card b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.procedure-recent-card small{display:block;font-size:10px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.procedure-category-filter{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.procedure-category-filter::-webkit-scrollbar{display:none}.procedure-category-chip{border:1px solid transparent;background:var(--chip-bg,#eef2f6);color:var(--chip-color,var(--text-2));border-radius:999px;padding:0 12px;height:36px;display:inline-flex;align-items:center;justify-content:center;line-height:1;white-space:nowrap;cursor:pointer;font-size:14px;font-weight:650}.procedure-category-chip.active{background:var(--chip-color,var(--accent));color:#fff;border-color:var(--chip-color,var(--accent))}.procedure-category-chip b{font-size:13px;margin-left:5px;font-weight:700;line-height:1}.procedure-compact-grid{display:grid;grid-template-columns:1fr;gap:8px}.procedure-compact-card{--category-color:#68778A;position:relative;display:flex;align-items:stretch;min-width:0;min-height:68px;background:#fff;border:.5px solid var(--border);border-radius:11px;box-shadow:0 1px 3px rgba(0,0,0,.035);overflow:hidden}.procedure-compact-card:before{content:'';width:4px;flex:0 0 4px;background:var(--category-color)}.procedure-main-open{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;border:0;background:none;padding:8px 0 8px 9px;cursor:pointer;color:var(--text)}.procedure-svg-icon{width:42px;height:42px;flex:0 0 42px}.procedure-compact-copy{min-width:0}.procedure-compact-copy b{display:block;font-size:14px;line-height:1.3;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.procedure-compact-copy small{display:block;color:var(--text-2);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.procedure-compact-side{display:flex;align-items:center;gap:5px;padding-right:6px;flex:0 0 auto}.procedure-compact-card .procedure-card-menu{position:static;width:34px;height:34px;background:transparent}.procedure-review-badge{font-size:10px!important;max-width:116px;text-align:center}.category-manager-sheet{height:auto;max-height:min(82dvh,760px);max-width:620px}.category-manager-row{display:grid;grid-template-columns:14px minmax(0,1fr) auto auto;gap:7px;align-items:center;padding:9px 0;border-bottom:.5px solid var(--border)}.category-manager-swatch{width:12px;height:34px;border-radius:999px;background:var(--category-color)}.category-manager-copy b{display:block}.category-manager-copy small{display:block;font-size:11px;color:var(--text-muted);margin-top:2px}.category-color-picker{display:flex;gap:9px;flex-wrap:wrap}.category-color-choice{width:34px;height:34px;min-height:0;border:3px solid transparent;border-radius:50%;cursor:pointer}.category-color-choice.selected{border-color:#111;box-shadow:0 0 0 2px #fff inset}.empty-category{padding:18px;text-align:center;color:var(--text-muted);background:#f7f8fa;border-radius:12px}.procedure-icon-groups{display:flex;flex-direction:column;gap:14px}.procedure-icon-group-title{font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:7px}.procedure-icon-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.procedure-icon-choice{aspect-ratio:1;border:1px solid var(--border);background:#fff;border-radius:11px;padding:4px;cursor:pointer}.procedure-icon-choice.selected{border:2px solid var(--accent);background:#eef7ff}.procedure-png-icon{display:block;width:100%;height:100%;background-image:url('./assets/procedure-icons-v2.png');background-size:300% 300%;background-repeat:no-repeat;background-position:var(--icon-pos-x,0%) var(--icon-pos-y,0%);border-radius:10px}
 @media(max-width:900px){.procedure-recent-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.category-icon-picker{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:620px){.procedure-workbench-toolbar{display:block}.procedure-workbench-toolbar .secondary{margin-top:8px;width:100%}.procedure-recent-strip{display:flex;overflow-x:auto;gap:8px;padding-bottom:3px}.procedure-recent-card{flex:0 0 132px}.procedure-compact-grid{grid-template-columns:1fr}.procedure-compact-card{min-height:72px}.procedure-svg-icon{width:38px;height:38px;flex-basis:38px}.procedure-compact-side .procedure-category-mini{display:none}.category-manager-row{grid-template-columns:36px minmax(0,1fr) auto auto}.category-manager-row [data-cat-up],.category-manager-row [data-cat-down]{display:none}.category-icon-picker{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
@@ -567,12 +567,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.20.2 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.20.3 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-/* v5.20.2 2026-09-10：
+/* v5.20.3 2026-09-10：
    1) 修正文件名稱命中會把整份文件所有段落都算命中的問題；正文命中頁／段落只計實際符合；
    2) 搜尋段落點入 PDF 前以該段正文重新驗證實體 PDF 頁，避免搜尋索引與原始 PDF 定位錯位；
    3) 常用程序待確認閱讀器新增「確認頁碼正確」，確認後清除提醒並保存新版正文快照；
@@ -667,68 +667,17 @@ const PROCEDURE_RECENT_KEY='stationAssistantRecentProceduresV1';
 let procedureCategoryFilter='all';
 let procedureListQuery='';
 const PROCEDURE_ICON_LIBRARY=[
-  ['train','電聯車'],
-  ['door','車門故障清車'],
-  ['train_alert','行車異常'],
-  ['train_clean','列車清潔'],
-  ['fire','車站火警'],
-  ['extinguisher','滅火器'],
-  ['fire_alarm','火警警報'],
-  ['evacuation','疏散避難'],
-  ['elevator','電梯困人'],
-  ['escalator','電扶梯停機'],
-  ['escalator_alert','電扶梯異常'],
-  ['elevator_maint','電梯維修'],
-  ['ticket','票卡作業'],
-  ['gate','閘門異常'],
-  ['no_money','無錢購票'],
-  ['child_ticket','兒童票證'],
-  ['passenger','旅客諮詢'],
-  ['crowd','車站人潮'],
-  ['accessible','無障礙服務'],
-  ['lost_found','遺失物'],
-  ['medical','旅客受傷'],
-  ['ambulance','送醫'],
-  ['aed','AED'],
-  ['stretcher','傷患搬運'],
-  ['wrench','設備維修'],
-  ['gear','設備異常'],
-  ['power','電力異常'],
-  ['leak','漏水'],
-  ['station_clean','車站清潔'],
-  ['trash','垃圾處理'],
-  ['spray','消毒'],
-  ['environment','環境維護'],
-  ['camera','監視器'],
-  ['security','保全'],
-  ['radio','無線電'],
-  ['phone','電話'],
-  ['rain','雨天應變'],
-  ['typhoon','防颱'],
-  ['heat','高溫'],
-  ['cold','低溫'],
-  ['document','SOP'],
-  ['notice','通告'],
-  ['record','修訂紀錄'],
-  ['manual','作業手冊'],
-  ['broadcast','車站廣播'],
-  ['alert','異常通報'],
-  ['more','其他作業'],
-  ['custom','自訂類別']
+  ['train','電聯車'],['elevator','電梯'],['escalator','電扶梯'],
+  ['fire','火警／警報'],['crowd','人潮'],['care','旅客關懷'],
+  ['ambulance','送醫／救護'],['document','SOP'],['extinguisher','消防設備']
 ];
 const PROCEDURE_ICON_GROUPS=[
-  ['列車／行車',['train','door','train_alert','train_clean']],
-  ['消防／安全',['fire','extinguisher','fire_alarm','evacuation']],
-  ['電梯／電扶梯',['elevator','escalator','escalator_alert','elevator_maint']],
-  ['票證／閘門',['ticket','gate','no_money','child_ticket']],
-  ['旅客服務',['passenger','crowd','accessible','lost_found']],
-  ['醫療／緊急救援',['medical','ambulance','aed','stretcher']],
-  ['設備／維修',['wrench','gear','power','leak']],
-  ['環境／清潔',['station_clean','trash','spray','environment']],
-  ['保全／監控',['camera','security','radio','phone']],
-  ['天氣／防災',['rain','typhoon','heat','cold']],
-  ['文件／作業',['document','notice','record','manual']],
-  ['其他',['broadcast','alert','more','custom']]
+  ['列車／行車',['train']],
+  ['消防／安全',['fire','extinguisher']],
+  ['電梯／電扶梯',['elevator','escalator']],
+  ['旅客服務',['crowd','care']],
+  ['醫療／緊急救援',['ambulance']],
+  ['文件／作業',['document']]
 ];
 const PROCEDURE_CATEGORY_COLORS={blue:'#0A78D1',green:'#2E9B63',orange:'#E88A1A',purple:'#7754C8',red:'#D94B4B',gray:'#68778A',teal:'#168C99'};
 function getProcedureCategories(){
@@ -739,8 +688,20 @@ function procedureCategoryById(id){return getProcedureCategories().find(c=>Strin
 function procedureCategoryColor(cat){return PROCEDURE_CATEGORY_COLORS[cat?.color]||PROCEDURE_CATEGORY_COLORS.gray;}
 /* Station Assistant 圖示母版 v1.0：採已確認的彩色情境 PNG，手機版以單一 sprite 資產載入。 */
 function procedureIconSvg(name){
-  const pos={'train':[0,0],'door':[14.285714,0],'train_alert':[28.571429,0],'train_clean':[42.857143,0],'fire':[57.142857,0],'extinguisher':[71.428571,0],'fire_alarm':[85.714286,0],'evacuation':[100.0,0],'elevator':[0,20.0],'escalator':[14.285714,20.0],'escalator_alert':[28.571429,20.0],'elevator_maint':[42.857143,20.0],'ticket':[57.142857,20.0],'gate':[71.428571,20.0],'no_money':[85.714286,20.0],'child_ticket':[100.0,20.0],'passenger':[0,40.0],'crowd':[14.285714,40.0],'accessible':[28.571429,40.0],'lost_found':[42.857143,40.0],'medical':[57.142857,40.0],'ambulance':[71.428571,40.0],'aed':[85.714286,40.0],'stretcher':[100.0,40.0],'wrench':[0,60.0],'gear':[14.285714,60.0],'power':[28.571429,60.0],'leak':[42.857143,60.0],'station_clean':[57.142857,60.0],'trash':[71.428571,60.0],'spray':[85.714286,60.0],'environment':[100.0,60.0],'camera':[0,80.0],'security':[14.285714,80.0],'radio':[28.571429,80.0],'phone':[42.857143,80.0],'rain':[57.142857,80.0],'typhoon':[71.428571,80.0],'heat':[85.714286,80.0],'cold':[100.0,80.0],'document':[0,100.0],'notice':[14.285714,100.0],'record':[28.571429,100.0],'manual':[42.857143,100.0],'broadcast':[57.142857,100.0],'alert':[71.428571,100.0],'more':[85.714286,100.0],'custom':[100.0,100.0]};
-  const p=pos[name]||pos.document;
+  const alias={
+    door:'train',train_alert:'train',train_clean:'train',
+    fire_alarm:'fire',evacuation:'crowd',
+    elevator_maint:'elevator',escalator_alert:'escalator',
+    passenger:'care',medical:'care',aed:'ambulance',stretcher:'ambulance',
+    notice:'document',record:'document',manual:'document'
+  };
+  const key=alias[name]||name;
+  const pos={
+    train:[0,0],elevator:[50,0],escalator:[100,0],
+    fire:[0,50],crowd:[50,50],care:[100,50],
+    ambulance:[0,100],document:[50,100],extinguisher:[100,100]
+  };
+  const p=pos[key]||pos.document;
   return `<span class="procedure-png-icon" aria-hidden="true" style="--icon-pos-x:${p[0]}%;--icon-pos-y:${p[1]}%"></span>`;
 }
 function suggestProcedureIcon(title){ return 'document'; }
@@ -4085,7 +4046,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div><div class="card settings-card" id="settings-categories"><p class="panel-title">常用程序分類</p><p class="panel-note">自訂分類名稱、捷運作業 SVG 圖示、識別色與順序。</p><span class="badge">${getProcedureCategories().length} 個分類</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.20.2 測試版</dd><dt>基準版本</dt><dd>手機版 v5.19.0</dd><dt>更新日期</dt><dd>2026-09-10</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>資料管理一致性修正：工作資料匯出／匯入按鈕改為同層級中性樣式，名稱統一為「匯出工作資料／匯入工作資料」；保留事件、人員、自訂分類與常用程序圖示設定的跨裝置移轉。</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.20.3 測試版</dd><dt>基準版本</dt><dd>手機版 v5.19.0</dd><dt>更新日期</dt><dd>2026-09-10</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>圖示母版修正：改用已確認的 3×3 九圖示 PNG 母版，逐格精準裁切並保留安全留白，避免圖示帶到相鄰邊緣；其他功能維持不變。</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -4150,7 +4111,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" class="modal-close-btn" aria-label="關閉">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.20.2・2026.09.10</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.20.3・2026.09.10</p>
       <p class="muted">「工作資料」包含常用程序、分類名稱／顏色／順序、程序圖示、通告、事件與人員，可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="secondary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出工作資料</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入工作資料</button>

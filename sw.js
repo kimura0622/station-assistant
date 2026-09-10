@@ -1,4 +1,4 @@
-const CACHE_NAME = 'station-assistant-mobile-github-v5.20.3';
+const CACHE_NAME = 'station-assistant-mobile-github-v5.20.4';
 const APP_SHELL = [
   './',
   './index.html',

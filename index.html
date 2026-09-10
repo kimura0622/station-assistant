@@ -453,7 +453,7 @@
   }
   @media (max-width:520px){.procedure-card-grid{grid-template-columns:1fr 1fr;}}
 
-  /* v5.20.3 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
+  /* v5.20.4 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
   @media (max-width:899px){
     html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;}
     body{display:block!important;margin:0!important;padding:0!important;background:var(--bg)!important;min-height:100vh!important;}
@@ -478,7 +478,7 @@
   .event-participant-list{display:grid;gap:0}.event-person-card{display:grid!important;grid-template-columns:minmax(86px,130px) minmax(0,1fr);align-items:start!important;gap:10px!important;padding:10px 4px!important;border:0!important;border-bottom:.5px solid var(--border)!important;border-radius:0!important}.event-person-card:last-child{border-bottom:0!important}.event-person-detail{display:flex;gap:10px;flex-wrap:wrap;min-width:0}.event-person-detail span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}.event-person-location{color:var(--text-muted)!important}.event-person-edit-title{display:none;font-weight:750;color:var(--accent-text)}.event-more{display:none}.modal-close-btn{border:0;background:none;font-size:18px;min-width:44px;min-height:44px}
 
 
-  /* v5.20.3 mobile UX */
+  /* v5.20.4 mobile UX */
   @media(max-width:899px){
     .modal-overlay{overflow:hidden!important}.modal-sheet{max-width:100%!important;overflow:hidden!important}.modal-body{overflow-x:hidden!important;max-width:100%!important;box-sizing:border-box!important}
     .pdf-reader-shell .modal-header{padding-top:calc(10px + env(safe-area-inset-top))!important;padding-left:max(14px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important;min-height:calc(54px + env(safe-area-inset-top))!important}.pdf-reader-shell .modal-header>span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px!important}.pdf-reader-shell #sop-pdf-close{min-width:44px!important;min-height:44px!important;padding:0!important;margin-left:6px!important;display:grid!important;place-items:center!important}
@@ -517,7 +517,7 @@
   .search-page-group{margin-left:0;margin-right:0}
 
 
-  /* v5.20.3 iPhone 全頁面版面校正：safe-area 只計算一次，底部導覽不再漂浮或遮住內容 */
+  /* v5.20.4 iPhone 全頁面版面校正：safe-area 只計算一次，底部導覽不再漂浮或遮住內容 */
   @media(max-width:899px){
     :root{--mobile-nav-h:68px;--mobile-top-h:56px;}
     html,body{width:100%;height:100%;height:100dvh;overflow:hidden!important;}
@@ -551,6 +551,44 @@
 
 #phone.data-modal-open #tabbar{visibility:hidden!important;pointer-events:none!important;}
 #phone.data-modal-open #content{padding-bottom:0!important;}
+
+
+  /* v5.20.4 mobile event layout + category focus regression fix */
+  @media(max-width:899px){
+    /* Event summary: subject owns the full width; actions are secondary and sit below. */
+    .event-summary-card .row.between{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important;align-items:start!important}
+    .event-summary-card .row.between>div:first-child{width:100%!important;min-width:0!important}
+    .event-summary-card .row.between>div:first-child>b{display:block!important;font-size:17px!important;line-height:1.48!important;overflow-wrap:anywhere!important}
+    .event-summary-card .row.between>div:last-child{justify-self:end!important;display:flex!important;gap:7px!important}
+    .event-summary-card .row.between>div:last-child button{min-width:48px!important;min-height:44px!important;height:44px!important;padding:6px 11px!important;font-size:14px!important}
+    .event-summary-meta{margin:7px 0 0!important;font-size:13px!important;line-height:1.45!important;white-space:normal!important}
+
+    /* Event checks: never force desktop columns into a phone-width card. */
+    .event-check-view{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:6px 10px!important;align-items:center!important;padding:10px 2px!important;min-width:0!important}
+    .event-check-view>b{grid-column:1/-1!important;font-size:14px!important;line-height:1.5!important;min-width:0!important;overflow-wrap:anywhere!important}
+    .event-check-view>span:nth-child(2){grid-column:1/-1!important;font-size:13.5px!important;white-space:normal!important;overflow-wrap:anywhere!important}
+    .event-check-view>.event-check-duration{grid-column:1!important;text-align:left!important;font-size:13.5px!important;white-space:normal!important;padding:0!important}
+    .event-check-view>.event-check-result{grid-column:2!important;justify-self:end!important;font-size:13px!important;white-space:nowrap!important}
+
+    /* Participant editor: station full-width, then role/name and alias/location in paired rows. */
+    .event-person-row{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)!important;gap:9px 8px!important}
+    .event-person-row>.event-person-edit-title{grid-column:1/-1!important}
+    .event-person-row>label:first-of-type{grid-column:1/-1!important}
+    .event-person-row label{min-width:0!important}
+    .event-person-row label input{font-size:15px!important}
+
+    /* Improvement text: balance title/body spacing without increasing the card excessively. */
+    .event-detail-priority .panel-title+.event-body{margin-top:8px!important;padding-bottom:3px!important}
+
+    /* Timeline: retain the blue rail, but remove the nested heavy card treatment. */
+    .event-timeline{margin-top:4px!important}
+    .event-time-row{background:transparent!important;border:0!important;border-bottom:.5px solid var(--border)!important;border-radius:0!important;box-shadow:none!important;padding:8px 2px 12px!important;margin:0 0 7px!important}
+    .event-time-row:last-child{border-bottom:0!important;margin-bottom:0!important}
+    .event-time-row:before{top:13px!important}
+    .event-time{font-size:14.5px!important;margin-bottom:5px!important}
+    .event-body{font-size:14px!important;line-height:1.62!important}
+  }
+
 </style>
 </head>
 <body>
@@ -567,12 +605,12 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.20.3 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.20.4 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-/* v5.20.3 2026-09-10：
+/* v5.20.4 2026-09-10：
    1) 修正文件名稱命中會把整份文件所有段落都算命中的問題；正文命中頁／段落只計實際符合；
    2) 搜尋段落點入 PDF 前以該段正文重新驗證實體 PDF 頁，避免搜尋索引與原始 PDF 定位錯位；
    3) 常用程序待確認閱讀器新增「確認頁碼正確」，確認後清除提醒並保存新版正文快照；
@@ -1893,7 +1931,7 @@ let procedureDragEndedAt=0;
 function bindProcedureWorkbench(){
   const search=document.getElementById('procedure-list-search');if(search)search.addEventListener('input',e=>{procedureListQuery=e.target.value;render();requestAnimationFrame(()=>document.getElementById('procedure-list-search')?.focus())});
   document.getElementById('procedure-category-manage')?.addEventListener('click',openProcedureCategoryManager);
-  contentEl.querySelectorAll('[data-procedure-category]').forEach(b=>b.addEventListener('click',()=>{procedureCategoryFilter=b.dataset.procedureCategory;render()}));
+  contentEl.querySelectorAll('[data-procedure-category]').forEach(b=>b.addEventListener('click',()=>{if(document.activeElement instanceof HTMLElement)document.activeElement.blur();procedureCategoryFilter=b.dataset.procedureCategory;render();requestAnimationFrame(()=>document.getElementById('procedure-list-search')?.blur())}));
   contentEl.querySelectorAll('[data-procedure-open]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const f=cache.favorites.find(x=>Number(x.id)===Number(b.dataset.procedureOpen));if(f){noteRecentProcedure(f.id);openSavedItem(f)}}));
 }
 function bindProcedureCardSorting(){
@@ -3576,7 +3614,7 @@ function openEventEditor(existing=null){
 }
 function eventInvolvedStationsText(e){
   const ss=[...new Set((e?.participants||[]).map(p=>p.station).filter(Boolean))];
-  return ss.length?`｜涉及車站：${ss.join('、')}`:'';
+  return ss.length?` · ${ss.join('、')}`:'';
 }
 function parseEventOpRecords(text){
   const lines=String(text||'').replace(/\r/g,'').split('\n'),rows=[],preamble=[];let current=null;
@@ -3594,7 +3632,7 @@ function openEventDetail(id){
   const e=cache.personnel.find(x=>x.id===Number(id)&&x.recordType==='event');if(!e)return;
   const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='88';
   overlay.innerHTML=`<div class="modal-sheet event-editor-sheet"><div class="modal-header"><b>${escapeHtml(e.station||'未指定車站')}｜<span class="${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span></b><button id="ed-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body">
-    <div class="card event-summary-card"><div class="row between"><div><b>${escapeHtml(e.subject||e.title||'事件紀錄')}</b><p class="tiny-muted">${escapeHtml(e.date||'')}｜${escapeHtml(RIDERSHIP_LINES[e.lineCode]||'')}${escapeHtml(eventInvolvedStationsText(e))}</p></div><div class="row" style="gap:7px"><button class="secondary op-detail-btn ${e.opText?'has-data':''}" id="ed-op" title="${e.opText?'查看 OP 通報紀錄':'尚無 OP 通報紀錄'}">OP</button><button class="secondary" id="ed-edit">修改</button></div></div></div>
+    <div class="card event-summary-card"><div class="row between"><div><b>${escapeHtml(e.subject||e.title||'事件紀錄')}</b><p class="tiny-muted event-summary-meta">${escapeHtml(e.date||'')} · ${escapeHtml(RIDERSHIP_LINES[e.lineCode]||'')}${escapeHtml(eventInvolvedStationsText(e))}</p></div><div class="row" style="gap:7px"><button class="secondary op-detail-btn ${e.opText?'has-data':''}" id="ed-op" title="${e.opText?'查看 OP 通報紀錄':'尚無 OP 通報紀錄'}">OP</button><button class="secondary" id="ed-edit">修改</button></div></div></div>
     ${(e.checks||[]).length?`<div class="panel event-detail-priority"><h3 class="panel-title">事件檢核</h3>${renderEventChecksView(e.checks)}</div>`:''}
     ${e.improvement?`<div class="panel event-detail-priority"><h3 class="panel-title">檢討與改善事項</h3><div class="event-body" style="white-space:pre-wrap">${escapeHtml(e.improvement)}</div></div>`:''}
     <div class="panel"><h3 class="panel-title">參與人員</h3>${renderEventParticipantRows(e.participants||[],false,e.station||'')}</div>
@@ -4046,7 +4084,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div><div class="card settings-card" id="settings-categories"><p class="panel-title">常用程序分類</p><p class="panel-note">自訂分類名稱、捷運作業 SVG 圖示、識別色與順序。</p><span class="badge">${getProcedureCategories().length} 個分類</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.20.3 測試版</dd><dt>基準版本</dt><dd>手機版 v5.19.0</dd><dt>更新日期</dt><dd>2026-09-10</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>圖示母版修正：改用已確認的 3×3 九圖示 PNG 母版，逐格精準裁切並保留安全留白，避免圖示帶到相鄰邊緣；其他功能維持不變。</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.20.4 測試版</dd><dt>基準版本</dt><dd>手機版 v5.19.0</dd><dt>更新日期</dt><dd>2026-09-10</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>手機事件版面與分類操作修正：分類篩選不再喚出鍵盤；事件摘要、事件檢核、參與人員編輯與時間軸改為手機友善排版；檢討與改善事項調整卡片內文字垂直留白。</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -4111,7 +4149,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" class="modal-close-btn" aria-label="關閉">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.20.3・2026.09.10</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.20.4・2026.09.10</p>
       <p class="muted">「工作資料」包含常用程序、分類名稱／顏色／順序、程序圖示、通告、事件與人員，可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="secondary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出工作資料</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入工作資料</button>

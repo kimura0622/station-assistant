@@ -1,3 +1,9 @@
+## v5.20.7｜2026-09-11
+- 修正 iPhone Safari／PWA 事件編輯頁原生 `input[type=date]` 仍可能依 intrinsic width 撐出螢幕右側的回歸問題。
+- 事件日期改由固定寬度容器承載原生日期控制項，外框由容器負責；原生 date input 使用 `-webkit-fill-available` 並限制 inline size，保留 iOS 日期選擇器。
+- 事件編輯其他欄位、分類篩選焦點、事件檢核、參與人員 40%／60%、程序圖示與資料格式均維持 v5.20.6。
+- Service Worker 快取版本同步更新為 v5.20.7。
+
 ## v5.20.6｜2026-09-10
 - 修正作業查詢分類篩選重新 render 後無條件聚焦搜尋框，iPhone 不再因切換分類自動跳出鍵盤。
 - 修正事件編輯頁 `input[type=date]` 在 iPhone 上超出內容邊界；事件編輯欄位統一限制在可用寬度內。

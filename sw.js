@@ -1,4 +1,4 @@
-const CACHE_NAME = 'station-assistant-mobile-github-v5.20.5';
+const CACHE_NAME = 'station-assistant-mobile-github-v5.20.6';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const APP_SHELL = [
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './assets/procedure-icons-v2.png'
+  './assets/procedure-icons-v2.1.png'
 ];
 
 self.addEventListener('install', event => {

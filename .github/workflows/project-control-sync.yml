@@ -1,0 +1,52 @@
+name: 專案總控同步
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: 回寫目前版本與開發紀錄
+    runs-on: ubuntu-latest
+    steps:
+      - name: 取得專案內容
+        uses: actions/checkout@v4
+
+      - name: 整理同步資料
+        id: details
+        shell: bash
+        run: |
+          version="$(sed -nE 's/^##[[:space:]]+(v[0-9][^｜|[:space:]]*).*/\1/p' CHANGELOG.md | head -n 1)"
+          summary="$(awk '/^## / { if (found) exit; found=1; next } found && /^- / { sub(/^- /, ""); print; exit }' CHANGELOG.md)"
+          committed_at="$(git show -s --format=%cI "$GITHUB_SHA")"
+          test -n "$version"
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+          printf 'summary=%s\n' "$summary" >> "$GITHUB_OUTPUT"
+          printf 'committed_at=%s\n' "$committed_at" >> "$GITHUB_OUTPUT"
+
+      - name: 回寫專案總控
+        env:
+          PROJECT_CONTROL_SYNC_TOKEN: ${{ secrets.PROJECT_CONTROL_SYNC_TOKEN }}
+          PROJECT_CONTROL_SITES_BYPASS_TOKEN: ${{ secrets.PROJECT_CONTROL_SITES_BYPASS_TOKEN }}
+          VERSION: ${{ steps.details.outputs.version }}
+          SUMMARY: ${{ steps.details.outputs.summary }}
+          COMMITTED_AT: ${{ steps.details.outputs.committed_at }}
+        shell: bash
+        run: |
+          payload="$(jq -n \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg sha "$GITHUB_SHA" \
+            --arg version "$VERSION" \
+            --arg summary "$SUMMARY" \
+            --arg committedAt "$COMMITTED_AT" \
+            '{repository: $repository, sha: $sha, version: $version, summary: $summary, committedAt: $committedAt}')"
+          curl --fail-with-body --silent --show-error \
+            --request POST "https://project-control-kimura.kimura0622.chatgpt.site/api/github-sync" \
+            --header "content-type: application/json" \
+            --header "x-project-control-token: $PROJECT_CONTROL_SYNC_TOKEN" \
+            --header "OAI-Sites-Authorization: Bearer $PROJECT_CONTROL_SITES_BYPASS_TOKEN" \
+            --data "$payload"

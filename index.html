@@ -733,17 +733,16 @@
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
     <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
     <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.20.7 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.20.8 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-/* v5.20.7 2026-09-11：
-   1) 修正文件名稱命中會把整份文件所有段落都算命中的問題；正文命中頁／段落只計實際符合；
-   2) 搜尋段落點入 PDF 前以該段正文重新驗證實體 PDF 頁，避免搜尋索引與原始 PDF 定位錯位；
-   3) 常用程序待確認閱讀器新增「確認頁碼正確」，確認後清除提醒並保存新版正文快照；
-   4) 事件參與人員解析支援「小班＋值班站長／值班站務專員」等班別職稱；
-   5) 維持修訂／異動頁排除、文字模式階層、表格與 SOP 安全更新規則。 */
+/* v5.20.8 2026-09-21：
+   1) 多站事件人員可由每行前綴辨識車站，不再只依賴獨立車站標題；
+   2) 支援日班／夜班等班別、簡稱括號、缺少「於／在」的值勤敘述與「國館」別名；
+   3) 手機桌面圖示依系列 App v1.3 改為工作模板、白色「站」字與鈷藍索引圓點；
+   4) IndexedDB、工作資料格式及既有 PDF／搜尋／運量功能維持不變。 */
 pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.19.0';
 
 /* ---------- IndexedDB layer ---------- */
@@ -3590,12 +3589,15 @@ function parseEventParticipants(raw,defaultStation=''){
   const lines=String(raw||'').replace(/\r/g,'').split('\n');
   const out=[];
   const roleNames=['值班站務專員','值班站務員','值班副站長','值班站長','站務專員','站務員','副站長','站長','保全','清潔人員','清潔'];
-  const shiftNames=['小班','早班','日班','夜班','晚班'];
+  const shiftNames=['大夜班','小夜班','小班','早班','日班','中班','夜班','晚班','支援'];
   const stationNames=[...new Set(eventStationOptions().map(r=>r.station).filter(Boolean))];
+  const stationAliases={'市府':'市政府','國館':'國父紀念館'};
+  const stationTokens=[...new Set([...stationNames,...Object.keys(stationAliases)])].sort((a,b)=>b.length-a.length);
   let stationContext=defaultStation||'';
+  const canonicalStation=name=>stationAliases[name]||stationNames.find(n=>n.replace(/站$/,'')===String(name||'').replace(/站$/,''))||name||'';
   const resolveStationHeading=line=>{
     const normalized=line.replace(/[。．.\s]/g,'').replace(/站$/,'');
-    return stationNames.find(n=>n.replace(/站$/,'')===normalized)||'';
+    return stationAliases[normalized]||stationNames.find(n=>n.replace(/站$/,'')===normalized)||'';
   };
   for(const rawLine of lines){
     const line=rawLine.trim();
@@ -3605,10 +3607,24 @@ function parseEventParticipants(raw,defaultStation=''){
     const heading=resolveStationHeading(line);
     if(heading){stationContext=heading;continue;}
 
-    // 支援：(簡稱XXX)/(以下簡稱XXX)，亦允許沒有簡稱；位置可用「於」或「在」。
-    const m=line.match(/^(.*?)(?:[（(](?:以下)?簡稱\s*([^）)]+)[）)])?\s*(?:於|在)\s*(.+?)[。．.]?$/);
-    if(!m) continue;
-    let before=m[1].trim(),alias=(m[2]||'').trim(),location=m[3].trim();
+    // 同時支援「昆陽站長…」「昆陽站日班保全…」、簡稱括號、缺少「於／在」等實務寫法。
+    let body=line.replace(/[。．.]$/,'').trim(),alias='',location='';
+    const aliasMatch=body.match(/[（(](?:以下)?簡稱\s*([^）)]+)[）)]/);
+    if(aliasMatch){
+      alias=aliasMatch[1].trim();
+      location=body.slice((aliasMatch.index||0)+aliasMatch[0].length).replace(/^\s*(?:於|在)?\s*/,'').trim();
+      body=body.slice(0,aliasMatch.index).trim();
+    }else{
+      const locationMatch=body.match(/^(.*?)\s*(?:於|在)\s*(.+)$/);
+      if(locationMatch){body=locationMatch[1].trim();location=locationMatch[2].trim();}
+    }
+    const stationToken=stationTokens.find(n=>body.startsWith(n+'站')||body.startsWith(n));
+    if(stationToken){
+      stationContext=canonicalStation(stationToken);
+      body=body.slice(stationToken.length).trim();
+      if(body.startsWith('站')&&!roleNames.some(r=>body.startsWith(r))) body=body.slice(1).trim();
+    }
+    let before=body;
     let shift='',role='',name=before;
     for(const sh of shiftNames){
       if(name.startsWith(sh)){shift=sh;name=name.slice(sh.length).trim();break;}
@@ -3616,6 +3632,7 @@ function parseEventParticipants(raw,defaultStation=''){
     for(const r of roleNames){
       if(name.startsWith(r)){role=r;name=name.slice(r.length).trim();break;}
     }
+    name=name.replace(/[。．.]$/,'').trim();
     if(!role || !name) continue;
     out.push({station:stationContext,shift,role:shift?`${shift}${role}`:role,name,alias,location});
   }
@@ -4213,7 +4230,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div><div class="card settings-card" id="settings-categories"><p class="panel-title">常用程序分類</p><p class="panel-note">自訂分類名稱、捷運作業 SVG 圖示、識別色與順序。</p><span class="badge">${getProcedureCategories().length} 個分類</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.20.7 測試版</dd><dt>基準版本</dt><dd>手機版 v5.19.0</dd><dt>更新日期</dt><dd>2026-09-11</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>iPhone 日期欄位回歸修正：事件日期改由固定寬度外框承載原生日期控制項，避免 Safari／PWA 原生 date input 的 intrinsic width 撐出畫面；其餘 v5.20.6 事件版面、分類篩選焦點、40%／60% 參與人員欄寬與程序圖示維持不變。</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.20.8 測試版</dd><dt>基準版本</dt><dd>手機版 v5.20.7</dd><dt>更新日期</dt><dd>2026-09-21</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>多站事件人員解析支援每行車站前綴、班別、簡稱、缺少「於／在」及「國館」別名；桌面圖示改依系列 App v1.3 使用「站」字、工作模板漸層與鈷藍索引圓點。資料格式與其他功能不變。</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-data').onclick=openDataMgmt;
@@ -4278,7 +4295,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" class="modal-close-btn" aria-label="關閉">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.20.7・2026.09.11</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.20.8・2026.09.21</p>
       <p class="muted">「工作資料」包含常用程序、分類名稱／顏色／順序、程序圖示、通告、事件與人員，可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="secondary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出工作資料</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入工作資料</button>

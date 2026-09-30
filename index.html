@@ -46,6 +46,7 @@
 
   .event-kind-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.event-kind{min-height:42px;border:.5px solid var(--border-strong);border-radius:11px;background:#fff;font-size:13px;color:var(--text-2)}.event-kind.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent-text);font-weight:650}
   .event-bad{color:#c62828!important;font-weight:750}.event-good{color:#14733b!important;font-weight:700}.event-editor-sheet{height:92%;max-width:900px}.event-raw-input{min-height:220px}.event-timeline{position:relative;margin:8px 0 12px 8px;padding-left:19px;border-left:2px solid #b8d3ec}.event-time-row{position:relative;background:#fff;border:.5px solid var(--border);border-radius:11px;padding:10px 11px;margin:0 0 9px}.event-time-row:before{content:"";position:absolute;left:-26px;top:15px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 0 0 1px var(--accent)}.event-time{font-size:12px;font-weight:750;color:var(--accent-text);margin-bottom:4px}.event-body{font-size:13px;line-height:1.65;color:var(--text)}.event-edit-grid{display:grid;grid-template-columns:100px 1fr;gap:8px}.event-edit-grid textarea{min-height:74px}.event-person-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:7px}.event-person-card{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:.5px solid var(--border)}.event-person-card:last-child{border-bottom:0}.event-person-card span{font-size:12px;color:var(--text-2)}.event-summary-card{border-left:4px solid var(--accent)}.event-raw{white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.65;color:var(--text-2)}
+  .event-import-box{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:11px 12px;margin-bottom:10px;border:.5px solid var(--border);border-radius:12px;background:#f7faff}.event-import-box .event-import-status{font-size:12px;color:var(--text-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.event-attachment-card{display:flex;align-items:center;justify-content:space-between;gap:12px}.event-attachment-meta{min-width:0}.event-attachment-meta b,.event-attachment-meta small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.event-attachment-meta small{margin-top:4px;color:var(--text-muted)}.event-document-actions{display:flex;gap:8px;flex-wrap:wrap}.event-document-preview{max-width:820px;margin:0 auto;padding:16px;background:#fff;border:1px solid var(--border);border-radius:12px}.event-document-preview h3{font-size:15px;margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)}.event-document-preview p{margin:6px 0;line-height:1.72;white-space:pre-wrap}.event-document-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));border:1px solid var(--border);border-bottom:0}.event-document-row:last-child{border-bottom:1px solid var(--border)}.event-document-cell{padding:7px 8px;border-right:1px solid var(--border);white-space:pre-wrap}.event-document-cell:last-child{border-right:0}
   @media(max-width:700px){.event-person-row{grid-template-columns:1fr 1fr}.event-edit-grid{grid-template-columns:1fr}.event-editor-sheet{height:94%}}
 
 
@@ -717,86 +718,118 @@
     .procedure-icon-choice.selected{border:1px solid #8bbde6!important;background:#f5f9fd!important;box-shadow:0 0 0 1px rgba(32,120,190,.08) inset!important;}
   }
 
+.network-node.has-events .network-dot{display:flex;width:46px;min-width:46px;height:46px;padding:0;border:3px solid #fff;border-radius:50%;background:var(--route-color);color:#fff;box-shadow:0 0 0 2px var(--route-color),0 8px 18px rgba(0,0,0,.16);letter-spacing:0}
+.network-node.has-events .network-dot:before{content:none}
+.network-node.has-events .network-dot b{margin:0;font-size:18px;line-height:1;font-weight:800;color:#fff}
+.network-node.has-events .network-name.above{bottom:calc(50% + 34px)}
+.network-node.has-events .network-name.below{top:calc(50% + 34px)}
+.network-category-card{width:min(390px,calc(100vw - 32px));height:auto;max-height:none}
+.network-category-list{display:grid;gap:9px}
+.network-category-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border:1px solid var(--border);border-radius:12px;background:#f8fafc}
+.network-category-row b{font-size:14px}
+.network-category-row small{display:block;margin-top:3px;color:var(--text-muted)}
+.network-category-count{min-width:58px;font-size:20px;font-weight:800}
+.network-category-row.disabled{opacity:.58}
+.network-category-row.disabled .network-category-count{font-size:12px;font-weight:650;color:var(--text-muted)}
+.event-list-card.status-pending{background:#eef7ff!important;border-color:#abd3f5!important}.event-list-card.status-route{background:#fff5df!important;border-color:#efc66e!important}.event-status-badge{display:inline-flex;align-items:center;min-height:22px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:750;white-space:nowrap}.event-status-badge.pending{color:#075a9c;background:#dcefff}.event-status-badge.route{color:#875300;background:#ffe5ab}.event-type-label{color:var(--event-type-color);font-size:13px;font-weight:750}.event-category-badge{color:#596b80;border:1px solid #cdd7e4;border-radius:7px;padding:3px 7px;font-size:11px;font-weight:700}.event-category-badge.event-bad{color:#c62828;border-color:#e9b5b5}.event-category-badge.event-good{color:#14733b;border-color:#acd4bd}
+.event-batch-list{display:grid;gap:9px;margin:12px 0}.event-batch-row{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;padding:11px 12px;border:1px solid var(--border);border-radius:11px;background:#fff}.event-batch-row.error{background:#fff0f0;border-color:#e6aaaa}.event-batch-row.duplicate{background:#fff9e9;border-color:#e7cf8b}.event-batch-row.route{background:#fff5df;border-color:#efc66e}.event-batch-copy b,.event-batch-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.event-batch-copy small{margin-top:4px;color:var(--text-muted)}.event-batch-summary{display:flex;gap:7px;flex-wrap:wrap}.event-batch-summary span{padding:5px 8px;border-radius:8px;background:#f1f5f9;font-size:12px}.event-review-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mobile-network-page{display:grid;gap:12px}.mobile-network-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}.mobile-network-filters label{display:grid;gap:4px;font-size:12px;font-weight:700;color:var(--text-2)}.mobile-network-line{--route-color:#2676bd;padding:14px;border-radius:15px;background:#fff;border:1px solid color-mix(in srgb,var(--route-color) 28%,var(--border));box-shadow:0 5px 16px rgba(20,36,60,.04)}.mobile-network-line.orange{--route-color:#d18a12}.mobile-network-line h3{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:15px}.mobile-network-line h3:before{content:"";width:5px;height:20px;border-radius:5px;background:var(--route-color)}.mobile-network-stations{position:relative;display:grid;gap:0}.mobile-network-station{position:relative;display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:54px;border:0;background:transparent;text-align:left;padding:4px 2px;color:var(--text)}.mobile-network-station:before{content:"";position:absolute;left:20px;top:0;bottom:0;width:4px;background:var(--route-color);opacity:.82}.mobile-network-station:first-child:before{top:50%}.mobile-network-station:last-child:before{bottom:50%}.mobile-network-dot{position:relative;z-index:1;display:grid;place-items:center;width:18px;height:18px;margin-left:12px;border:3px solid var(--route-color);border-radius:50%;background:#fff}.mobile-network-station.has-events .mobile-network-dot{width:38px;height:38px;margin-left:2px;background:var(--route-color);border:3px solid #fff;box-shadow:0 0 0 2px var(--route-color);color:#fff;font-size:15px;font-weight:850}.mobile-network-name{font-size:14px;font-weight:700}.mobile-network-external{opacity:.48}.other-menu{display:grid;gap:12px}.other-card{cursor:pointer}.other-card .panel-title{margin-bottom:5px}
+@media(max-width:899px){.event-list-meta{grid-column:1;grid-row:3;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.event-list-meta .event-type-label,.event-list-meta .event-category-badge,.event-list-meta .event-status-badge{white-space:nowrap}.event-batch-row select{width:100%}}
+@media(max-width:600px){.event-attachment-card{align-items:flex-start;flex-direction:column}.event-document-actions{width:100%}.event-document-actions button{flex:1}.event-document-preview{padding:12px}.event-document-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div id="phone">
   <div id="topbar">
-    <h1 id="page-title">作業查詢</h1>
+    <h1 id="page-title">路線總覽</h1>
     <button id="data-mgmt-btn" title="設定">⚙</button>
   </div>
   <div id="content"></div>
   <div id="tabbar">
     <div class="desktop-brand">站務工作助手<small>內部離線資料工作台</small></div>
+    <button class="tab-btn" data-tab="network"><span class="icon">◎</span>路線總覽</button>
     <button class="tab-btn" data-tab="sop"><span class="icon">🔎</span>作業查詢</button>
     <button class="tab-btn" data-tab="ridership"><span class="icon">▥</span>運量查詢</button>
-    <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>事件/人員</button>
-    <button class="tab-btn" data-tab="library"><span class="icon">▤</span>資料管理</button>
-    <button class="tab-btn" data-tab="settings"><span class="icon">⚙</span>設定</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.20.9 · 資料僅存本機</div>
+    <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>紀錄查詢</button>
+    <button class="tab-btn" data-tab="other"><span class="icon">•••</span>其他</button>
+    <div class="desktop-version">手機 PWA 測試版 v5.23.0 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-/* v5.20.9 2026-09-21：
-   1) 姓名後括號改採通案性簡稱候選規則，支援簡稱、以下稱、下稱及無引導詞短稱謂；
-   2) 排除電話、支援、休假、備註等明顯非簡稱括號內容；
-   3) 原文角色「菁英」統一轉為「菁英保全」；
-   4) IndexedDB、工作資料格式、桌面圖示及其他功能維持不變。 */
+/* v5.23.0 2026-09-30：手機直向路網、事件類型、批次 Word 匯入與待確認狀態。 */
 pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.19.0';
 
 /* ---------- IndexedDB layer ---------- */
 const DB_NAME = 'stationAssistantDB';
 const STORES = ['pdfFiles','sopDocs','announcements','personnel','ridership','favorites','recentViews','synonymGroups','unmatchedQueries','annotations'];
+const DB_STORES = [...STORES,'eventAttachments'];
 // 使用專用名稱，避免PDF.js在file://假Worker模式下與通用全域名稱 db 衝突。
 let stationOperationsDatabase;
+let stationDatabaseOpenPromise = null;
 function openDB(){
-  return new Promise((resolve,reject)=>{
-    const req = indexedDB.open(DB_NAME, 4);
+  if(stationOperationsDatabase) return Promise.resolve(stationOperationsDatabase);
+  if(stationDatabaseOpenPromise) return stationDatabaseOpenPromise;
+  stationDatabaseOpenPromise = new Promise((resolve,reject)=>{
+    const req = indexedDB.open(DB_NAME, 5);
+    const waitTimer=setTimeout(()=>reject(new Error('本機資料庫連線逾時，請關閉其他站務助手分頁後重新開啟。')),8000);
     req.onupgradeneeded = (e)=>{
       const d = e.target.result;
-      STORES.forEach(name=>{
+      DB_STORES.forEach(name=>{
         if(!d.objectStoreNames.contains(name)){
           d.createObjectStore(name,{keyPath:'id',autoIncrement:true});
         }
       });
     };
-    req.onsuccess = ()=>{stationOperationsDatabase=req.result; resolve(stationOperationsDatabase);};
-    req.onerror = ()=>reject(req.error);
-  });
+    req.onsuccess = ()=>{
+      clearTimeout(waitTimer);
+      stationOperationsDatabase=req.result;
+      stationOperationsDatabase.onversionchange=()=>{
+        stationOperationsDatabase.close();
+        stationOperationsDatabase=undefined;
+      };
+      resolve(stationOperationsDatabase);
+    };
+    req.onerror = ()=>{clearTimeout(waitTimer);reject(req.error);};
+    req.onblocked = ()=>{clearTimeout(waitTimer);reject(new Error('本機資料庫正被其他版本占用，請關閉其他站務助手分頁後重試。'));};
+  }).finally(()=>{stationDatabaseOpenPromise=null;});
+  return stationDatabaseOpenPromise;
 }
-function txStore(name, mode){
-  return stationOperationsDatabase.transaction(name, mode).objectStore(name);
+async function dbRequest(name,mode,method,value,retry=true){
+  const database=await openDB();
+  try{
+    return await new Promise((res,rej)=>{
+      const store=database.transaction(name,mode).objectStore(name);
+      const request=value===undefined?store[method]():store[method](value);
+      request.onsuccess=()=>res(request.result);
+      request.onerror=()=>rej(request.error);
+    });
+  }catch(err){
+    if(retry&&(err?.name==='InvalidStateError'||err?.name==='TransactionInactiveError')){
+      try{database.close();}catch(_error){}
+      if(stationOperationsDatabase===database)stationOperationsDatabase=undefined;
+      return dbRequest(name,mode,method,value,false);
+    }
+    throw err;
+  }
 }
 function dbGetAll(name){
-  return new Promise((res,rej)=>{
-    const r = txStore(name,'readonly').getAll();
-    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
-  });
+  return dbRequest(name,'readonly','getAll');
+}
+function dbGet(name,id){
+  return dbRequest(name,'readonly','get',id);
 }
 function dbAdd(name, obj){
-  return new Promise((res,rej)=>{
-    const r = txStore(name,'readwrite').add(obj);
-    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
-  });
+  return dbRequest(name,'readwrite','add',obj);
 }
 function dbPut(name, obj){
-  return new Promise((res,rej)=>{
-    const r = txStore(name,'readwrite').put(obj);
-    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
-  });
+  return dbRequest(name,'readwrite','put',obj);
 }
 function dbDelete(name, id){
-  return new Promise((res,rej)=>{
-    const r = txStore(name,'readwrite').delete(id);
-    r.onsuccess=()=>res(); r.onerror=()=>rej(r.error);
-  });
+  return dbRequest(name,'readwrite','delete',id);
 }
 function dbClear(name){
-  return new Promise((res,rej)=>{
-    const r=txStore(name,'readwrite').clear();
-    r.onsuccess=()=>res();r.onerror=()=>rej(r.error);
-  });
+  return dbRequest(name,'readwrite','clear');
 }
 
 /* ---------- In-memory cache ---------- */
@@ -806,7 +839,7 @@ async function reloadCache(){
 }
 
 /* ---------- App state ---------- */
-let currentTab = 'sop';
+let currentTab = 'network';
 let sopFilter = 'content'; // 'content' | 'all'
 let searchSource = 'all'; // 'all' | 'sop' | 'notice'
 let sopKeyword = '';
@@ -828,6 +861,13 @@ const SEARCH_HISTORY_KEY='stationAssistantSearchHistory';
 const PROCEDURE_COLORS=['blue','green','orange','purple','red','gray'];
 
 const PROCEDURE_CATEGORY_KEY='stationAssistantProcedureCategoriesV1';
+const EVENT_TYPE_KEY='stationAssistantEventTypesV1';
+const DEFAULT_EVENT_TYPES=[{id:'door',name:'車門異常',color:'blue'},{id:'fire',name:'火警異常',color:'red'},{id:'elevator',name:'電梯異常',color:'teal'},{id:'escalator',name:'扶梯異常',color:'orange'},{id:'other',name:'其他',color:'gray'}];
+function getEventTypes(){try{const stored=JSON.parse(localStorage.getItem(EVENT_TYPE_KEY));return Array.isArray(stored)?stored.filter(c=>c&&c.id&&c.name):DEFAULT_EVENT_TYPES.map(c=>({...c}));}catch{return DEFAULT_EVENT_TYPES.map(c=>({...c}))}}
+function saveEventTypes(rows){localStorage.setItem(EVENT_TYPE_KEY,JSON.stringify(rows));}
+function isEventUnclassified(id){return !getEventTypes().some(t=>t.id===id)}
+function eventTypeName(id){return getEventTypes().find(t=>t.id===id)?.name||'未分類'}
+function eventTypeColor(id){return PROCEDURE_CATEGORY_COLORS[getEventTypes().find(t=>t.id===id)?.color]||PROCEDURE_CATEGORY_COLORS.gray}
 const PROCEDURE_RECENT_KEY='stationAssistantRecentProceduresV1';
 let procedureCategoryFilter='all';
 let procedureListQuery='';
@@ -919,8 +959,14 @@ function editProcedureCategory(id,done){
   o.querySelectorAll('[data-cat-color]').forEach(b=>b.onclick=()=>{selectedColor=b.dataset.catColor;o.querySelectorAll('[data-cat-color]').forEach(x=>x.classList.toggle('selected',x===b))});
   o.querySelector('#cat-edit-save').onclick=()=>{const name=o.querySelector('#cat-name').value.trim();if(!name)return alert('請輸入分類名稱');const rows=getProcedureCategories(),row={id:existing?.id||`cat-${Date.now()}`,name,color:selectedColor,order:existing?.order||rows.length+1};const idx=rows.findIndex(c=>c.id===row.id);if(idx>=0)rows[idx]=row;else rows.push(row);saveProcedureCategories(rows);o.remove();done?.()};
 }
+function openEventTypeManager(onChange=()=>{}){
+  const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='100';
+  const draw=()=>{const rows=getEventTypes();overlay.innerHTML=`<div class="modal-sheet category-manager-sheet"><div class="modal-header"><b>事件類型管理</b><button class="modal-close-btn" id="event-type-close">✕</button></div><div class="modal-body"><p class="muted">可編輯名稱、顏色與順序；刪除後既有事件會顯示為未分類。</p><div class="category-manager-list">${rows.map((c,i)=>`<div class="category-manager-row"><span class="category-manager-swatch" style="--category-color:${PROCEDURE_CATEGORY_COLORS[c.color]||PROCEDURE_CATEGORY_COLORS.gray}"></span><div class="category-manager-copy"><b>${escapeHtml(c.name)}</b></div><button class="mini-action" data-type-up="${escapeHtml(c.id)}" ${i===0?'disabled':''}>↑</button><button class="mini-action" data-type-down="${escapeHtml(c.id)}" ${i===rows.length-1?'disabled':''}>↓</button><button class="mini-action" data-type-edit="${escapeHtml(c.id)}">編輯</button><button class="mini-action danger-text" data-type-delete="${escapeHtml(c.id)}">刪除</button></div>`).join('')}</div><button class="primary" id="event-type-add" style="width:100%;margin-top:12px">＋ 新增類型</button></div></div>`;overlay.querySelector('#event-type-close').onclick=()=>{overlay.remove();onChange();};overlay.querySelector('#event-type-add').onclick=()=>edit(null);overlay.querySelectorAll('[data-type-edit]').forEach(b=>b.onclick=()=>edit(b.dataset.typeEdit));overlay.querySelectorAll('[data-type-up],[data-type-down]').forEach(b=>b.onclick=()=>{const index=rows.findIndex(c=>c.id===(b.dataset.typeUp||b.dataset.typeDown)),to=index+(b.dataset.typeUp?-1:1);if(index<0||to<0||to>=rows.length)return;[rows[index],rows[to]]=[rows[to],rows[index]];saveEventTypes(rows);draw();onChange();});overlay.querySelectorAll('[data-type-delete]').forEach(b=>b.onclick=async()=>{const id=b.dataset.typeDelete,used=cache.personnel.filter(e=>e.recordType==='event'&&e.eventTypeId===id);if(!confirm(`刪除「${eventTypeName(id)}」？${used.length?`已有 ${used.length} 件事件會改為未分類。`:''}`))return;saveEventTypes(rows.filter(c=>c.id!==id));for(const event of used)await dbPut('personnel',{...event,eventTypeId:''});if(used.length)await reloadCache();draw();onChange();});};
+  const edit=id=>{const current=getEventTypes().find(c=>c.id===id);let color=current?.color||'blue';const box=document.createElement('div');box.className='modal-overlay';box.style.zIndex='102';box.innerHTML=`<div class="modal-sheet"><div class="modal-header"><b>${current?'編輯':'新增'}事件類型</b><button class="modal-close-btn" id="type-edit-close">✕</button></div><div class="modal-body"><div class="field"><label>名稱</label><input id="type-edit-name" maxlength="12" value="${escapeHtml(current?.name||'')}"></div><div class="field"><label>識別色</label><div class="category-color-picker">${Object.entries(PROCEDURE_CATEGORY_COLORS).map(([key,value])=>`<button class="category-color-choice ${key===color?'selected':''}" data-type-color="${key}" style="background:${value}" aria-label="${key}"></button>`).join('')}</div></div><button class="primary" id="type-edit-save" style="width:100%">儲存</button></div></div>`;document.getElementById('phone').appendChild(box);box.querySelector('#type-edit-close').onclick=()=>box.remove();box.querySelectorAll('[data-type-color]').forEach(b=>b.onclick=()=>{color=b.dataset.typeColor;box.querySelectorAll('[data-type-color]').forEach(x=>x.classList.toggle('selected',x===b));});box.querySelector('#type-edit-save').onclick=()=>{const name=box.querySelector('#type-edit-name').value.trim(),rows=getEventTypes();if(!name)return alert('請輸入類型名稱');if(rows.some(c=>c.name===name&&c.id!==id))return alert('已有同名類型');if(current){const index=rows.findIndex(c=>c.id===id);rows[index]={...current,name,color};}else rows.push({id:`type-${Date.now()}`,name,color});saveEventTypes(rows);box.remove();draw();onChange();};};
+  document.getElementById('phone').appendChild(overlay);draw();
+}
 
-const titleMap = {sop:'作業查詢', ridership:'運量查詢', personnel:'特殊事件／人員', library:'資料管理', settings:'設定'};
+const titleMap = {network:'路線總覽',sop:'作業查詢',ridership:'運量查詢',personnel:'紀錄查詢',other:'其他',library:'資料管理',settings:'設定'};
 
 /* ---------- PDF parsing helpers ---------- */
 function isRevisionPage(text){
@@ -1312,12 +1358,15 @@ function focusAtEnd(id){
 function render(){
   titleEl.textContent = titleMap[currentTab];
   document.getElementById('phone').classList.toggle('ridership-mode',currentTab==='ridership');
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===currentTab));
+  const activeTab=['library','settings'].includes(currentTab)?'other':currentTab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===activeTab));
+  if(currentTab==='network') renderNetwork();
   if(currentTab==='sop') renderSop();
   if(currentTab==='library') renderLibrary();
   if(currentTab==='personnel') renderPersonnel();
   if(currentTab==='ridership') renderRidership();
   if(currentTab==='settings') renderSettings();
+  if(currentTab==='other') renderOther();
 }
 
 /* --- SOP tab --- */
@@ -2016,10 +2065,10 @@ async function exportProcedures(){
   const announcements=cache.announcements.map(n=>{const copy={...n,portableId:n.id,noticeKey:transferNoticeKey(n),pdfData:n.pdfData?bufToBase64(n.pdfData):null,
     relationDocumentKeys:(n.relations||[]).map(r=>{const d=cache.sopDocs.find(x=>x.id===Number(r.docId)),p=d?cache.pdfFiles.find(x=>x.id===Number(d.pdfFileId)):null;return d?{documentKey:transferDocumentKey(d,p),startPage:r.startPage||null,endPage:r.endPage||r.startPage||null}:null;}).filter(Boolean),
     procedurePortableIds:(n.procedureIds||[]).map(id=>Number(id))};delete copy.id;delete copy.relations;delete copy.procedureIds;return copy;});
-  downloadJson({format:'station-assistant-transfer',version:7,mode:'lightweight',exportedAt:new Date().toISOString(),source:'mobile',documents,procedures:procedures.map(portableProcedureV3),annotations,announcements,events:events.map(portableWorkRecord),personnel:personnel.map(portableWorkRecord),procedureCategories:getProcedureCategories()},`工作資料移轉-${new Date().toISOString().slice(0,10)}.json`);
+  downloadJson({format:'station-assistant-transfer',version:7,mode:'lightweight',exportedAt:new Date().toISOString(),source:'mobile',documents,procedures:procedures.map(portableProcedureV3),annotations,announcements,events:events.map(portableWorkRecord),personnel:personnel.map(portableWorkRecord),procedureCategories:getProcedureCategories(),eventTypes:getEventTypes()},`工作資料移轉-${new Date().toISOString().slice(0,10)}.json`);
 }
-async function transferSnapshot(){const out={};for(const name of ['pdfFiles','sopDocs','favorites','annotations','announcements','personnel'])out[name]=await dbGetAll(name);out._procedureCategories=getProcedureCategories();return out;}
-async function restoreTransferSnapshot(snapshot){for(const name of ['pdfFiles','sopDocs','favorites','annotations','announcements','personnel']){if(!Array.isArray(snapshot[name]))continue;await dbClear(name);for(const row of snapshot[name])await dbAdd(name,row);}if(Array.isArray(snapshot._procedureCategories))saveProcedureCategories(snapshot._procedureCategories);await reloadCache();}
+async function transferSnapshot(){const out={};for(const name of ['pdfFiles','sopDocs','favorites','annotations','announcements','personnel'])out[name]=await dbGetAll(name);out._procedureCategories=getProcedureCategories();out._eventTypes=getEventTypes();return out;}
+async function restoreTransferSnapshot(snapshot){for(const name of ['pdfFiles','sopDocs','favorites','annotations','announcements','personnel']){if(!Array.isArray(snapshot[name]))continue;await dbClear(name);for(const row of snapshot[name])await dbAdd(name,row);}if(Array.isArray(snapshot._procedureCategories))saveProcedureCategories(snapshot._procedureCategories);if(Array.isArray(snapshot._eventTypes))saveEventTypes(snapshot._eventTypes);await reloadCache();}
 function chooseImportMode(fileData,stats){
   return new Promise(resolve=>{const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='95';
     overlay.innerHTML=`<div class="modal-sheet" style="height:auto;max-width:540px"><div class="modal-header"><b>匯入工作資料</b><button id="pi-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body"><p style="line-height:1.75;margin-top:0">常用程序 <b>${stats.procedures}</b> 筆｜SOP 識別 <b>${stats.documents}</b> 份｜通告 <b>${stats.notices}</b> 筆｜通告 PDF <b>${stats.noticePdfs}</b> 份｜標註 <b>${stats.annotations}</b> 筆｜關聯 <b>${stats.relations}</b> 組｜事件 <b>${stats.events||0}</b> 筆｜人員 <b>${stats.personnel||0}</b> 筆</p><div class="import-report">輕量移轉不包含 SOP PDF 與正文。${stats.missingDocs.length?`<br><b style="color:var(--danger)">找不到相同 SOP：${stats.missingDocs.map(escapeHtml).join('、')}</b><br>相關常用程序、標註與 SOP 關聯將安全略過。`:'<br>所有 SOP 均可與本機文件配對。'}<br>匯入前會建立暫存快照；如發生錯誤，將自動回復。</div><button class="primary" id="pi-merge" style="width:100%;margin:12px 0 9px">合併匯入（建議）</button><button class="secondary" id="pi-replace" style="width:100%;color:var(--danger)">取代移轉資料</button></div></div>`;
@@ -2052,6 +2101,7 @@ async function importProceduresFile(file){
     const existingPeople=new Map(cache.personnel.filter(r=>r.recordType!=='event').map(r=>[transferPersonnelKey(r),r]));
     for(const source of data.personnel||[]){const copy={...source},key=transferPersonnelKey(copy),current=existingPeople.get(key);if(current){Object.assign(current,copy,{id:current.id});await dbPut('personnel',current);result.personnelUpdated++;}else{copy.id=await dbAdd('personnel',copy);cache.personnel.push(copy);existingPeople.set(key,copy);result.personnelAdded++;}}
     if(Array.isArray(data.procedureCategories))saveProcedureCategories(data.procedureCategories);
+    if(Array.isArray(data.eventTypes))saveEventTypes(data.eventTypes);
     await reloadCache();render();alert(`匯入完成：常用程序新增 ${result.procedureAdded}、沿用 ${result.procedureUpdated}；標註新增 ${result.annotationAdded}；通告新增 ${result.noticeAdded}、更新 ${result.noticeUpdated}；SOP PDF 新增 ${result.pdfAdded}；事件新增 ${result.eventAdded}、更新 ${result.eventUpdated}；人員新增 ${result.personnelAdded}、更新 ${result.personnelUpdated}。${result.unmatched?`\n未能配對 ${result.unmatched} 項，已安全略過。`:''}`);
   }catch(error){await restoreTransferSnapshot(snapshot);render();alert(`匯入失敗，已回復匯入前資料。\n${error.message||error}`);}
 }
@@ -2240,7 +2290,7 @@ function bindImportBtn(id){
   input.addEventListener('change', async (e)=>{
     const file = e.target.files[0];
     if(!file) return;
-    await handlePdfImport(file);
+    try{await handlePdfImport(file);}finally{e.target.value='';}
   });
 }
 async function handlePdfImport(file,options={}){
@@ -2252,7 +2302,7 @@ async function handlePdfImport(file,options={}){
     <div style="height:8px;background:#e5e5ea;border-radius:99px;overflow:hidden;">
       <div id="pc-progress-bar" style="height:100%;width:1%;background:var(--accent);transition:width .2s;"></div>
     </div>
-    <p id="pc-progress-main" class="muted" style="margin:12px 0 4px;">正在讀取檔案…</p>
+    <p id="pc-progress-main" class="muted" style="margin:12px 0 4px;">正在連接本機資料庫…</p>
     <p id="pc-progress-time" class="tiny-muted" style="margin:0;">大型合併PDF可能需要數十分鐘</p>
   </div>`;
   const timer=setInterval(()=>{
@@ -2261,6 +2311,9 @@ async function handlePdfImport(file,options={}){
     if(el) el.textContent=`已執行 ${Math.floor(sec/60)}分${String(sec%60).padStart(2,'0')}秒`;
   },1000);
   try{
+    await openDB();
+    const ready=document.getElementById('pc-progress-main');
+    if(ready)ready.textContent='正在讀取檔案…';
     let parseBuf = await file.arrayBuffer();
     const pages = await parsePdfArrayBuffer(parseBuf,(current,total)=>{
       const pct=total?Math.max(1,Math.round(current/total*100)):1;
@@ -2396,7 +2449,7 @@ function showImportReview(docs, pdfFileId, options={}){
         alert(`SOP 更新完成。\n文件：成功對應 ${result.matched} 份｜新增 ${result.added} 份｜移除 ${result.removed} 份${result.review?`\n常用程序：自動移轉 ${result.auto}｜內容有異動 ${result.changed}｜無法定位 ${result.unmatched}。\n所有經新版比對的常用程序均保留確認提醒；請逐筆確認後再清除狀態。`:''}`);
       }else{
         for(const doc of docs)await dbAdd('sopDocs',{pdfFileId,name:doc.name||'未命名文件',pages:doc.pages});
-        const pdfRec=cache.pdfFiles.find(f=>f.id===pdfFileId)||await new Promise((res,rej)=>{const r=txStore('pdfFiles','readonly').get(pdfFileId);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});
+        const pdfRec=cache.pdfFiles.find(f=>f.id===pdfFileId)||await dbGet('pdfFiles',pdfFileId);
         if(pdfRec){pdfRec.documentCount=docs.length;pdfRec.status='已完成';pdfRec.qualityReport=buildPdfQualityReport(docs);pdfRec.sopType=options.sopType||pdfRec.sopType||'';await dbPut('pdfFiles',pdfRec);}
         await reloadCache();
       }
@@ -3271,7 +3324,7 @@ async function retryPendingFavoriteLocations(){
   return repaired;
 }
 async function commitSopReplacement(targetPdfId,tempPdfId,newDocs,sopType){
-  const readPdf=id=>new Promise((res,rej)=>{const r=txStore('pdfFiles','readonly').get(Number(id));r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});
+  const readPdf=id=>dbGet('pdfFiles',Number(id));
   const target=cache.pdfFiles.find(f=>Number(f.id)===Number(targetPdfId))||await readPdf(targetPdfId);
   const temp=cache.pdfFiles.find(f=>Number(f.id)===Number(tempPdfId))||await readPdf(tempPdfId);
   if(!target||!temp)throw new Error('找不到更新前或新版 PDF 暫存資料。');
@@ -3484,7 +3537,7 @@ function renderLibrary(){
 確認前舊版仍會保留；如無法安全對應既有程序，更新會自動中止。
 
 確定開始解析新版嗎？`)){e.target.value='';return;}
-    await handlePdfImport(file,{sopType,replacePdfId});
+    try{await handlePdfImport(file,{sopType,replacePdfId});}finally{e.target.value='';}
   });
   bindImeSafeSearch(document.getElementById('notice-library-search'),value=>{noticeKeyword=value;noticePage=1;filterNoticeCards();},filterNoticeCards);
   document.getElementById('notice-filter-cat')?.addEventListener('change',()=>{noticePage=1;filterNoticeCards();});
@@ -3565,6 +3618,7 @@ function openNoticeRelationsEditor(id){
 }
 
 /* --- Personnel/event tab --- */
+const MANAGED_EVENT_STATIONS={BL:['頂埔','永寧','土城','海山','亞東醫院','府中','板橋','新埔','江子翠','龍山寺','西門','台北車站','善導寺','忠孝新生','忠孝復興','忠孝敦化','國父紀念館','市政府','永春','後山埤','昆陽','南港','南港展覽館'],O:['南勢角','景安','永安市場','頂溪','古亭','東門','忠孝新生','松江南京','行天宮','中山國小','民權西路','大橋頭','台北橋','菜寮','三重','三重國小','三和國中','徐匯中學','三民高中','蘆洲','先嗇宮','頭前庄','新莊','輔大','丹鳳','迴龍']};
 function eventStationOptions(){
   const map=new Map();
   for(const row of cache.ridership){
@@ -3573,14 +3627,18 @@ function eventStationOptions(){
     const key=`${r.lineCode}:${String(r.code).toUpperCase()}:${r.station}`;
     if(!map.has(key)) map.set(key,r);
   }
-  return [...map.values()].sort(compareStationsByCode);
+  for(const [lineCode,names] of Object.entries(MANAGED_EVENT_STATIONS))names.forEach((station,index)=>{const key=lineCode+':'+station;if(![...map.values()].some(r=>r.lineCode===lineCode&&r.station===station))map.set(key,{lineCode,lineName:RIDERSHIP_LINES[lineCode],station,code:`${lineCode}${index+1}`});});
+  return [...map.values()].filter(r=>['BL','O'].includes(r.lineCode)).sort(compareStationsByCode);
 }
 function parseEventTimeline(raw){
-  const lines=String(raw||'').replace(/\r/g,'').split('\n');
+  const allLines=String(raw||'').replace(/\r/g,'').split('\n');
+  const start=allLines.findIndex(line=>/^\s*(?:2[.．、]?\s*)?事件經過\s*[:：]?\s*$/.test(line.trim()));
+  const lines=start>=0?allLines.slice(start+1):allLines;
   const out=[];let current=null;
   for(const line of lines){
-    const m=line.trim().match(/^([01]?\d|2[0-3]):([0-5]\d)\s+(.+)$/);
-    if(m){current={time:`${m[1].padStart(2,'0')}:${m[2]}`,text:m[3].trim()};out.push(current);}
+    if(/^\s*(?:\d+[.．、]?\s*)?(?:DVR|NVR)(?:\s*檢視|\s*調閱|\s*畫面)?\s*[:：]?/i.test(line.trim()))break;
+    const m=line.trim().match(/^([01]?\d|2[0-4])[:：]([0-5]\d)\s*(.+)$/);
+    if(m){const nextDay=Number(m[1])===24;current={time:`${nextDay?'00':m[1].padStart(2,'0')}:${m[2]}`,text:m[3].trim(),...(nextDay?{nextDay:true}:{})};out.push(current);}
     else if(line.trim()&&current) current.text+=`\n${line.trim()}`;
   }
   return out;
@@ -3603,7 +3661,7 @@ function parseEventParticipants(raw,defaultStation=''){
   for(const rawLine of lines){
     const line=rawLine.trim();
     if(!line) continue;
-    if(/^([01]?\d|2[0-3]):[0-5]\d(?:[:：][0-5]\d)?\s+/.test(line)) break;
+    if(/^([01]?\d|2[0-3])[:：][0-5]\d(?:[:：][0-5]\d)?\s*.+/.test(line)) break;
 
     const heading=resolveStationHeading(line);
     if(heading){stationContext=heading;continue;}
@@ -3613,10 +3671,10 @@ function parseEventParticipants(raw,defaultStation=''){
     const aliasMatch=body.match(/[（(]\s*([^）)]+?)\s*[）)]/);
     if(aliasMatch){
       aliasCandidate=aliasMatch[1].trim();
-      location=body.slice((aliasMatch.index||0)+aliasMatch[0].length).replace(/^\s*(?:於|在)?\s*/,'').trim();
+      location=body.slice((aliasMatch.index||0)+aliasMatch[0].length).replace(/^\s*(?:位於|位在|於|在)?\s*/,'').trim();
       body=body.slice(0,aliasMatch.index).trim();
     }else{
-      const locationMatch=body.match(/^(.*?)\s*(?:於|在)\s*(.+)$/);
+      const locationMatch=body.match(/^(.*?)\s*(?:位於|位在|於|在)\s*(.+)$/);
       if(locationMatch){body=locationMatch[1].trim();location=locationMatch[2].trim();}
     }
     const stationToken=stationTokens.find(n=>body.startsWith(n+'站')||body.startsWith(n));
@@ -3652,6 +3710,87 @@ function detectStationsInEvent(raw){
   const names=[...new Set(eventStationOptions().map(r=>r.station))].filter(n=>n&&String(raw).includes(n));
   return names;
 }
+function eventFileSize(bytes){const n=Number(bytes)||0;return n<1024?`${n} B`:n<1048576?`${(n/1024).toFixed(0)} KB`:`${(n/1048576).toFixed(1)} MB`;}
+function decodeXmlText(xml){const area=document.createElement('textarea');area.innerHTML=String(xml||'').replace(/<w:tab\b[^>]*\/>/g,'\t').replace(/<w:br\b[^>]*\/>/g,'\n').replace(/<\/w:tc>/g,'\t').replace(/<\/w:tr>/g,'\n').replace(/<\/w:p>/g,'\n').replace(/<[^>]+>/g,'');return area.value.replace(/\u00a0/g,' ').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();}
+async function unzipDocxEntry(file,expectedName){
+  const bytes=new Uint8Array(await file.arrayBuffer()),view=new DataView(bytes.buffer);let eocd=-1;for(let i=bytes.length-22;i>=Math.max(0,bytes.length-65557);i--){if(view.getUint32(i,true)===0x06054b50){eocd=i;break;}}if(eocd<0)throw new Error('不是有效的 DOCX 檔案');
+  const count=view.getUint16(eocd+10,true),decoder=new TextDecoder('utf-8');let offset=view.getUint32(eocd+16,true);for(let i=0;i<count;i++){if(view.getUint32(offset,true)!==0x02014b50)break;const method=view.getUint16(offset+10,true),compressed=view.getUint32(offset+20,true),nameLength=view.getUint16(offset+28,true),extraLength=view.getUint16(offset+30,true),commentLength=view.getUint16(offset+32,true),localOffset=view.getUint32(offset+42,true),name=decoder.decode(bytes.subarray(offset+46,offset+46+nameLength));if(name===expectedName){const localNameLength=view.getUint16(localOffset+26,true),localExtraLength=view.getUint16(localOffset+28,true),start=localOffset+30+localNameLength+localExtraLength,data=bytes.slice(start,start+compressed);if(method===0)return decoder.decode(data);if(method!==8||typeof DecompressionStream==='undefined')throw new Error('此裝置無法解壓縮 DOCX，請改用貼上文字');const stream=new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));return decoder.decode(await new Response(stream).arrayBuffer());}offset+=46+nameLength+extraLength+commentLength;}throw new Error('DOCX 內找不到文件內容');
+}
+function rocEventDate(text){const m=String(text||'').match(/(?:民國\s*)?(\d{2,3})\s*(?:年|[/.\-])\s*(\d{1,2})\s*(?:月|[/.\-])\s*(\d{1,2})\s*日?/);if(!m)return'';const year=Number(m[1])<1911?Number(m[1])+1911:Number(m[1]);return `${year}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;}
+function eventSection(text,startNames,endNames){const source=String(text||''),starts=startNames.map(n=>({n,i:source.indexOf(n)})).filter(x=>x.i>=0).sort((a,b)=>a.i-b.i);if(!starts.length)return'';const from=starts[0].i+starts[0].n.length,ends=endNames.map(n=>source.indexOf(n,from)).filter(i=>i>from);return source.slice(from,ends.length?Math.min(...ends):source.length).replace(/^[\s:：]+/,'').trim();}
+const EVENT_IMPROVEMENT_TABLE_LABELS=['事件類別','主分類','次分類','車站設備異常','票務事件','違規行為','旅客事件','其他事件','廠商事件','處室介面','外單位'];
+function eventImprovementBoundary(line){const cleaned=String(line||'').replace(/[\u200B-\u200D\u2060\uFEFF]/g,'').trim().replace(/^[^\u3400-\u9FFFA-Za-z0-9]+/,'').replace(/\s+/g,'');return EVENT_IMPROVEMENT_TABLE_LABELS.some(label=>{if(!cleaned.startsWith(label))return false;const rest=cleaned.slice(label.length);return !rest||/^[:：]/.test(rest)||/^[^\u3400-\u9FFFA-Za-z0-9]/.test(rest)||EVENT_IMPROVEMENT_TABLE_LABELS.some(next=>rest.startsWith(next));});}
+function normalizeEventImprovement(value){const kept=[];for(const line of String(value||'').replace(/\r/g,'').split('\n')){if(eventImprovementBoundary(line))break;kept.push(line);}const result=kept.join('\n').replace(/^[\s:：]+/,'').trim();return /^無[\s。．.;；、！!？?]*$/.test(result)?'':result;}
+function eventImprovementSection(text){const lines=String(text||'').replace(/\r/g,'').split('\n'),start=lines.findIndex(line=>/(?:檢討與改善事項|檢討改善事項)/.test(line));if(start<0)return'';const out=[];for(const line of lines.slice(start+1)){const trimmed=line.trim();if(/^\s*(?:8|9|1\d)[.．、]\s*/.test(trimmed))break;if(eventImprovementBoundary(trimmed))break;if(/^(?:報修日期|報修編號|附件|照片)\s*[:：]?/.test(trimmed))break;out.push(line);}return normalizeEventImprovement(out.join('\n'));}
+function inferImportedEventType(text){const s=String(text||'');if(/電扶梯|扶梯/.test(s))return'escalator';if(/電梯|受困/.test(s))return'elevator';if(/火警|消防/.test(s))return'fire';if(/車門|月台門|列車/.test(s))return'door';return'other';}
+function parseImportedStationCandidate(value){const source=String(value||'').replace(/[\u200B-\u200D\u2060\uFEFF]/g,'').trim();if(!source)return null;const transferCodes=[...source.matchAll(/忠孝新生(?:站)?\s*(?:[（(]\s*)?(BL|O)(?:\s*[）)])?/gi)].map(match=>match[1].toUpperCase()),unique=[...new Set(transferCodes)];if(unique.length===1)return {station:'忠孝新生',lineCode:unique[0],routeConfirmationRequired:false};const names=[...new Set(eventStationOptions().map(row=>row.station))].sort((a,b)=>b.length-a.length),station=names.find(name=>source.includes(name));if(!station)return null;const codes=[...new Set(eventStationOptions().filter(row=>row.station===station).map(row=>row.lineCode))];return {station,lineCode:codes.length===1?codes[0]:'',routeConfirmationRequired:codes.length!==1};}
+function parseImportedEventStation(text,rows){const candidates=[];rows.slice(0,50).forEach((row,index)=>{const same=String(row).match(/^(?:事件)?(?:站名|車站)\s*[:：]\s*(.+)$/);if(same?.[1])candidates.push(same[1]);if(/^(?:事件)?(?:站名|車站)\s*[:：]?\s*$/.test(String(row))&&rows[index+1])candidates.push(rows[index+1]);});for(const candidate of candidates){const parsed=parseImportedStationCandidate(candidate);if(parsed)return parsed;}for(const candidate of rows.slice(0,40)){const parsed=parseImportedStationCandidate(candidate);if(parsed)return parsed;}return parseImportedStationCandidate(text)||{station:'',lineCode:'',routeConfirmationRequired:false};}
+async function parseEventDocx(file){if(!/\.docx$/i.test(file.name))throw new Error('僅支援 DOCX 格式');const xml=await unzipDocxEntry(file,'word/document.xml'),text=decodeXmlText(xml),rows=text.split(/\n|\t/).map(s=>s.trim()).filter(Boolean),stationHit=parseImportedEventStation(text,rows),overviewIndex=rows.findIndex(s=>/事件概述/.test(s)),overview=overviewIndex>=0?rows.slice(overviewIndex+1,overviewIndex+6).find(s=>!/^(?:[（(]?何時|值班人員|事件經過|地點|時間|日期|主分類|次分類)/.test(s)):'',improvement=eventImprovementSection(text);return{text,date:rocEventDate(text),station:stationHit.station,lineCode:stationHit.lineCode,routeConfirmationRequired:stationHit.routeConfirmationRequired,subject:(overview||file.name.replace(/\.docx$/i,'')).slice(0,120),improvement,eventTypeId:inferImportedEventType(`${overview}\n${text.slice(0,1800)}`)};}
+function explicitZhongxiaoLineCode(text){const source=String(text||''),rows=source.split(/\n|\t/).map(value=>value.trim()).filter(Boolean),parsed=parseImportedEventStation(source,rows);return parsed.station==='忠孝新生'&&parsed.lineCode?parsed.lineCode:'';}
+async function repairExistingImportedEvents(){let repaired=0;for(const event of cache.personnel.filter(row=>row.recordType==='event')){const next={...event};let changed=false;const improvement=normalizeEventImprovement(event.improvement||'');if(improvement!==String(event.improvement||'')){next.improvement=improvement;changed=true;}const station=String(event.station||'').replace(/站$/,'').replace(/\s*(?:[（(]\s*)?(?:BL|O)(?:\s*[）)])?$/i,'').trim();if(event.attachmentId&&station==='忠孝新生'){const lineCode=explicitZhongxiaoLineCode(event.rawText||'');if(next.station!=='忠孝新生'){next.station='忠孝新生';changed=true;}if(lineCode){if(next.lineCode!==lineCode){next.lineCode=lineCode;changed=true;}if(next.routeConfirmationRequired){next.routeConfirmationRequired=false;changed=true;}}else if(!next.routeConfirmationRequired){next.routeConfirmationRequired=true;changed=true;}}if(changed){next.updatedAt=new Date().toISOString();await dbPut('personnel',next);repaired++;}}if(repaired)await reloadCache();return repaired;}
+async function eventFileHash(file){const buffer=await file.arrayBuffer();if(globalThis.crypto?.subtle){const digest=await crypto.subtle.digest('SHA-256',buffer);return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');}let hash=2166136261;for(const byte of new Uint8Array(buffer)){hash^=byte;hash=Math.imul(hash,16777619);}return `fnv-${(hash>>>0).toString(16)}-${buffer.byteLength}`;}
+function normalizedEventDuplicateKey(event){const subject=String(event?.subject||event?.title||'').replace(/[\s\p{P}\p{S}]+/gu,'').toLowerCase();return [event?.date||'',event?.lineCode||'',String(event?.station||'').replace(/站$/,''),subject].join('|');}
+function findEventDuplicate(parsed,sourceHash){const events=cache.personnel.filter(row=>row.recordType==='event'),exact=sourceHash&&events.find(row=>row.sourceHash===sourceHash);if(exact)return {kind:'exact',event:exact};const key=normalizedEventDuplicateKey(parsed),suspect=key&&events.find(row=>normalizedEventDuplicateKey(row)===key);return suspect?{kind:'suspect',event:suspect}:null;}
+async function saveBatchImportedEvent(item,action){const existing=action==='overwrite'?item.duplicate?.event:null,parsed=item.parsed,now=new Date().toISOString(),record={...(existing||{}),recordType:'event',lineCode:parsed.lineCode||'',station:parsed.station||'',routeConfirmationRequired:!!parsed.routeConfirmationRequired||!parsed.station||!parsed.lineCode,category:existing?.category||'一般事件',eventTypeId:parsed.eventTypeId||existing?.eventTypeId||'',date:parsed.date||existing?.date||'',subject:parsed.subject||existing?.subject||'事件紀錄',title:parsed.subject||existing?.title||'事件紀錄',rawText:parsed.text,sourceMode:'word',sourceHash:item.sourceHash,reviewStatus:'pending',opText:existing?.opText||'',improvement:normalizeEventImprovement(parsed.improvement),checks:existing?.checks||[],timeline:parseEventTimeline(parsed.text),participants:parseEventParticipants(parsed.text,parsed.station),updatedAt:now};let eventId=existing?.id;if(eventId)await dbPut('personnel',record);else{record.createdAt=now;eventId=await dbAdd('personnel',record);}const attachmentId=await saveEventAttachment(item.file,eventId,existing?.attachmentId);record.id=eventId;record.attachmentId=attachmentId;record.attachmentName=item.file.name;record.attachmentSize=item.file.size;await dbPut('personnel',record);}
+function openBatchEventImport(){const input=document.createElement('input');input.type='file';input.accept='.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document';input.multiple=true;input.onchange=async()=>{const files=[...input.files||[]];if(!files.length)return;const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='105';overlay.innerHTML=`<div class="modal-sheet event-editor-sheet"><div class="modal-header"><b>批次匯入事件 Word</b><button class="modal-close-btn" id="batch-close">✕</button></div><div class="modal-body"><p id="batch-progress" class="muted">正在解析 0 / ${files.length} 份文件…</p><div id="batch-result"></div><button class="primary" id="batch-save" style="width:100%;margin-top:12px" disabled>確認匯入</button></div></div>`;document.getElementById('phone').appendChild(overlay);overlay.querySelector('#batch-close').onclick=()=>overlay.remove();const items=[];for(let index=0;index<files.length;index++){const file=files[index];try{const [parsed,sourceHash]=await Promise.all([parseEventDocx(file),eventFileHash(file)]),duplicate=findEventDuplicate(parsed,sourceHash);items.push({file,parsed,sourceHash,duplicate,action:duplicate?'skip':'import'});}catch(error){items.push({file,error:error?.message||'解析失敗',action:'skip'});}overlay.querySelector('#batch-progress').textContent=`正在解析 ${index+1} / ${files.length} 份文件…`;}const draw=()=>{const valid=items.filter(x=>!x.error),duplicates=valid.filter(x=>x.duplicate),routes=valid.filter(x=>x.parsed.routeConfirmationRequired);overlay.querySelector('#batch-progress').innerHTML=`<div class="event-batch-summary"><span>可處理 ${valid.length}</span><span>重複 ${duplicates.length}</span><span>路線待確認 ${routes.length}</span><span>失敗 ${items.length-valid.length}</span></div><p class="tiny-muted">重複資料預設跳過；覆蓋必須逐筆選擇。</p>`;overlay.querySelector('#batch-result').innerHTML=`<div class="event-batch-list">${items.map((item,i)=>{const state=item.error?'error':item.duplicate?'duplicate':item.parsed.routeConfirmationRequired?'route':'',meta=item.error?item.error:`${escapeHtml(item.parsed.date||'未辨識日期')}｜${escapeHtml(item.parsed.station||'未辨識車站')}${item.duplicate?`｜${item.duplicate.kind==='exact'?'完全重複':'疑似重複'}`:''}${item.parsed.routeConfirmationRequired?'｜路線待確認':''}`,options=item.error?'<option>略過</option>':item.duplicate?`<option value="skip">跳過</option><option value="overwrite">覆蓋既有</option><option value="keep">保留兩筆</option>`:`<option value="import">匯入</option><option value="skip">略過</option>`;return `<div class="event-batch-row ${state}"><div class="event-batch-copy"><b>${escapeHtml(item.file.name)}</b><small>${meta}</small></div><select data-batch-action="${i}" ${item.error?'disabled':''}>${options}</select></div>`;}).join('')}</div>`;overlay.querySelectorAll('[data-batch-action]').forEach(select=>select.onchange=()=>{items[Number(select.dataset.batchAction)].action=select.value;});overlay.querySelector('#batch-save').disabled=!valid.length;};draw();overlay.querySelector('#batch-save').onclick=async()=>{const selected=items.filter(item=>!item.error&&!['skip',''].includes(item.action));if(!selected.length)return alert('目前沒有選擇要匯入的文件。');const button=overlay.querySelector('#batch-save');button.disabled=true;button.textContent='正在匯入…';for(const item of selected)await saveBatchImportedEvent(item,item.action);await reloadCache();overlay.remove();renderPersonnel();alert(`批次匯入完成：${selected.length} 件，均標示為待確認。`);};};input.click();}
+function findMobileBatchEventDuplicate(items,parsed,sourceHash){
+  const key=normalizedEventDuplicateKey(parsed);
+  const previous=items.find(item=>!item.error&&(item.sourceHash===sourceHash||normalizedEventDuplicateKey(item.parsed)===key));
+  return previous?{kind:'batch',event:null}:findEventDuplicate(parsed,sourceHash);
+}
+function openBatchEventImportV2(){
+  const input=document.createElement('input');
+  input.type='file';
+  input.accept='.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  input.multiple=true;
+  input.onchange=async()=>{
+    const files=[...input.files||[]];if(!files.length)return;
+    const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='105';
+    overlay.innerHTML=`<div class="modal-sheet event-editor-sheet"><div class="modal-header"><b>批次匯入事件 Word</b><button class="modal-close-btn" id="batch-close">✕</button></div><div class="modal-body"><p id="batch-progress" class="muted">正在解析 0 / ${files.length} 份文件…</p><div id="batch-result"></div><button class="primary" id="batch-save" style="width:100%;margin-top:12px" disabled>確認匯入</button></div></div>`;
+    document.getElementById('phone').appendChild(overlay);
+    overlay.querySelector('#batch-close').onclick=()=>overlay.remove();
+    const items=[];
+    for(let index=0;index<files.length;index++){
+      const file=files[index];
+      try{
+        const [parsed,sourceHash]=await Promise.all([parseEventDocx(file),eventFileHash(file)]);
+        if(!parsed.date)throw new Error('未辨識到事件日期');
+        if(!parseEventTimeline(parsed.text).length)throw new Error('未辨識到事件時間軸');
+        parsed.routeConfirmationRequired=!!parsed.routeConfirmationRequired||!parsed.station||!parsed.lineCode;
+        const duplicate=findMobileBatchEventDuplicate(items,parsed,sourceHash);
+        items.push({file,parsed,sourceHash,duplicate,action:duplicate?'skip':'import'});
+      }catch(error){items.push({file,error:error?.message||'解析失敗',action:'skip'});}
+      overlay.querySelector('#batch-progress').textContent=`正在解析 ${index+1} / ${files.length} 份文件…`;
+    }
+    const draw=()=>{
+      const valid=items.filter(item=>!item.error),duplicates=valid.filter(item=>item.duplicate),routes=valid.filter(item=>item.parsed.routeConfirmationRequired);
+      overlay.querySelector('#batch-progress').innerHTML=`<div class="event-batch-summary"><span>可處理 ${valid.length}</span><span>重複／疑似 ${duplicates.length}</span><span>路線待確認 ${routes.length}</span><span>失敗 ${items.length-valid.length}</span></div><p class="tiny-muted">完全相同或疑似重複預設跳過；只有既有事件才能選擇覆蓋。</p>`;
+      overlay.querySelector('#batch-result').innerHTML=`<div class="event-batch-list">${items.map((item,index)=>{
+        const state=item.error?'error':item.duplicate?'duplicate':item.parsed.routeConfirmationRequired?'route':'';
+        const duplicateText=item.duplicate?(item.duplicate.kind==='exact'?'完全重複':item.duplicate.kind==='batch'?'本批次重複':'疑似重複'):'';
+        const meta=item.error?item.error:`${escapeHtml(item.parsed.date||'未辨識日期')}｜${escapeHtml(item.parsed.station||'未辨識車站')}${duplicateText?`｜${duplicateText}`:''}${item.parsed.routeConfirmationRequired?'｜路線待確認':''}`;
+        const options=item.error?'<option>略過</option>':item.duplicate?.kind==='batch'?'<option value="skip">跳過</option><option value="keep">保留兩筆</option>':item.duplicate?'<option value="skip">跳過</option><option value="overwrite">覆蓋既有</option><option value="keep">保留兩筆</option>':'<option value="import">匯入</option><option value="skip">略過</option>';
+        return `<div class="event-batch-row ${state}"><div class="event-batch-copy"><b>${escapeHtml(item.file.name)}</b><small>${meta}</small></div><select data-batch-action="${index}" ${item.error?'disabled':''}>${options}</select></div>`;
+      }).join('')}</div>`;
+      overlay.querySelectorAll('[data-batch-action]').forEach(select=>select.onchange=()=>{items[Number(select.dataset.batchAction)].action=select.value;});
+      overlay.querySelector('#batch-save').disabled=!valid.length;
+    };
+    draw();
+    overlay.querySelector('#batch-save').onclick=async()=>{
+      const selected=items.filter(item=>!item.error&&!['skip',''].includes(item.action));
+      if(!selected.length)return alert('目前沒有選擇要匯入的文件。');
+      const button=overlay.querySelector('#batch-save');button.disabled=true;button.textContent='正在匯入…';
+      for(const item of selected)await saveBatchImportedEvent(item,item.action);
+      await reloadCache();overlay.remove();renderPersonnel();
+      alert(`批次匯入完成：${selected.length} 件，均標示為待確認。`);
+    };
+  };
+  input.click();
+}
+async function saveEventAttachment(file,eventId,existingAttachmentId){const row={eventId,fileName:file.name,mimeType:file.type||'application/vnd.openxmlformats-officedocument.wordprocessingml.document',size:file.size,data:file,lastModified:file.lastModified||0,updatedAt:new Date().toISOString()};if(existingAttachmentId){row.id=existingAttachmentId;await dbPut('eventAttachments',row);return existingAttachmentId;}return dbAdd('eventAttachments',row);}
+async function openEventAttachment(event){if(!event?.attachmentId)return;const row=await dbGet('eventAttachments',event.attachmentId);if(!row?.data)return alert('找不到原始事件文件，可能尚未從完整備份還原。');const url=URL.createObjectURL(row.data),a=document.createElement('a');a.href=url;a.download=row.fileName||'事件通報.docx';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function eventDocumentPreviewHtml(text){const lines=String(text||'').replace(/\r/g,'').split('\n');return lines.map(line=>{const trimmed=line.trim();if(!trimmed)return'<div style="height:6px"></div>';if(/^\d+[.．、]\s*/.test(trimmed))return`<h3>${escapeHtml(trimmed)}</h3>`;if(line.includes('\t'))return`<div class="event-document-row">${line.split('\t').filter(cell=>cell.trim()).map(cell=>`<div class="event-document-cell">${escapeHtml(cell.trim())}</div>`).join('')}</div>`;return`<p>${escapeHtml(trimmed)}</p>`;}).join('');}
+function openEventDocumentPreview(event){const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='97';overlay.innerHTML=`<div class="modal-sheet event-editor-sheet"><div class="modal-header"><b>文件預覽｜${escapeHtml(event.attachmentName||'事件通報.docx')}</b><button class="modal-close-btn" id="event-document-close">✕</button></div><div class="modal-body"><div class="event-document-preview">${eventDocumentPreviewHtml(event.rawText||'')}</div></div></div>`;document.getElementById('phone').appendChild(overlay);overlay.querySelector('#event-document-close').onclick=()=>overlay.remove();}
 function eventLineOptions(){return ['BL','O'].filter(code=>eventStationOptions().some(r=>r.lineCode===code));}
 function eventCategoryClass(category){return category==='待改善案例'?'event-bad':category==='良好案例'?'event-good':'';}
 function renderEventTimelineRows(timeline,editable=false){
@@ -3710,14 +3849,18 @@ function collectEventPreview(overlay,timeline,participants){
 }
 function openEventEditor(existing=null){
   const isEdit=!!existing,stations=eventStationOptions();
-  if(existing&&!existing.lineCode){const hit=stations.find(r=>r.station===existing.station);if(hit)existing={...existing,lineCode:hit.lineCode};}
+  if(existing&&!existing.lineCode&&!existing.routeConfirmationRequired){const hit=stations.find(r=>r.station===existing.station);if(hit)existing={...existing,lineCode:hit.lineCode};}
   const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='90';
-  overlay.innerHTML=`<div class="modal-sheet event-editor-sheet"><div class="modal-header"><b>${isEdit?'修改事件':'貼上事件紀錄'}</b><button id="ep-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body">
+  const importBox=`<div class="event-import-box"><button class="secondary" type="button" id="ep-docx-open">${isEdit?'更換原始 Word':'匯入事件 Word'}</button><input type="file" id="ep-docx-file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden><span class="event-import-status" id="ep-docx-status">${existing?.attachmentName?`已保存：${escapeHtml(existing.attachmentName)}`:'選擇固定格式 DOCX 後立即在本機解析'}</span></div>`;
+  overlay.innerHTML=`<div class="modal-sheet event-editor-sheet"><div class="modal-header"><b>${isEdit?'修改事件':'新增事件'}</b><button id="ep-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body">
+    ${!isEdit?importBox:''}
     ${buildEventStationSelectors(stations,existing||{})}
+    <div class="field"><label>事件類型</label><div class="row" style="gap:7px"><select id="ep-event-type" style="min-width:0;flex:1"><option value="">未分類</option>${getEventTypes().map(t=>`<option value="${escapeHtml(t.id)}" ${existing?.eventTypeId===t.id?'selected':''}>${escapeHtml(t.name)}</option>`).join('')}</select><button class="secondary" type="button" id="ep-manage-types" style="width:auto">編輯</button></div></div>
     <div class="field"><label>事件屬性</label><div class="event-kind-row"><button class="event-kind ${!existing||existing.category==='一般事件'?'active':''}" data-kind="一般事件">一般事件</button><button class="event-kind ${existing?.category==='良好案例'?'active':''}" data-kind="良好案例">良好案例</button><button class="event-kind ${existing?.category==='待改善案例'?'active':''}" data-kind="待改善案例">待改善</button></div></div>
     <div class="field event-date-field"><label>事件日期</label><div class="event-date-control"><input type="date" id="ep-date" value="${escapeHtml(existing?.date||new Date().toISOString().slice(0,10))}"></div></div>
     <div class="field"><label>事件主旨</label><textarea id="ep-subject" class="event-subject-input" rows="2" placeholder="例如：4號電扶梯異常向下滑行處理事件">${escapeHtml(existing?.subject||existing?.title||'')}</textarea></div>
-    <div class="field"><label>貼上／修改原始事件紀錄</label><textarea id="ep-raw" class="event-raw-input" placeholder="可先貼人員值勤說明，再貼 18:02、18:03…時間紀錄">${escapeHtml(existing?.rawText||'')}</textarea><span class="tiny-muted">人員前言會辨識「簡稱／以下簡稱＋值勤位置」；HH:MM 開頭段落會拆成時間軸。解析只在本機進行。</span></div>
+    <div class="field" id="ep-raw-field" ${existing?.attachmentId?'hidden':''}><label>貼上／修改原始事件紀錄</label><textarea id="ep-raw" class="event-raw-input" placeholder="可先貼人員值勤說明，再貼 18:02、18:03…時間紀錄">${escapeHtml(existing?.rawText||'')}</textarea><span class="tiny-muted">人員前言會辨識「簡稱／以下簡稱＋值勤位置」；HH:MM 開頭段落會拆成時間軸。解析只在本機進行。</span></div>
+    ${isEdit?importBox:''}
     <div class="field"><label>OP 通報紀錄</label><textarea id="ep-op" class="event-raw-input" placeholder="貼上行控針對本事件公告給相關主管／高階主管的 OP 通報原文；此欄保留原文，不進行事件解析。">${escapeHtml(existing?.opText||'')}</textarea><span class="tiny-muted">OP 與現場事件時間軸分開保存，資料僅存本機。</span></div>
     <div class="field"><label>檢討與改善事項</label><textarea id="ep-improvement" class="event-improvement" placeholder="可填寫事件檢討、改善作法或後續追蹤事項；無則可留空。">${escapeHtml(existing?.improvement||'')}</textarea></div>
     <div class="field"><label>事件檢核</label><div id="ep-check-editor"></div><span class="tiny-muted">預設 1 筆，可增加。輸入起訖時間後自動計算間隔；符合／不符合由人工判定。</span></div>
@@ -3725,7 +3868,7 @@ function openEventEditor(existing=null){
     <div id="ep-preview"></div>
   </div></div>`;
   document.getElementById('phone').appendChild(overlay);
-  let kind=existing?.category||'一般事件',timeline=(existing?.timeline||[]).map(x=>({...x})),participants=(existing?.participants||[]).map(x=>({...x})),checks=(existing?.checks?.length?existing.checks:[{name:'',start:'',end:'',result:''}]).map(x=>({...x}));
+  let kind=existing?.category||'一般事件',timeline=(existing?.timeline||[]).map(x=>({...x})),participants=(existing?.participants||[]).map(x=>({...x})),checks=(existing?.checks?.length?existing.checks:[{name:'',start:'',end:'',result:''}]).map(x=>({...x})),pendingAttachment=null,pendingAttachmentHash='';
   const renderChecksEditor=()=>{
     const box=overlay.querySelector('#ep-check-editor');if(!box)return;box.innerHTML=renderEventChecksEditor(checks);
     box.querySelector('#event-check-add').onclick=()=>{checks=collectEventChecks(box,checks);checks.push({name:'',start:'',end:'',result:''});renderChecksEditor();};
@@ -3735,12 +3878,15 @@ function openEventEditor(existing=null){
   renderChecksEditor();
   const lineSel=overlay.querySelector('#ep-line'); if(lineSel){populateEventStationSelect(overlay,lineSel.value,existing?.station||'');lineSel.onchange=()=>populateEventStationSelect(overlay,lineSel.value,'');}
   overlay.querySelector('#ep-close').onclick=()=>overlay.remove();
+  overlay.querySelector('#ep-manage-types').onclick=()=>openEventTypeManager(()=>{const select=overlay.querySelector('#ep-event-type'),value=select.value;select.innerHTML=`<option value="">未分類</option>${getEventTypes().map(t=>`<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`).join('')}`;select.value=getEventTypes().some(t=>t.id===value)?value:'';});
   overlay.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{kind=b.dataset.kind;overlay.querySelectorAll('[data-kind]').forEach(x=>x.classList.toggle('active',x===b));});
+  overlay.querySelector('#ep-docx-open').onclick=()=>overlay.querySelector('#ep-docx-file').click();
+  overlay.querySelector('#ep-docx-file').onchange=async event=>{const file=event.target.files?.[0];if(!file)return;const status=overlay.querySelector('#ep-docx-status');status.textContent='正在本機解析文件…';try{const [imported,sourceHash]=await Promise.all([parseEventDocx(file),eventFileHash(file)]);pendingAttachment=file;pendingAttachmentHash=sourceHash;overlay.querySelector('#ep-raw').value=imported.text;overlay.querySelector('#ep-raw-field').hidden=true;if(imported.date)overlay.querySelector('#ep-date').value=imported.date;if(imported.subject)overlay.querySelector('#ep-subject').value=imported.subject;overlay.querySelector('#ep-improvement').value=imported.improvement;if(imported.lineCode){overlay.querySelector('#ep-line').value=imported.lineCode;populateEventStationSelect(overlay,imported.lineCode,imported.station);}else if(imported.station==='忠孝新生'){overlay.querySelector('#ep-line').value='';populateEventStationSelect(overlay,'','');}overlay.querySelector('#ep-event-type').value=getEventTypes().some(t=>t.id===imported.eventTypeId)?imported.eventTypeId:'';timeline=parseEventTimeline(imported.text);participants=parseEventParticipants(imported.text,imported.station);status.textContent=`已解析：${file.name}（${eventFileSize(file.size)}）${imported.routeConfirmationRequired?'；路線待確認':''}`;if(!timeline.length)alert('文件已讀取，但沒有辨識到 HH:MM 時間軸，請確認時間格式。');else renderPreview();}catch(error){pendingAttachment=null;pendingAttachmentHash='';status.textContent='匯入失敗，請改用貼上文字';alert(error.message||'無法讀取事件文件。');}event.target.value='';};
   const renderPreview=()=>{
     const raw=overlay.querySelector('#ep-raw').value.trim();
     const station=overlay.querySelector('#ep-station')?.value||overlay.querySelector('#ep-station-manual')?.value.trim()||'';
     const detected=detectStationsInEvent(raw),other=detected.filter(n=>n!==station);
-    overlay.querySelector('#ep-preview').innerHTML=`<div class="card event-summary-card" style="margin-top:12px"><b>解析結果</b><p class="tiny-muted">${escapeHtml(station||'未選車站')}｜<span class="${eventCategoryClass(kind)}">${escapeHtml(kind)}</span></p>${detected.includes(station)?'<span class="viewed-badge">✓ 內文車站符合</span>':''}${other.length?`<p class="tiny-muted">內文另有出現：${escapeHtml(other.join('、'))}，請確認是否為支援／通報車站。</p>`:''}</div><div class="panel"><div class="row between"><h3 class="panel-title" style="margin:0">參與人員／事件內簡稱</h3><button class="secondary" id="event-person-add" style="min-height:34px;padding:5px 10px">＋ 新增參與人員</button></div>${renderEventParticipantRows(participants,true,station)}</div><div class="panel"><h3 class="panel-title">事件時間軸</h3>${renderEventTimelineRows(timeline,true)}</div><button class="primary" id="ep-save" style="width:100%;margin-bottom:10px">${isEdit?'儲存修改':'確認存入'}</button>`;
+    overlay.querySelector('#ep-preview').innerHTML=`<div class="card event-summary-card" style="margin-top:12px"><b>解析結果</b><p class="tiny-muted">${escapeHtml(station||'未選車站')}｜${escapeHtml(eventTypeName(overlay.querySelector('#ep-event-type').value))}｜<span class="${eventCategoryClass(kind)}">${escapeHtml(kind)}</span></p>${detected.includes(station)?'<span class="viewed-badge">✓ 內文車站符合</span>':''}${other.length?`<p class="tiny-muted">內文另有出現：${escapeHtml(other.join('、'))}，請確認是否為支援／通報車站。</p>`:''}</div><div class="panel"><div class="row between"><h3 class="panel-title" style="margin:0">參與人員／事件內簡稱</h3><button class="secondary" id="event-person-add" style="min-height:34px;padding:5px 10px">＋ 新增參與人員</button></div>${renderEventParticipantRows(participants,true,station)}</div><div class="panel"><h3 class="panel-title">事件時間軸</h3>${renderEventTimelineRows(timeline,true)}</div><button class="primary" id="ep-save" style="width:100%;margin-bottom:10px">${isEdit?'儲存修改':'確認存入'}</button>`;
     const addPersonBtn=overlay.querySelector('#event-person-add');
     if(addPersonBtn)addPersonBtn.onclick=()=>{
       const state=collectEventPreview(overlay,timeline,participants);
@@ -3753,8 +3899,9 @@ function openEventEditor(existing=null){
       const station=overlay.querySelector('#ep-station')?.value||overlay.querySelector('#ep-station-manual')?.value.trim()||''; if(!station)return alert('請先選擇或輸入車站。');
       const state=collectEventPreview(overlay,timeline,participants); if(!state.timeline.length)return alert('至少需要一筆時間紀錄。');
       const subject=overlay.querySelector('#ep-subject').value.trim()||'事件紀錄';
-      const record={...(existing||{}),recordType:'event',lineCode:overlay.querySelector('#ep-line')?.value||existing?.lineCode||'',station,category:kind,date:overlay.querySelector('#ep-date').value,subject,title:subject,rawText:overlay.querySelector('#ep-raw').value.trim(),opText:overlay.querySelector('#ep-op').value.trim(),improvement:overlay.querySelector('#ep-improvement').value.trim(),checks:collectEventChecks(overlay.querySelector('#ep-check-editor'),checks),timeline:state.timeline,participants:state.participants,updatedAt:new Date().toISOString()};
-      if(existing?.id) await dbPut('personnel',record); else {record.createdAt=new Date().toISOString();await dbAdd('personnel',record);}
+      const record={...(existing||{}),recordType:'event',lineCode:overlay.querySelector('#ep-line')?.value||existing?.lineCode||'',station,routeConfirmationRequired:false,category:kind,eventTypeId:overlay.querySelector('#ep-event-type').value,date:overlay.querySelector('#ep-date').value,subject,title:subject,rawText:overlay.querySelector('#ep-raw').value.trim(),sourceMode:pendingAttachment||existing?.attachmentId?'word':'manual',sourceHash:pendingAttachmentHash||existing?.sourceHash||'',reviewStatus:'confirmed',opText:overlay.querySelector('#ep-op').value.trim(),improvement:normalizeEventImprovement(overlay.querySelector('#ep-improvement').value),checks:collectEventChecks(overlay.querySelector('#ep-check-editor'),checks),timeline:state.timeline,participants:state.participants,updatedAt:new Date().toISOString()};
+      let eventId=existing?.id;if(eventId)await dbPut('personnel',record);else{record.createdAt=new Date().toISOString();eventId=await dbAdd('personnel',record);}
+      if(pendingAttachment){const attachmentId=await saveEventAttachment(pendingAttachment,eventId,existing?.attachmentId);record.id=eventId;record.attachmentId=attachmentId;record.attachmentName=pendingAttachment.name;record.attachmentSize=pendingAttachment.size;await dbPut('personnel',record);}
       await reloadCache();overlay.remove();renderPersonnel();
     };
   };
@@ -3787,22 +3934,39 @@ function openEventOp(e){
 function openEventDetail(id){
   const e=cache.personnel.find(x=>x.id===Number(id)&&x.recordType==='event');if(!e)return;
   const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='88';
-  overlay.innerHTML=`<div class="modal-sheet event-editor-sheet"><div class="modal-header"><b>${escapeHtml(e.station||'未指定車站')}｜<span class="${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span></b><button id="ed-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body">
+  overlay.innerHTML=`<div class="modal-sheet event-editor-sheet"><div class="modal-header"><b>${escapeHtml(e.station||'未指定車站')}｜<span style="color:${eventTypeColor(e.eventTypeId)}">${escapeHtml(eventTypeName(e.eventTypeId))}</span>｜<span class="${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span></b><button id="ed-close" style="border:0;background:none;font-size:18px">✕</button></div><div class="modal-body">
+    ${e.reviewStatus==='pending'||e.routeConfirmationRequired?`<div class="panel"><div class="event-review-actions"><span class="event-status-badge ${e.routeConfirmationRequired?'route':'pending'}">${e.routeConfirmationRequired?'路線待確認':'新匯入待確認'}</span><span class="muted">${e.routeConfirmationRequired?'請先修改並選擇正確路線。':'確認內容無誤後標示為已確認。'}</span>${!e.routeConfirmationRequired?'<button class="primary" id="ed-confirm">確認資料</button>':''}</div></div>`:''}
     <div class="card event-summary-card"><div class="row between"><div><b>${escapeHtml(e.subject||e.title||'事件紀錄')}</b><p class="tiny-muted event-summary-meta">${escapeHtml(e.date||'')} · ${escapeHtml(RIDERSHIP_LINES[e.lineCode]||'')}${escapeHtml(eventInvolvedStationsText(e))}</p></div><div class="row" style="gap:7px"><button class="secondary op-detail-btn ${e.opText?'has-data':''}" id="ed-op" title="${e.opText?'查看 OP 通報紀錄':'尚無 OP 通報紀錄'}">OP</button><button class="secondary" id="ed-edit">修改</button></div></div></div>
     ${(e.checks||[]).length?`<div class="panel event-detail-priority"><h3 class="panel-title">事件檢核</h3>${renderEventChecksView(e.checks)}</div>`:''}
     ${e.improvement?`<div class="panel event-detail-priority"><h3 class="panel-title">檢討與改善事項</h3><div class="event-body" style="white-space:pre-wrap">${escapeHtml(e.improvement)}</div></div>`:''}
     <div class="panel"><h3 class="panel-title">參與人員</h3>${renderEventParticipantRows(e.participants||[],false,e.station||'')}</div>
     <div class="panel"><h3 class="panel-title">事件時間軸</h3>${renderEventTimelineRows(e.timeline||[])}</div>
-    <details><summary class="tiny-muted">原始事件紀錄</summary><div class="card event-raw">${escapeHtml(e.rawText||'')}</div></details>
+    ${e.attachmentId?`<div class="panel event-attachment-card"><div class="event-attachment-meta"><b>原始事件文件</b><small>Word 文件・${escapeHtml(eventFileSize(e.attachmentSize||0))}</small></div><div class="event-document-actions"><button class="secondary" id="ed-document-preview">預覽文件</button><button class="secondary" id="ed-attachment">下載原始 Word</button></div></div>`:''}
+    ${!e.attachmentId&&e.rawText?`<details><summary class="tiny-muted">原始事件紀錄</summary><div class="card event-raw">${escapeHtml(e.rawText||'')}</div></details>`:''}
   </div></div>`;
   document.getElementById('phone').appendChild(overlay);
   overlay.querySelector('#ed-close').onclick=()=>overlay.remove();
   const opBtn=overlay.querySelector('#ed-op');
   if(opBtn)opBtn.onclick=()=>openEventOp(e);
+  overlay.querySelector('#ed-attachment')?.addEventListener('click',()=>openEventAttachment(e));
+  overlay.querySelector('#ed-document-preview')?.addEventListener('click',()=>openEventDocumentPreview(e));
+  overlay.querySelector('#ed-confirm')?.addEventListener('click',async()=>{await dbPut('personnel',{...e,reviewStatus:'confirmed',confirmedAt:new Date().toISOString(),updatedAt:new Date().toISOString()});await reloadCache();overlay.remove();renderPersonnel();});
   overlay.querySelector('#ed-edit').onclick=()=>{overlay.remove();openEventEditor(e);};
 }
+const NETWORK_BLUE=['頂埔','永寧','土城','海山','亞東醫院','府中','板橋','新埔','江子翠','龍山寺','西門','台北車站','善導寺','忠孝新生','忠孝復興','忠孝敦化','國父紀念館','市政府','永春','後山埤','昆陽','南港','南港展覽館'];
+const NETWORK_ORANGE_TRUNK=['南勢角','景安','永安市場','頂溪','古亭','東門','忠孝新生','松江南京','行天宮','中山國小','民權西路','大橋頭'];
+const NETWORK_ORANGE_LUZHOU=['三重國小','三和國中','徐匯中學','三民高中','蘆洲'];
+const NETWORK_ORANGE_HUILONG=['台北橋','菜寮','三重','先嗇宮','頭前庄','新莊','輔大','丹鳳','迴龍'];
+const NETWORK_STATIONS={BL:NETWORK_BLUE,O:[...NETWORK_ORANGE_TRUNK,...NETWORK_ORANGE_LUZHOU,...NETWORK_ORANGE_HUILONG]},NETWORK_EXTERNAL=new Set(['BL:台北車站','O:古亭','O:東門','O:松江南京']),NETWORK_ALIAS={'臺北車站':'台北車站','市府':'市政府','國館':'國父紀念館','臺北橋':'台北橋'};
+let networkYear=new Date().getFullYear(),networkMonth=String(new Date().getMonth()+1).padStart(2,'0'),networkCategory='',networkTypeId='';
+function networkDateBounds(){const today=new Date(),iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,year=Number(networkYear)||today.getFullYear(),month=networkMonth==='all'?null:Number(networkMonth),start=month?`${year}-${String(month).padStart(2,'0')}-01`:`${year}-01-01`,last=month?new Date(year,month,0):new Date(year,11,31);return {start,end:iso(year===today.getFullYear()&&last>today?today:last)};}
+function networkEventKey(event){if(event?.routeConfirmationRequired)return'';const raw=String(event.station||'').trim(),normalized=NETWORK_ALIAS[raw]||raw,station=Object.values(NETWORK_STATIONS).some(stations=>stations.includes(normalized))?normalized:(NETWORK_ALIAS[normalized.replace(/站$/,'')]||normalized.replace(/站$/,'')),line=String(event.lineCode||'').toUpperCase(),key=NETWORK_STATIONS[line]?.includes(station)?`${line}:${station}`:(()=>{const lines=Object.keys(NETWORK_STATIONS).filter(code=>NETWORK_STATIONS[code].includes(station));return lines.length===1?`${lines[0]}:${station}`:'';})();return NETWORK_EXTERNAL.has(key)?'':key;}
+function networkFilteredEvents(){const {start,end}=networkDateBounds();return cache.personnel.filter(e=>e.recordType==='event'&&e.reviewStatus!=='pending'&&!e.routeConfirmationRequired&&(!networkCategory||e.category===networkCategory)&&(!networkTypeId||e.eventTypeId===networkTypeId||(networkTypeId==='unclassified'&&isEventUnclassified(e.eventTypeId)))&&String(e.date||'')>=start&&String(e.date||'')<=end);}
+function mobileNetworkStationRows(line,stations,counts,stationEvents){return `<div class="mobile-network-stations">${stations.map(station=>{const key=`${line}:${station}`,external=NETWORK_EXTERNAL.has(key),count=external?0:(counts.get(key)||0);return `<button class="mobile-network-station ${count?'has-events':''} ${external?'mobile-network-external':''}" ${external?'disabled':''} data-network-key="${escapeHtml(key)}"><span class="mobile-network-dot">${count||''}</span><span class="mobile-network-name">${escapeHtml(station)}</span><span class="tiny-muted">${external?'非權管':count?`${count} 件`:'—'}</span></button>`;}).join('')}</div>`;}
+function openMobileNetworkStation(key,items){const [line,station]=key.split(':'),{start,end}=networkDateBounds(),overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='96';overlay.innerHTML=`<div class="modal-sheet network-category-card"><div class="modal-header"><b>${escapeHtml(station)}｜${line==='BL'?'板南線':'中和新蘆線'}</b><button class="modal-close-btn" id="network-modal-close">✕</button></div><div class="modal-body"><div class="network-category-list"><div class="network-category-row"><div><b>事件</b><small>${start} ～ ${end}</small></div><button class="primary network-category-count" id="network-modal-events" ${items.length?'':'disabled'}>${items.length}</button></div><div class="network-category-row disabled"><div><b>旅客受傷</b><small>功能尚未建立</small></div><span class="network-category-count">尚未啟用</span></div><div class="network-category-row disabled"><div><b>旅客意見</b><small>功能尚未建立</small></div><span class="network-category-count">尚未啟用</span></div></div></div></div>`;document.getElementById('phone').appendChild(overlay);overlay.querySelector('#network-modal-close').onclick=()=>overlay.remove();overlay.querySelector('#network-modal-events')?.addEventListener('click',()=>{eventFilterLine=line;eventFilterStation=station;eventFilterCategory=networkCategory;eventFilterTypeId=networkTypeId;eventFilterPeriodType=networkMonth==='all'?'year':'month';eventFilterPeriod=networkMonth==='all'?String(networkYear):`${networkYear}-${networkMonth}`;overlay.remove();currentTab='personnel';render();});}
+function renderNetwork(){const events=networkFilteredEvents(),counts=new Map(),stationEvents=new Map();for(const event of events){const key=networkEventKey(event);if(!key)continue;counts.set(key,(counts.get(key)||0)+1);if(!stationEvents.has(key))stationEvents.set(key,[]);stationEvents.get(key).push(event);}const years=[...new Set([new Date().getFullYear(),Number(networkYear),...cache.personnel.filter(e=>e.recordType==='event').map(e=>Number(String(e.date||'').slice(0,4))).filter(Boolean)])].sort((a,b)=>b-a),{start,end}=networkDateBounds(),pending=cache.personnel.filter(e=>e.recordType==='event'&&(e.reviewStatus==='pending'||e.routeConfirmationRequired)).length;contentEl.innerHTML=`<div class="mobile-network-page"><div class="card mobile-network-filters"><label>年度<select id="network-year">${years.map(y=>`<option value="${y}" ${y===Number(networkYear)?'selected':''}>${y}年</option>`).join('')}</select></label><label>月份<select id="network-month"><option value="all">全年</option>${Array.from({length:12},(_,i)=>{const value=String(i+1).padStart(2,'0');return `<option value="${value}" ${networkMonth===value?'selected':''}>${i+1}月</option>`;}).join('')}</select></label><label>事件類型<select id="network-type"><option value="">全部類型</option>${getEventTypes().map(t=>`<option value="${escapeHtml(t.id)}" ${networkTypeId===t.id?'selected':''}>${escapeHtml(t.name)}</option>`).join('')}<option value="unclassified">未分類</option></select></label><label>事件屬性<select id="network-category"><option value="">全部屬性</option>${['一般事件','良好案例','待改善案例'].map(v=>`<option ${networkCategory===v?'selected':''}>${v}</option>`).join('')}</select></label></div><p class="tiny-muted" style="margin:0 2px">${start}～${end}｜已確認 ${events.length} 件${pending?`｜另有 ${pending} 件待確認`:''}</p><section class="mobile-network-line"><h3>板南線</h3>${mobileNetworkStationRows('BL',NETWORK_BLUE,counts,stationEvents)}</section><section class="mobile-network-line orange"><h3>中和新蘆線・共線段</h3>${mobileNetworkStationRows('O',NETWORK_ORANGE_TRUNK,counts,stationEvents)}<h3 style="margin-top:15px">蘆洲方向</h3>${mobileNetworkStationRows('O',NETWORK_ORANGE_LUZHOU,counts,stationEvents)}<h3 style="margin-top:15px">迴龍方向</h3>${mobileNetworkStationRows('O',NETWORK_ORANGE_HUILONG,counts,stationEvents)}</section></div>`;contentEl.querySelector('#network-year').onchange=e=>{networkYear=Number(e.target.value);renderNetwork();};contentEl.querySelector('#network-month').onchange=e=>{networkMonth=e.target.value;renderNetwork();};contentEl.querySelector('#network-type').onchange=e=>{networkTypeId=e.target.value;renderNetwork();};contentEl.querySelector('#network-category').onchange=e=>{networkCategory=e.target.value;renderNetwork();};contentEl.querySelectorAll('[data-network-key]').forEach(button=>{if(button.disabled)return;button.onclick=()=>openMobileNetworkStation(button.dataset.networkKey,stationEvents.get(button.dataset.networkKey)||[]);});}
 let personnelView='events';
-let eventFilterLine='',eventFilterStation='',eventFilterCategory='',eventFilterPeriod='',eventFilterPeriodType='';
+let eventFilterLine='',eventFilterStation='',eventFilterCategory='',eventFilterTypeId='',eventFilterPeriod='',eventFilterPeriodType='';
 function eventPeriodMatch(dateVal,period,type){
   if(!type||!period)return true;
   const d=String(dateVal||'');
@@ -3819,7 +3983,7 @@ function openEventActionMenu(id){
   document.getElementById('phone').appendChild(overlay);
   overlay.querySelector('#eam-close').onclick=()=>overlay.remove();
   overlay.querySelector('#eam-edit').onclick=()=>{overlay.remove();openEventEditor(e);};
-  overlay.querySelector('#eam-delete').onclick=async()=>{if(!confirm('確定刪除這筆事件？'))return;await dbDelete('personnel',e.id);await reloadCache();overlay.remove();renderPersonnel();};
+  overlay.querySelector('#eam-delete').onclick=async()=>{if(!confirm('確定刪除這筆事件？原始事件文件也會一併刪除。'))return;if(e.attachmentId)await dbDelete('eventAttachments',e.attachmentId);await dbDelete('personnel',e.id);await reloadCache();overlay.remove();renderPersonnel();};
 }
 function renderPersonnel(){
   const events=cache.personnel.filter(p=>p.recordType==='event').sort((a,b)=>(b.date||'').localeCompare(a.date||''));
@@ -3831,10 +3995,10 @@ function renderPersonnel(){
   const filtered=events.filter(e=>{
     const textOk=!kw||[e.station,e.category,e.subject,e.title,e.rawText,e.opText,e.improvement,(e.checks||[]).map(c=>`${c.name} ${c.start} ${c.end} ${c.result}`).join(' '),(e.participants||[]).map(p=>`${p.station||''} ${p.role} ${p.name} ${p.alias}`).join(' ')].some(v=>String(v||'').includes(kw));
     const lineOk=!eventFilterLine||e.lineCode===eventFilterLine||eventStationOptions().some(r=>r.station===e.station&&r.lineCode===eventFilterLine);
-    return textOk&&lineOk&&(!eventFilterStation||e.station===eventFilterStation)&&(!eventFilterCategory||e.category===eventFilterCategory)&&eventPeriodMatch(e.date,eventFilterPeriod,eventFilterPeriodType);
+    return textOk&&lineOk&&(!eventFilterStation||e.station===eventFilterStation)&&(!eventFilterCategory||e.category===eventFilterCategory)&&(!eventFilterTypeId||e.eventTypeId===eventFilterTypeId||(eventFilterTypeId==='unclassified'&&isEventUnclassified(e.eventTypeId)))&&eventPeriodMatch(e.date,eventFilterPeriod,eventFilterPeriodType);
   });
-  const conditions=[kw&&`關鍵字：${kw}`,eventFilterLine&&`路線：${RIDERSHIP_LINES[eventFilterLine]||eventFilterLine}`,eventFilterStation&&`車站：${eventFilterStation}`,eventFilterCategory&&`屬性：${eventFilterCategory}`,eventFilterPeriod&&`期間：${eventFilterPeriod}`].filter(Boolean);
-  let html=`<div class="event-toolbar-head"><div class="event-tabs"><button class="event-tab ${personnelView==='events'?'active':''}" data-personnel-view="events">事件紀錄</button><button class="event-tab ${personnelView==='people'?'active':''}" data-personnel-view="people">人員紀錄</button></div>${personnelView==='events'?'<button class="primary event-add-btn" id="event-paste-open">＋ 新增事件</button>':''}</div>`;
+  const conditions=[kw&&`關鍵字：${kw}`,eventFilterLine&&`路線：${RIDERSHIP_LINES[eventFilterLine]||eventFilterLine}`,eventFilterStation&&`車站：${eventFilterStation}`,eventFilterTypeId&&`類型：${eventFilterTypeId==='unclassified'?'未分類':eventTypeName(eventFilterTypeId)}`,eventFilterCategory&&`屬性：${eventFilterCategory}`,eventFilterPeriod&&`期間：${eventFilterPeriod}`].filter(Boolean);
+  let html=`<div class="event-toolbar-head"><div class="event-tabs"><button class="event-tab ${personnelView==='events'?'active':''}" data-personnel-view="events">事件紀錄</button><button class="event-tab ${personnelView==='people'?'active':''}" data-personnel-view="people">人員紀錄</button></div>${personnelView==='events'?'<div class="row"><button class="secondary event-add-btn" id="event-batch-open">批次 Word</button><button class="primary event-add-btn" id="event-paste-open">＋ 新增</button></div>':''}</div>`;
   if(personnelView==='people'){
     html+=`<div class="card"><b>人員紀錄</b><p class="muted" style="margin:7px 0 0">正式人員名冊匯入與事件關聯將在後續版本啟用。目前事件內解析出的參與人員仍完整保存在各事件中。</p></div>`;
     if(legacy.length)html+=`<details open><summary class="tiny-muted">既有人員／事件紀錄（${legacy.length}）</summary>${legacy.map(p=>`<div class="card"><div class="row between"><span style="font-weight:500;font-size:14px">${escapeHtml(p.name||'')}</span><button class="danger-text" data-del-p="${p.id}">刪除</button></div><p class="tiny-muted">${escapeHtml(p.date||'')}　${escapeHtml(p.event||'')}</p>${p.note?`<p class="muted">${escapeHtml(p.note)}</p>`:''}</div>`).join('')}</details>`;
@@ -3843,30 +4007,33 @@ function renderPersonnel(){
         <input type="text" id="p-search" aria-label="關鍵字" placeholder="搜尋事件主旨、內容或參與人員" value="${escapeHtml(personnelKeyword)}">
         <select id="event-filter-line" aria-label="路線"><option value="">全部路線</option>${lineOptions.map(([c,n])=>`<option value="${escapeHtml(c)}" ${eventFilterLine===c?'selected':''}>${escapeHtml(n)}</option>`).join('')}</select>
         <select id="event-filter-station" aria-label="車站"><option value="">全部車站</option>${stationOptions.map(r=>`<option value="${escapeHtml(r.station)}" ${eventFilterStation===r.station?'selected':''}>${escapeHtml(r.station)}（${escapeHtml(r.code)}）</option>`).join('')}</select>
+        <select id="event-filter-type" aria-label="事件類型"><option value="">全部類型</option>${getEventTypes().map(t=>`<option value="${escapeHtml(t.id)}" ${eventFilterTypeId===t.id?'selected':''}>${escapeHtml(t.name)}</option>`).join('')}<option value="unclassified" ${eventFilterTypeId==='unclassified'?'selected':''}>未分類</option></select>
         <select id="event-filter-category" aria-label="事件屬性"><option value="">全部屬性</option>${['一般事件','良好案例','待改善案例'].map(v=>`<option ${eventFilterCategory===v?'selected':''}>${v}</option>`).join('')}</select>
         <div class="event-period-wrap"><select id="event-filter-period-type" aria-label="日期期間"><option value="">全部期間</option><option value="year" ${eventFilterPeriodType==='year'?'selected':''}>指定年度</option><option value="month" ${eventFilterPeriodType==='month'?'selected':''}>指定月份</option><option value="date" ${eventFilterPeriodType==='date'?'selected':''}>指定日期</option></select>${eventFilterPeriodType==='year'?`<select id="event-filter-period" aria-label="年度">${[...new Set(events.map(e=>String(e.date||'').slice(0,4)).filter(Boolean))].sort().reverse().map(y=>`<option value="${y}" ${eventFilterPeriod===y?'selected':''}>${y}年</option>`).join('')}</select>`:eventFilterPeriodType==='month'?`<input type="month" id="event-filter-period" value="${escapeHtml(eventFilterPeriod)}">`:eventFilterPeriodType==='date'?`<input type="date" id="event-filter-period" value="${escapeHtml(eventFilterPeriod)}">`:''}</div>
         <button class="secondary filter-clear" id="event-filter-clear">清除</button>
       </div>
       <div class="event-filter-summary">共 ${filtered.length} 件${conditions.length?`｜目前條件：${escapeHtml(conditions.join('・'))}`:''}</div>`;
-    if(filtered.length) filtered.forEach(e=>{html+=`<div class="card event-list-card compact" data-event-detail="${e.id}"><div class="event-list-one"><span class="event-list-date">${escapeHtml(e.date||'')}</span><span class="event-list-station">${escapeHtml(e.station||'未指定車站')}</span><span class="${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span><span class="event-list-subject">${escapeHtml(e.subject||e.title||'事件紀錄')}</span><div class="event-list-actions"><button class="secondary event-action ${e.opText?'op-has-data':''}" data-op-event="${e.id}" title="${e.opText?'查看 OP 通報紀錄':'尚無 OP 通報紀錄'}">OP</button><button class="secondary event-action" data-edit-event="${e.id}">修改</button><button class="event-action event-delete" data-del-event="${e.id}">刪除</button><button class="secondary event-action event-more" data-more-event="${e.id}" aria-label="更多操作">⋯</button></div></div></div>`;});
+    if(filtered.length) filtered.forEach(e=>{const statusClass=e.routeConfirmationRequired?'status-route':e.reviewStatus==='pending'?'status-pending':'',statusBadge=e.routeConfirmationRequired?'<span class="event-status-badge route">路線待確認</span>':e.reviewStatus==='pending'?'<span class="event-status-badge pending">待確認</span>':'';html+=`<div class="card event-list-card compact ${statusClass}" data-event-detail="${e.id}"><div class="event-list-one"><span class="event-list-date">${escapeHtml(e.date||'')}</span><span class="event-list-station">${escapeHtml(e.station||'未指定車站')}</span><span class="event-list-meta"><span class="event-type-label" style="--event-type-color:${eventTypeColor(e.eventTypeId)}">${escapeHtml(eventTypeName(e.eventTypeId))}</span><span class="event-category-badge ${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span>${statusBadge}</span><span class="event-list-subject">${escapeHtml(e.subject||e.title||'事件紀錄')}</span><div class="event-list-actions"><button class="secondary event-action ${e.opText?'op-has-data':''}" data-op-event="${e.id}" title="${e.opText?'查看 OP 通報紀錄':'尚無 OP 通報紀錄'}">OP</button><button class="secondary event-action" data-edit-event="${e.id}">修改</button><button class="event-action event-delete" data-del-event="${e.id}">刪除</button><button class="secondary event-action event-more" data-more-event="${e.id}" aria-label="更多操作">⋯</button></div></div></div>`;});
     else html+=`<div class="empty" style="padding:34px 20px"><p>沒有符合條件的事件</p><span class="tiny-muted">可清除篩選條件，或貼上新的事件紀錄。</span></div>`;
   }
   contentEl.innerHTML=html;
   contentEl.querySelectorAll('[data-personnel-view]').forEach(btn=>btn.onclick=()=>{personnelView=btn.dataset.personnelView;renderPersonnel();});
   if(personnelView==='events'){
     document.getElementById('event-paste-open').onclick=()=>openEventEditor();
+    document.getElementById('event-batch-open').onclick=openBatchEventImportV2;
     bindImeSafeSearch(document.getElementById('p-search'),value=>{personnelKeyword=value;},renderPersonnel);
     document.getElementById('event-filter-line').onchange=e=>{eventFilterLine=e.target.value;eventFilterStation='';renderPersonnel();};
     document.getElementById('event-filter-station').onchange=e=>{eventFilterStation=e.target.value;renderPersonnel();};
     document.getElementById('event-filter-category').onchange=e=>{eventFilterCategory=e.target.value;renderPersonnel();};
+    document.getElementById('event-filter-type').onchange=e=>{eventFilterTypeId=e.target.value;renderPersonnel();};
     document.getElementById('event-filter-period-type').onchange=e=>{eventFilterPeriodType=e.target.value;eventFilterPeriod='';if(eventFilterPeriodType==='year'){const years=[...new Set(events.map(x=>String(x.date||'').slice(0,4)).filter(Boolean))].sort().reverse();eventFilterPeriod=years[0]||String(new Date().getFullYear());}renderPersonnel();};
     if(document.getElementById('event-filter-period'))document.getElementById('event-filter-period').onchange=e=>{eventFilterPeriod=e.target.value;renderPersonnel();};
-    document.getElementById('event-filter-clear').onclick=()=>{personnelKeyword='';eventFilterLine='';eventFilterStation='';eventFilterCategory='';eventFilterPeriod='';eventFilterPeriodType='';renderPersonnel();};
+    document.getElementById('event-filter-clear').onclick=()=>{personnelKeyword='';eventFilterLine='';eventFilterStation='';eventFilterCategory='';eventFilterTypeId='';eventFilterPeriod='';eventFilterPeriodType='';renderPersonnel();};
     contentEl.querySelectorAll('[data-event-detail]').forEach(card=>card.onclick=e=>{if(e.target.closest('button'))return;openEventDetail(card.dataset.eventDetail);});
     contentEl.querySelectorAll('[data-op-event]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();const rec=cache.personnel.find(x=>x.id===Number(btn.dataset.opEvent));if(rec)openEventOp(rec);});
     contentEl.querySelectorAll('[data-edit-event]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();const rec=cache.personnel.find(x=>x.id===Number(btn.dataset.editEvent));if(rec)openEventEditor(rec);});
     contentEl.querySelectorAll('[data-more-event]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openEventActionMenu(Number(btn.dataset.moreEvent));});
-    contentEl.querySelectorAll('[data-del-event]').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();if(confirm('確定刪除此事件紀錄？')){await dbDelete('personnel',Number(btn.dataset.delEvent));await reloadCache();renderPersonnel();}});
+    contentEl.querySelectorAll('[data-del-event]').forEach(btn=>btn.onclick=async click=>{click.stopPropagation();const event=cache.personnel.find(x=>x.id===Number(btn.dataset.delEvent));if(confirm('確定刪除此事件紀錄？原始事件文件也會一併刪除。')){if(event?.attachmentId)await dbDelete('eventAttachments',event.attachmentId);await dbDelete('personnel',Number(btn.dataset.delEvent));await reloadCache();renderPersonnel();}});
   }
   contentEl.querySelectorAll('[data-del-p]').forEach(btn=>btn.onclick=async()=>{if(confirm('確定刪除此筆紀錄？')){await dbDelete('personnel',Number(btn.dataset.delP));await reloadCache();renderPersonnel();}});
 }
@@ -4226,6 +4393,11 @@ function renderRidershipV24(){
 renderRidership=renderRidershipV24;
 
 /* --- Settings and data overview --- */
+function renderOther(){
+  contentEl.innerHTML=`<div class="other-menu"><div class="card other-card" id="other-library"><p class="panel-title">資料管理</p><p class="panel-note">管理 SOP、通告及文件來源。</p><span class="badge">${cache.sopDocs.length+cache.announcements.length} 份資料</span></div><div class="card other-card" id="other-settings"><p class="panel-title">設定</p><p class="panel-note">管理事件類型、分類、備份與版本資訊。</p></div></div>`;
+  document.getElementById('other-library').onclick=()=>{currentTab='library';render();};
+  document.getElementById('other-settings').onclick=()=>{currentTab='settings';render();};
+}
 function renderSettings(){
   const years=[...new Set(monthlyRidershipRecords().map(r=>Number(r.year)).filter(Boolean))].sort((a,b)=>a-b);
   const lastBackup=localStorage.getItem('stationAssistantLastBackup')||'尚未建立';
@@ -4238,11 +4410,13 @@ function renderSettings(){
     </div>
     <div class="settings-list">
       <div class="card settings-card" id="settings-search"><p class="panel-title">搜尋設定</p><p class="panel-note">管理智慧搜尋詞庫、同義詞及查無結果紀錄。</p><span class="badge">${cache.synonymGroups.length} 組詞庫</span></div><div class="card settings-card" id="settings-categories"><p class="panel-title">常用程序分類</p><p class="panel-note">自訂分類名稱、捷運作業 SVG 圖示、識別色與順序。</p><span class="badge">${getProcedureCategories().length} 個分類</span></div>
+      <div class="card settings-card" id="settings-event-types"><p class="panel-title">事件類型</p><p class="panel-note">編輯名稱、顏色、順序及新增事件類型。</p><span class="badge">${getEventTypes().length} 個類型</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.20.9 測試版</dd><dt>基準版本</dt><dd>手機版 v5.20.8</dd><dt>更新日期</dt><dd>2026-09-21</dd><dt>資料格式</dt><dd>IndexedDB v4</dd><dt>本次更新</dt><dd>姓名後括號改採通案性簡稱判斷，支援「以下稱／下稱」及無引導詞短稱謂，排除明顯備註內容；「菁英」統一解析為「菁英保全」。資料格式與其他功能不變。</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.23.0 測試版</dd><dt>基準版本</dt><dd>手機版 v5.22.0</dd><dt>更新日期</dt><dd>2026-09-30</dd><dt>資料格式</dt><dd>IndexedDB v5（新增事件確認狀態，舊資料相容）</dd><dt>本次更新</dt><dd>新增直向路網首頁、事件類型、批次 Word 匯入、重複檢核與待確認狀態；資料管理及設定移至「其他」。</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
+  document.getElementById('settings-event-types').onclick=()=>openEventTypeManager(renderSettings);
   document.getElementById('settings-data').onclick=openDataMgmt;
   document.getElementById('settings-categories')?.addEventListener('click',openProcedureCategoryManager);
   document.getElementById('settings-clear-history').onclick=e=>{e.stopPropagation();if(confirm('確定清除所有搜尋歷史嗎？')){setSearchHistory([]);renderSettings();}};
@@ -4265,14 +4439,12 @@ function base64ToBuf(b64){
 }
 async function exportData(){
   const dump = {};
-  for(const name of STORES){
+  for(const name of DB_STORES){
     const rows = await dbGetAll(name);
-    dump[name] = rows.map(r=>{
-      if(name==='pdfFiles') return {...r, data: bufToBase64(r.data)};
-      return r;
-    });
+    dump[name] = [];
+    for(const r of rows){if(name==='pdfFiles')dump[name].push({...r,data:bufToBase64(r.data)});else if(name==='eventAttachments')dump[name].push({...r,data:bufToBase64(await r.data.arrayBuffer())});else dump[name].push(r);}
   }
-  dump._localData={ridershipEvents:ridershipEvents(),procedureCategories:getProcedureCategories(),recentProcedures:getRecentProcedureIds()};
+  dump._localData={ridershipEvents:ridershipEvents(),procedureCategories:getProcedureCategories(),eventTypes:getEventTypes(),recentProcedures:getRecentProcedureIds()};
   const blob = new Blob([JSON.stringify(dump)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -4281,22 +4453,22 @@ async function exportData(){
   localStorage.setItem('stationAssistantLastBackup',new Date().toLocaleString('zh-TW'));
 }
 async function importData(file){
-  const text = await file.text();
-  const dump = JSON.parse(text);
-  for(const name of STORES){
+  const text=await file.text(),dump=JSON.parse(text),eventIdMap=new Map(),attachmentEventMap=new Map();
+  for(const name of DB_STORES){
     if(!dump[name]) continue;
     for(const row of dump[name]){
-      const copy = {...row};
-      delete copy.id;
-      if(name==='pdfFiles') copy.data = base64ToBuf(copy.data);
-      await dbAdd(name, copy);
+      const oldId=row.id,copy={...row};delete copy.id;
+      if(name==='pdfFiles')copy.data=base64ToBuf(copy.data);
+      if(name==='personnel'&&copy.recordType==='event'){const oldAttachmentId=copy.attachmentId;delete copy.attachmentId;const newId=await dbAdd(name,copy);eventIdMap.set(oldId,newId);if(oldAttachmentId)attachmentEventMap.set(oldAttachmentId,newId);continue;}
+      if(name==='eventAttachments'){copy.data=new Blob([base64ToBuf(copy.data)],{type:copy.mimeType||'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});copy.eventId=eventIdMap.get(copy.eventId)||copy.eventId;const newAttachmentId=await dbAdd(name,copy),newEventId=attachmentEventMap.get(oldId);if(newEventId){const event=await dbGet('personnel',newEventId);if(event){event.attachmentId=newAttachmentId;event.attachmentName=copy.fileName;event.attachmentSize=copy.size;await dbPut('personnel',event);}}continue;}
+      await dbAdd(name,copy);
     }
   }
   if(Array.isArray(dump._localData?.ridershipEvents))saveRidershipEvents(dump._localData.ridershipEvents);
   if(Array.isArray(dump._localData?.procedureCategories))saveProcedureCategories(dump._localData.procedureCategories);
+  if(Array.isArray(dump._localData?.eventTypes))saveEventTypes(dump._localData.eventTypes);
   if(Array.isArray(dump._localData?.recentProcedures))localStorage.setItem(PROCEDURE_RECENT_KEY,JSON.stringify(dump._localData.recentProcedures));
-  await reloadCache();
-  render();
+  await reloadCache();render();
 }
 function closeDataMgmt(){document.getElementById('dm-overlay')?.remove();document.getElementById('phone')?.classList.remove('data-modal-open');}
 function openDataMgmt(){
@@ -4305,7 +4477,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" class="modal-close-btn" aria-label="關閉">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.20.9・2026.09.21</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.23.0・2026.09.30</p>
       <p class="muted">「工作資料」包含常用程序、分類名稱／顏色／順序、程序圖示、通告、事件與人員，可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="secondary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出工作資料</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入工作資料</button>
@@ -4337,15 +4509,23 @@ function openDataMgmt(){
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{ currentTab = btn.dataset.tab; sopKeyword=''; render(); });
 });
-document.getElementById('data-mgmt-btn').addEventListener('click', ()=>{currentTab='settings';render();});
+document.getElementById('data-mgmt-btn').addEventListener('click', ()=>{currentTab='other';render();});
 
-(async function init(){
-  await openDB();
-  await reloadCache();
-  await migrateSopSlotTypes();
-  await retryPendingFavoriteLocations();
-  render();
-})();
+async function initializeApp(){
+  try{
+    await openDB();
+    await reloadCache();
+    await repairExistingImportedEvents();
+    await migrateSopSlotTypes();
+    await retryPendingFavoriteLocations();
+    render();
+  }catch(err){
+    console.error(err);
+    contentEl.innerHTML=`<div class="card"><b>無法開啟本機資料</b><p class="muted">請關閉其他舊版本分頁後再重新連線。本程式不會清除既有資料。</p><p class="tiny-muted">${escapeHtml(err?.message||'未知錯誤')}</p><button class="primary" id="db-retry" style="margin-top:10px">重新連線</button></div>`;
+    document.getElementById('db-retry')?.addEventListener('click',()=>{contentEl.innerHTML='<div class="card">正在重新連接本機資料庫…</div>';initializeApp();});
+  }
+}
+initializeApp();
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(error=>console.warn('離線快取註冊失敗',error)));
 }

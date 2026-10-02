@@ -758,12 +758,12 @@
     <button class="tab-btn" data-tab="ridership"><span class="icon">▥</span>運量查詢</button>
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>紀錄查詢</button>
     <button class="tab-btn" data-tab="other"><span class="icon">•••</span>其他</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.23.6 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.23.7 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
-/* v5.23.6 2026-10-02：修正單月 CSV 雙引號／千分位解析及資料代號相容。 */
+/* v5.23.7 2026-10-02：修正單月 CSV 雙引號／千分位解析及資料代號相容。 */
 /* v5.23.5 2026-10-02：路網月份預設全年；運量支援年度 Excel／單月 CSV 相容匯入。 */
 /* v5.23.4 2026-10-01：移除重複路線標題並精簡事件清單。 */
 pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js?v=5.19.0';
@@ -4050,7 +4050,7 @@ function renderPersonnel(){
         <button class="secondary filter-clear" id="event-filter-clear">清除</button>
       </div>
       <div class="event-filter-summary">共 ${filtered.length} 件${conditions.length?`｜目前條件：${escapeHtml(conditions.join('・'))}`:''}</div>`;
-    if(filtered.length) filtered.forEach(e=>{const statusClass=e.routeConfirmationRequired?'status-route':e.reviewStatus==='pending'?'status-pending':'',statusBadge=e.routeConfirmationRequired?'<span class="event-status-badge route">路線待確認</span>':e.reviewStatus==='pending'?'<span class="event-status-badge pending">待確認</span>':'',line=String(e.lineCode||'').toUpperCase(),lineBadge=['BL','O'].includes(line)?`<span class="event-line-badge ${line==='O'?'orange':'blue'}">${line}</span>`:'';html+=`<div class="card event-list-card compact ${statusClass}" data-event-detail="${e.id}"><div class="event-list-one"><div class="event-list-identity"><span class="event-list-date">${escapeHtml(e.date||'')}</span><span class="event-list-station">${escapeHtml(e.station||'未指定車站')}</span>${lineBadge}</div><span class="event-list-meta"><span class="event-type-label" style="--event-type-color:${eventTypeColor(e.eventTypeId)}">${escapeHtml(eventTypeName(e.eventTypeId))}</span><span class="event-category-badge ${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span>${statusBadge}</span><span class="event-list-subject">${escapeHtml(e.subject||e.title||'事件紀錄')}</span><div class="event-list-actions">${e.opText?`<button class="secondary event-action op-has-data" data-op-event="${e.id}" title="查看 OP 通報紀錄">OP</button>`:''}<button class="secondary event-action" data-edit-event="${e.id}">修改</button><button class="event-action event-delete" data-del-event="${e.id}">刪除</button><button class="secondary event-action event-more" data-more-event="${e.id}" aria-label="更多操作">⋯</button></div></div></div>`;});
+    if(filtered.length) filtered.forEach(e=>{const statusClass=e.routeConfirmationRequired?'status-route':e.reviewStatus==='pending'?'status-pending':'',statusBadge=e.routeConfirmationRequired?'<span class="event-status-badge route">路線待確認</span>':e.reviewStatus==='pending'?'<span class="event-status-badge pending">待確認</span>':'',line=String(e.lineCode||'').toUpperCase(),lineBadge=['BL','O'].includes(line)?`<span class="event-line-badge ${line==='O'?'orange':'blue'}">${line}</span>`:'';html+=`<div class="card event-list-card compact ${statusClass}" data-event-detail="${e.id}"><div class="event-list-one"><div class="event-list-identity"><span class="event-list-date">${escapeHtml(e.date||'')}</span>${lineBadge}<span class="event-list-station">${escapeHtml(e.station||'未指定車站')}</span></div><span class="event-list-meta"><span class="event-type-label" style="--event-type-color:${eventTypeColor(e.eventTypeId)}">${escapeHtml(eventTypeName(e.eventTypeId))}</span><span class="event-category-badge ${eventCategoryClass(e.category)}">${escapeHtml(e.category||'一般事件')}</span>${statusBadge}</span><span class="event-list-subject">${escapeHtml(e.subject||e.title||'事件紀錄')}</span><div class="event-list-actions">${e.opText?`<button class="secondary event-action op-has-data" data-op-event="${e.id}" title="查看 OP 通報紀錄">OP</button>`:''}<button class="secondary event-action" data-edit-event="${e.id}">修改</button><button class="event-action event-delete" data-del-event="${e.id}">刪除</button><button class="secondary event-action event-more" data-more-event="${e.id}" aria-label="更多操作">⋯</button></div></div></div>`;});
     else html+=`<div class="empty" style="padding:34px 20px"><p>沒有符合條件的事件</p><span class="tiny-muted">可清除篩選條件，或貼上新的事件紀錄。</span></div>`;
   }
   contentEl.innerHTML=html;

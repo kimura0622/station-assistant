@@ -758,11 +758,12 @@
     <button class="tab-btn" data-tab="ridership"><span class="icon">▥</span>運量查詢</button>
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>紀錄查詢</button>
     <button class="tab-btn" data-tab="other"><span class="icon">•••</span>其他</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.23.7 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.23.8 · 資料僅存本機</div>
   </div>
 </div>
 
 <script>
+/* v5.23.8 2026-10-02：同步版本資訊與離線快取版本；運量匯入入口明確標示年度 Excel／單月 CSV。 */
 /* v5.23.7 2026-10-02：修正單月 CSV 雙引號／千分位解析及資料代號相容。 */
 /* v5.23.5 2026-10-02：路網月份預設全年；運量支援年度 Excel／單月 CSV 相容匯入。 */
 /* v5.23.4 2026-10-01：移除重複路線標題並精簡事件清單。 */
@@ -4265,7 +4266,7 @@ function renderRidership(){
   const year=Number(ridershipView.year||years[0]||new Date().getFullYear());
   if(ridershipView.section==='manage'){
     contentEl.innerHTML=`<div class="ridership-module-tabs"><button class="ridership-module-tab" data-ridership-section="query">運量查詢</button><button class="ridership-module-tab active" data-ridership-section="manage">資料管理</button></div>
-      <div class="card toolbar-card"><div><h2 class="section-title">運量資料管理</h2><p class="section-subtitle">支援年度 Excel（01～12 分頁）與單月 CSV；檔案僅在本機解析。</p></div><div class="toolbar-actions"><button class="primary" id="ridership-import-btn">匯入運量資料</button><input id="ridership-file-input" type="file" accept=".xlsx,.xls,.csv" style="display:none"></div></div>
+      <div class="card toolbar-card"><div><h2 class="section-title">運量資料管理</h2><p class="section-subtitle">支援年度 Excel（01～12 分頁）與單月 CSV；檔案僅在本機解析。</p></div><div class="toolbar-actions"><button class="primary" id="ridership-import-btn">匯入運量資料（年度 Excel／單月 CSV）</button><input id="ridership-file-input" type="file" accept=".xlsx,.xls,.csv" style="display:none"></div></div>
       ${lastRidershipImportReport?`<div class="import-report">${escapeHtml(lastRidershipImportReport)}</div>`:''}
       <div class="panel"><h3 class="panel-title">已匯入年度</h3><p class="panel-note">重新匯入相同年度、月份與工程代號時會更新原資料。</p>${years.length?years.map(y=>{const yearRows=records.filter(r=>Number(r.year)===y),lastImported=yearRows.map(r=>r.importedAt).filter(Boolean).sort().at(-1);return `<div class="row between" style="padding:10px 0;border-bottom:.5px solid var(--border)"><span><b>${y} 年</b>　<span class="tiny-muted">${yearRows.length.toLocaleString()} 筆｜匯入：${lastImported?formatUploadDate(lastImported):'舊版資料未記錄'}</span></span><button class="danger-text" data-delete-ridership-year="${y}">刪除年度</button></div>`;}).join(''):'<div class="empty" style="padding:35px">尚無年度運量資料</div>'}</div>`;
     contentEl.querySelector('[data-ridership-section="query"]').onclick=()=>{ridershipView.section='query';renderRidership();};
@@ -4428,7 +4429,7 @@ function renderRidershipV24(){
   const records=monthlyRidershipRecords(),years=[...new Set(records.map(r=>Number(r.year)))].sort((a,b)=>b-a);
   if(!ridershipView.year&&years.length)ridershipView.year=String(years[0]);const year=Number(ridershipView.year||years[0]||new Date().getFullYear());
   if(ridershipView.section==='manage'){
-    contentEl.innerHTML=`<div class="ridership-module-tabs"><button class="ridership-module-tab" data-ridership-section="query">運量查詢</button><button class="ridership-module-tab active">資料管理</button></div><div class="card toolbar-card"><div><h2 class="section-title">運量資料管理</h2><p class="section-subtitle">運量支援年度 Excel／單月 CSV；大型活動 Excel 亦只在本機解析。</p></div><div class="toolbar-actions"><button class="primary" id="ridership-import-btn">匯入運量資料</button><button class="secondary" id="ridership-event-import-btn">匯入大型活動</button><input id="ridership-file-input" type="file" accept=".xlsx,.xls,.csv" style="display:none"><input id="ridership-event-file-input" type="file" accept=".xlsx,.xls" style="display:none"></div></div>${lastRidershipImportReport?`<div class="import-report">${escapeHtml(lastRidershipImportReport)}</div>`:''}<div class="panel"><h3 class="panel-title">已匯入年度</h3><p class="panel-note">重新匯入相同年度、月份與工程代號時會更新原資料；Y環狀線自動排除。</p>${years.length?years.map(y=>{const rows=records.filter(r=>Number(r.year)===y);return `<div class="row between" style="padding:10px 0;border-bottom:.5px solid var(--border)"><span><b>${y}年</b>　<span class="tiny-muted">${rows.length.toLocaleString()}筆</span></span><button class="danger-text" data-delete-ridership-year="${y}">刪除年度</button></div>`;}).join(''):'<div class="empty">尚無年度資料</div>'}</div><div class="panel"><h3 class="panel-title">大型活動</h3><p class="panel-note">可單筆新增或匯入 Excel；活動資料只保存在本機。</p>${ridershipEventAdminHtml()}</div>`;
+    contentEl.innerHTML=`<div class="ridership-module-tabs"><button class="ridership-module-tab" data-ridership-section="query">運量查詢</button><button class="ridership-module-tab active">資料管理</button></div><div class="card toolbar-card"><div><h2 class="section-title">運量資料管理</h2><p class="section-subtitle">運量支援年度 Excel／單月 CSV；大型活動 Excel 亦只在本機解析。</p></div><div class="toolbar-actions"><button class="primary" id="ridership-import-btn">匯入運量資料（年度 Excel／單月 CSV）</button><button class="secondary" id="ridership-event-import-btn">匯入大型活動</button><input id="ridership-file-input" type="file" accept=".xlsx,.xls,.csv" style="display:none"><input id="ridership-event-file-input" type="file" accept=".xlsx,.xls" style="display:none"></div></div>${lastRidershipImportReport?`<div class="import-report">${escapeHtml(lastRidershipImportReport)}</div>`:''}<div class="panel"><h3 class="panel-title">已匯入年度</h3><p class="panel-note">重新匯入相同年度、月份與工程代號時會更新原資料；Y環狀線自動排除。</p>${years.length?years.map(y=>{const rows=records.filter(r=>Number(r.year)===y);return `<div class="row between" style="padding:10px 0;border-bottom:.5px solid var(--border)"><span><b>${y}年</b>　<span class="tiny-muted">${rows.length.toLocaleString()}筆</span></span><button class="danger-text" data-delete-ridership-year="${y}">刪除年度</button></div>`;}).join(''):'<div class="empty">尚無年度資料</div>'}</div><div class="panel"><h3 class="panel-title">大型活動</h3><p class="panel-note">可單筆新增或匯入 Excel；活動資料只保存在本機。</p>${ridershipEventAdminHtml()}</div>`;
     contentEl.querySelector('[data-ridership-section="query"]').onclick=()=>{ridershipView.section='query';renderRidership();};document.getElementById('ridership-import-btn').onclick=()=>document.getElementById('ridership-file-input').click();document.getElementById('ridership-event-import-btn').onclick=()=>document.getElementById('ridership-event-file-input').click();
     document.getElementById('ridership-file-input').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await importRidershipFile(file);}catch(error){alert(`運量匯入失敗：${error.message||error}`);}};document.getElementById('ridership-event-file-input').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await importRidershipEvents(file);}catch(error){alert(`大型活動匯入失敗：${error.message||error}`);}};
     document.getElementById('ridership-event-clear')?.addEventListener('click',()=>{if(confirm('確定清除全部大型活動資料嗎？')){saveRidershipEvents([]);renderRidership();}});bindRidershipEventAdmin();contentEl.querySelectorAll('[data-delete-ridership-year]').forEach(btn=>btn.onclick=async()=>{const y=Number(btn.dataset.deleteRidershipYear),targets=records.filter(r=>Number(r.year)===y);if(!confirm(`確定刪除${y}年的${targets.length.toLocaleString()}筆運量資料嗎？`))return;for(const r of targets)await dbDelete('ridership',r.id);await reloadCache();ridershipView.year='';ridershipView.rankMonth='';renderRidership();});return;
@@ -4472,7 +4473,7 @@ function renderSettings(){
       <div class="card settings-card" id="settings-event-types"><p class="panel-title">事件類型</p><p class="panel-note">編輯名稱、顏色、順序及新增事件類型。</p><span class="badge">${getEventTypes().length} 個類型</span></div>
       <div class="card settings-card" id="settings-data"><p class="panel-title">資料與儲存</p><p class="panel-note">完整備份、還原與跨裝置資料移轉。</p><span class="badge">最近備份：${escapeHtml(lastBackup)}</span></div>
       <div class="card settings-card" id="settings-history"><p class="panel-title">搜尋歷史</p><p class="panel-note">目前保留最近 ${getSearchHistory().length} 筆搜尋，可在此清除。</p><button class="secondary" id="settings-clear-history">清除搜尋歷史</button></div>
-      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.23.4 測試版</dd><dt>基準版本</dt><dd>手機版 v5.23.3</dd><dt>更新日期</dt><dd>2026-10-01</dd><dt>資料格式</dt><dd>IndexedDB v5（舊資料相容）</dd><dt>本次更新</dt><dd>移除路線圖內重複線名；事件卡改為日期、車站、路線順序並縮小操作區。</dd></dl></div>
+      <div class="card settings-card" id="settings-version"><p class="panel-title">版本資訊</p><p class="panel-note">資料維持瀏覽器本機離線。</p><dl class="version-info"><dt>程式版本</dt><dd>v5.23.8 測試版</dd><dt>基準版本</dt><dd>手機版 v5.23.7</dd><dt>更新日期</dt><dd>2026-10-02</dd><dt>資料格式</dt><dd>IndexedDB v5（舊資料相容）</dd><dt>本次更新</dt><dd>同步版本資訊與離線快取版本；運量匯入入口明確標示年度 Excel／單月 CSV。</dd></dl></div>
     </div>`;
   document.getElementById('settings-search').onclick=openSynonymManager;
   document.getElementById('settings-event-types').onclick=()=>openEventTypeManager(renderSettings);
@@ -4536,7 +4537,7 @@ function openDataMgmt(){
     <div class="modal-header"><span style="font-weight:500;">資料管理</span>
       <button id="dm-close" class="modal-close-btn" aria-label="關閉">✕</button></div>
     <div class="modal-body">
-      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.23.4・2026.10.01</p>
+      <p class="tiny-muted" style="margin-top:0;">手機 PWA 測試版 v5.23.8・2026.10.02</p>
       <p class="muted">「工作資料」包含常用程序、分類名稱／顏色／順序、程序圖示、通告、事件、事件原始 Word 與人員，可手動傳到另一台裝置匯入；各裝置資料不會自動同步。</p>
       <button class="secondary" id="dm-transfer-export" style="width:100%;margin-bottom:10px;">匯出工作資料</button>
       <button class="secondary" id="dm-transfer-import" style="width:100%;margin-bottom:18px;">匯入工作資料</button>

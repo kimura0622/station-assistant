@@ -456,8 +456,8 @@
 
   /* v5.20.7 mobile shell: real-device full-screen PWA, preserve iPhone safe areas */
   @media (max-width:899px){
-    html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;}
-    body{display:block!important;margin:0!important;padding:0!important;background:var(--bg)!important;min-height:100vh!important;}
+    html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;} html{background:#101d33!important;}
+    body{display:block!important;margin:0!important;padding:0!important;background:#101d33!important;min-height:100vh!important;}
     #phone{width:100%!important;max-width:100%!important;height:100vh!important;height:100dvh!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:var(--bg)!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;}
     #topbar{min-height:calc(56px + env(safe-area-inset-top))!important;height:auto!important;padding:env(safe-area-inset-top) 16px 0!important;background:linear-gradient(135deg,#101d33 0%,#173a66 100%)!important;border-bottom:0!important;}
     #topbar h1{color:#fff!important;font-size:17px!important;}
@@ -762,6 +762,42 @@
 .event-month-sheet{max-height:none!important;border-radius:22px 22px 0 0!important;padding-top:5px}.event-sheet-handle{width:38px;height:4px;border-radius:999px;background:#c8cdd4;margin:3px auto 2px}.event-month-sheet .modal-header{min-height:48px!important;padding-top:6px!important}.event-month-sheet .modal-body{padding-top:8px!important}.event-month-grid{grid-template-columns:repeat(3,1fr)!important;gap:9px!important}.event-month-grid button{min-height:54px!important;border-radius:9px!important}.event-month-grid button.selected{background:#1677d2!important;border-color:#1677d2!important;color:#fff!important}.event-month-grid button.selected small{color:#eaf4ff!important}.event-month-links{margin-top:13px;border-top:1px solid var(--border)}.event-month-links button{width:100%;min-height:48px;border:0;border-bottom:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 3px;color:#1e2e3e;font-size:14px;text-align:left}.event-month-links button span:last-child{font-size:22px;color:#8a98a7}.event-year-choice{display:grid;gap:8px}.event-year-choice button{min-height:48px;border:1px solid var(--border);border-radius:10px;background:#fff;font-size:15px}.event-year-choice button.selected{background:#e7f3fd;border-color:#75afe0;color:#075a9c;font-weight:800}
 @media(max-width:390px){.event-record-row{grid-template-columns:48px minmax(0,1fr) 12px!important;gap:6px!important}.event-record-meta{grid-template-columns:minmax(98px,1.35fr) 28px minmax(54px,.75fr) minmax(42px,.7fr)!important;gap:4px!important}.event-record-icon,.event-record-icon .procedure-png-icon{width:22px!important;height:22px!important}.event-record-icon{flex-basis:22px!important}.event-record-type{gap:4px!important}.event-record-status{font-size:8px!important}}
 
+
+/* v5.23.9-r2：事件詳情依確認示意圖；結構化參與人員＋事件時間軸 */
+.event-detail-sheet{height:100%!important;max-height:100%!important;border-radius:0!important;display:grid!important;grid-template-rows:auto auto minmax(0,1fr)!important;background:#f4f7fb}
+.event-detail-head{padding:max(env(safe-area-inset-top),12px) max(14px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left))!important;background:#fff!important;border-bottom:1px solid var(--border)!important}
+.event-detail-nav{height:44px;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center}
+.event-detail-nav button{width:44px;height:44px;border:0;background:none;color:#075a9c;font-size:25px;display:grid;place-items:center;padding:0}
+.event-detail-nav b{text-align:center;font-size:17px}
+.event-detail-summary{padding:5px 2px 2px}
+.event-detail-date-status{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:#66788a}
+.event-detail-identity{display:flex;align-items:center;gap:7px;margin-top:7px;min-width:0}
+.event-detail-identity .procedure-png-icon{width:28px;height:28px}
+.event-detail-identity .event-line-badge{width:30px!important;min-width:30px!important;height:22px!important;border-radius:6px!important;padding:0!important}
+.event-detail-station{font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event-detail-subject{margin:7px 0 0;font-size:16px;line-height:1.45;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.event-detail-subject.expanded{white-space:normal;overflow:visible;text-overflow:clip}
+.event-detail-tabs{display:grid!important;grid-template-columns:repeat(5,1fr)!important;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
+.event-detail-tabs button{min-width:0;padding:11px 2px 9px;border:0;border-bottom:3px solid transparent;background:#fff;color:#9aa6b2;font-size:11px;white-space:nowrap}
+.event-detail-tabs button.has-data{color:#246da9;font-weight:750}.event-detail-tabs button.active{color:#075a9c;border-bottom-color:#1686d9;font-weight:850}
+.event-detail-scroll{overflow-y:auto;padding:12px max(12px,env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:#f4f7fb;-webkit-overflow-scrolling:touch}
+.event-content-section{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}
+.event-content-section h3{margin:0 0 9px;font-size:14px}
+.event-content-station{font-size:12px;font-weight:850;color:#075a9c;margin:9px 0 3px}
+.event-content-station:first-child{margin-top:0}
+.event-content-person{display:grid;grid-template-columns:minmax(90px,120px) minmax(0,1fr);gap:8px;padding:7px 0;border-bottom:1px solid #edf0f4;font-size:13px}
+.event-content-person:last-child{border-bottom:0}
+.event-content-person b{font-size:13px}.event-content-person span{color:#607184;min-width:0}
+.event-content-timeline{position:relative;margin-left:2px}
+.event-content-timeline:before{content:"";position:absolute;left:41px;top:9px;bottom:9px;width:2px;background:#d7e2ed}
+.event-content-time-row{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr);gap:14px;padding:7px 0}
+.event-content-time-row:before{content:"";position:absolute;left:37px;top:14px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #1686d9;z-index:1}
+.event-content-time{font-size:12px;font-weight:850;color:#075a9c;font-variant-numeric:tabular-nums}
+.event-content-time-body{min-width:0;font-size:13px;line-height:1.55;color:#27394b}
+.event-content-time-station{display:inline-block;margin-right:7px;color:#075a9c;font-weight:850}
+.event-detail-more-menu{position:absolute;right:max(12px,env(safe-area-inset-right));top:calc(max(env(safe-area-inset-top),12px) + 43px);z-index:4;min-width:132px;padding:6px;background:#fff;border:1px solid var(--border);border-radius:11px;box-shadow:0 10px 28px rgba(20,40,65,.18)}
+.event-detail-more-menu button{width:100%;min-height:42px;border:0;background:#fff;text-align:left;padding:0 10px;border-radius:8px;font-size:14px}
+
 </style>
 </head>
 <body>
@@ -778,7 +814,7 @@
     <button class="tab-btn" data-tab="ridership"><span class="icon">▥</span>運量查詢</button>
     <button class="tab-btn" data-tab="personnel"><span class="icon">♙</span>紀錄查詢</button>
     <button class="tab-btn" data-tab="other"><span class="icon">•••</span>其他</button>
-    <div class="desktop-version">手機 PWA 測試版 v5.23.9 · 資料僅存本機</div>
+    <div class="desktop-version">手機 PWA 測試版 v5.23.9-r2 · 資料僅存本機</div>
   </div>
 </div>
 
@@ -3991,12 +4027,58 @@ function eventWordContent(raw){
   }
   return out.join('\n').trim();
 }
-function eventDetailTabHasData(e,tab){if(tab==='improvement')return !!String(e.improvement||'').trim();if(tab==='timeline')return !!((e.checks||[]).length);if(tab==='op')return !!String(e.opText||'').trim();if(tab==='attachment')return !!e.attachmentId;return !!eventWordContent(e.rawText||'');}
+
+function eventTimelineStation(text, fallback=''){
+  const source=String(text||'');
+  const aliases={'市府':'市政府','國館':'國父紀念館','臺北橋':'台北橋','臺北車站':'台北車站'};
+  const names=[...new Set(eventStationOptions().map(r=>r.station).filter(Boolean))].sort((a,b)=>b.length-a.length);
+  for(const name of names){if(source.includes(name))return name;}
+  for(const [alias,name] of Object.entries(aliases)){if(source.includes(alias))return name;}
+  return fallback||'';
+}
+function renderEventStructuredContent(e){
+  const participants=Array.isArray(e.participants)?e.participants:[], timeline=Array.isArray(e.timeline)?e.timeline:[];
+  let people='';
+  if(participants.length){
+    const groups=new Map();
+    for(const p of participants){const station=p.station||e.station||'未指定車站';if(!groups.has(station))groups.set(station,[]);groups.get(station).push(p);}
+    people=`<section class="event-content-section"><h3>參與人員</h3>${[...groups].map(([station,rows])=>`<div class="event-content-station">${escapeHtml(station)}</div>${rows.map(p=>`<div class="event-content-person"><b>${escapeHtml([p.role,p.name].filter(Boolean).join('　')||'未指定')}</b><span>${escapeHtml([p.location,p.alias?`簡稱 ${p.alias}`:''].filter(Boolean).join('｜')||'—')}</span></div>`).join('')}`).join('')}</section>`;
+  }else people=`<section class="event-content-section"><h3>參與人員</h3><div class="event-detail-empty">尚無已解析參與人員資料</div></section>`;
+  let lastStation='';
+  const rows=timeline.map((row,index)=>{
+    const station=eventTimelineStation(row.text,index===0?(e.station||''):'')||lastStation;
+    const showStation=station&&station!==lastStation;
+    if(station)lastStation=station;
+    return `<div class="event-content-time-row"><div class="event-content-time">${escapeHtml(row.time||'')}</div><div class="event-content-time-body">${showStation?`<span class="event-content-time-station">${escapeHtml(station)}</span>`:''}${escapeHtml(row.text||'')}</div></div>`;
+  }).join('');
+  const time=`<section class="event-content-section"><h3>事件時間軸</h3>${rows?`<div class="event-content-timeline">${rows}</div>`:'<div class="event-detail-empty">尚無已解析事件時間軸資料</div>'}</section>`;
+  return people+time;
+}
+
+function eventDetailTabHasData(e,tab){if(tab==='improvement')return !!String(e.improvement||'').trim();if(tab==='timeline')return !!((e.checks||[]).length);if(tab==='op')return !!String(e.opText||'').trim();if(tab==='attachment')return !!e.attachmentId;return !!((e.participants||[]).length||(e.timeline||[]).length);}
 function openEventDetail(id){
   const e=cache.personnel.find(x=>x.id===Number(id)&&x.recordType==='event');if(!e)return;
-  const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='88';let active='content',scrolls={};
-  const tabBody=()=>{if(active==='content'){const content=eventWordContent(e.rawText||'');return content?`<div class="event-detail-text">${escapeHtml(content)}</div>`:'<div class="event-detail-empty">尚無事件經過資料</div>';}if(active==='improvement')return e.improvement?`<div class="event-detail-text">${escapeHtml(e.improvement)}</div>`:'<div class="event-detail-empty">尚無檢討改善資料</div>';if(active==='timeline')return (e.checks||[]).length?`<div class="event-detail-subsection"><h3>關鍵時間差</h3>${renderEventChecksView(e.checks)}</div>`:'<div class="event-detail-empty">尚無關鍵時間資料</div>';if(active==='op')return e.opText?`<div class="event-detail-text">${escapeHtml(e.opText)}</div>`:'<div class="event-detail-empty">尚無 OP 資料</div>';return e.attachmentId?`<div class="event-attachment-card"><div class="event-attachment-meta"><b>${escapeHtml(e.attachmentName||'原始事件文件')}</b><small>Word 文件・${escapeHtml(eventFileSize(e.attachmentSize||0))}</small></div><div class="event-document-actions"><button class="secondary" id="ed-document-preview">預覽</button><button class="secondary" id="ed-attachment">下載</button></div></div>`:'<div class="event-detail-empty">尚無附件</div>';};
-  const draw=()=>{overlay.innerHTML=`<div class="modal-sheet event-editor-sheet event-detail-sheet"><div class="event-detail-head"><button class="event-detail-close" id="ed-close">✕</button><div class="event-detail-title-row"><span class="event-detail-icon">${eventTypeIcon(e.eventTypeId)}</span><div class="event-detail-title"><div class="event-detail-kicker"><span>${escapeHtml(e.date||'')}</span>${e.lineCode?`<span class="event-line-badge ${e.lineCode==='O'?'orange':'blue'}">${escapeHtml(e.lineCode)}</span>`:''}<span>${escapeHtml(e.station||'未指定車站')}</span><span>${escapeHtml(eventTypeName(e.eventTypeId))}</span></div><h2>${escapeHtml(e.subject||e.title||'事件紀錄')}</h2></div><button class="secondary" id="ed-edit">修改</button></div>${e.reviewStatus==='pending'||e.routeConfirmationRequired?`<div class="event-detail-review"><span class="event-status-badge ${e.routeConfirmationRequired?'route':'pending'}">${e.routeConfirmationRequired?'路線待確認':'待確認'}</span>${!e.routeConfirmationRequired?'<button class="primary" id="ed-confirm">確認資料</button>':''}</div>`:''}</div><div class="event-detail-tabs">${[['content','事件內容'],['improvement','檢討改善'],['timeline','關鍵時間'],['op','OP'],['attachment','附件']].map(([key,label])=>`<button data-detail-tab="${key}" class="${active===key?'active':''} ${eventDetailTabHasData(e,key)?'has-data':'no-data'}">${label}</button>`).join('')}</div><div class="event-detail-scroll" id="event-detail-scroll">${tabBody()}</div></div>`;overlay.querySelector('#ed-close').onclick=()=>overlay.remove();overlay.querySelector('#ed-edit').onclick=()=>{overlay.remove();openEventEditor(e);};overlay.querySelector('#ed-confirm')?.addEventListener('click',async()=>{await dbPut('personnel',{...e,reviewStatus:'confirmed',confirmedAt:new Date().toISOString(),updatedAt:new Date().toISOString()});await reloadCache();overlay.remove();renderPersonnel();});overlay.querySelectorAll('[data-detail-tab]').forEach(b=>b.onclick=()=>{const sc=overlay.querySelector('#event-detail-scroll');scrolls[active]=sc?.scrollTop||0;active=b.dataset.detailTab;draw();requestAnimationFrame(()=>{const n=overlay.querySelector('#event-detail-scroll');if(n)n.scrollTop=scrolls[active]||0;});});overlay.querySelector('#ed-attachment')?.addEventListener('click',()=>openEventAttachment(e));overlay.querySelector('#ed-document-preview')?.addEventListener('click',()=>openEventDocumentPreview(e));};
+  const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.style.zIndex='88';let active='content',scrolls={},subjectExpanded=false,menuOpen=false;
+  const eventTime=(e.timeline||[])[0]?.time||'',d=String(e.date||''),dt=d?new Date(`${d}T00:00:00`):null,week=dt&&!Number.isNaN(dt.getTime())?['日','一','二','三','四','五','六'][dt.getDay()]:'';
+  const status=e.routeConfirmationRequired?'路線待確認':e.reviewStatus==='pending'?'待確認':(e.category&&e.category!=='一般事件'?e.category:'');
+  const tabBody=()=>{
+    if(active==='content')return renderEventStructuredContent(e);
+    if(active==='improvement')return e.improvement?`<div class="event-detail-text">${escapeHtml(e.improvement)}</div>`:'<div class="event-detail-empty">尚無檢討改善資料</div>';
+    if(active==='timeline')return (e.checks||[]).length?`<div class="event-detail-subsection"><h3>關鍵時間差</h3>${renderEventChecksView(e.checks)}</div>`:'<div class="event-detail-empty">尚無關鍵時間資料</div>';
+    if(active==='op')return e.opText?`<div class="event-detail-text">${escapeHtml(e.opText)}</div>`:'<div class="event-detail-empty">尚無 OP 資料</div>';
+    return e.attachmentId?`<div class="event-attachment-card"><div class="event-attachment-meta"><b>${escapeHtml(e.attachmentName||'原始事件文件')}</b><small>Word 文件・${escapeHtml(eventFileSize(e.attachmentSize||0))}</small></div><div class="event-document-actions"><button class="secondary" id="ed-document-preview">預覽</button><button class="secondary" id="ed-attachment">下載</button></div></div>`:'<div class="event-detail-empty">尚無附件</div>';
+  };
+  const draw=()=>{
+    overlay.innerHTML=`<div class="modal-sheet event-detail-sheet"><div class="event-detail-head"><div class="event-detail-nav"><button id="ed-close" aria-label="返回">‹</button><b>事件詳情</b><button id="ed-more" aria-label="更多">•••</button></div><div class="event-detail-summary"><div class="event-detail-date-status"><span>${escapeHtml(d)}${week?`（${week}）`:''}${eventTime?`　${escapeHtml(eventTime)}`:''}</span>${status?`<span class="event-status-badge ${e.routeConfirmationRequired?'route':'pending'}">${escapeHtml(status)}</span>`:''}</div><div class="event-detail-identity"><span>${eventTypeIcon(e.eventTypeId)}</span>${e.lineCode?`<span class="event-line-badge ${e.lineCode==='O'?'orange':'blue'}">${escapeHtml(e.lineCode)}</span>`:''}<span class="event-detail-station">${escapeHtml(e.station||'未指定車站')}</span></div><h2 class="event-detail-subject ${subjectExpanded?'expanded':''}" id="ed-subject">${escapeHtml(e.subject||e.title||'事件紀錄')}</h2></div>${menuOpen?`<div class="event-detail-more-menu"><button id="ed-edit">修改事件</button>${e.reviewStatus==='pending'&&!e.routeConfirmationRequired?'<button id="ed-confirm">確認資料</button>':''}</div>`:''}</div><div class="event-detail-tabs">${[['content','事件內容'],['improvement','檢討改善'],['timeline','關鍵時間'],['op','OP'],['attachment','附件']].map(([key,label])=>`<button data-detail-tab="${key}" class="${active===key?'active':''} ${eventDetailTabHasData(e,key)?'has-data':'no-data'}">${label}</button>`).join('')}</div><div class="event-detail-scroll" id="event-detail-scroll">${tabBody()}</div></div>`;
+    overlay.querySelector('#ed-close').onclick=()=>overlay.remove();
+    overlay.querySelector('#ed-more').onclick=()=>{menuOpen=!menuOpen;draw();};
+    overlay.querySelector('#ed-subject').onclick=()=>{subjectExpanded=!subjectExpanded;draw();};
+    overlay.querySelector('#ed-edit')?.addEventListener('click',()=>{overlay.remove();openEventEditor(e);});
+    overlay.querySelector('#ed-confirm')?.addEventListener('click',async()=>{await dbPut('personnel',{...e,reviewStatus:'confirmed',confirmedAt:new Date().toISOString(),updatedAt:new Date().toISOString()});await reloadCache();overlay.remove();renderPersonnel();});
+    overlay.querySelectorAll('[data-detail-tab]').forEach(b=>b.onclick=()=>{const sc=overlay.querySelector('#event-detail-scroll');scrolls[active]=sc?.scrollTop||0;active=b.dataset.detailTab;menuOpen=false;draw();requestAnimationFrame(()=>{const n=overlay.querySelector('#event-detail-scroll');if(n)n.scrollTop=scrolls[active]||0;});});
+    overlay.querySelector('#ed-attachment')?.addEventListener('click',()=>openEventAttachment(e));
+    overlay.querySelector('#ed-document-preview')?.addEventListener('click',()=>openEventDocumentPreview(e));
+  };
   document.getElementById('phone').appendChild(overlay);draw();
 }
 const NETWORK_BLUE=['頂埔','永寧','土城','海山','亞東醫院','府中','板橋','新埔','江子翠','龍山寺','西門','台北車站','善導寺','忠孝新生','忠孝復興','忠孝敦化','國父紀念館','市政府','永春','後山埤','昆陽','南港','南港展覽館'];
@@ -4055,7 +4137,7 @@ function openEventMonthPicker(events,forcedYear=''){
   document.getElementById('phone').appendChild(overlay);
   overlay.querySelector('#emp-close').onclick=()=>overlay.remove();
   overlay.querySelectorAll('[data-emp-month]').forEach(b=>b.onclick=()=>{eventFilterPeriodType='month';eventFilterPeriod=`${current}-${b.dataset.empMonth}`;overlay.remove();renderPersonnel();});
-  overlay.querySelector('#emp-all').onclick=()=>{eventFilterPeriodType='year';eventFilterPeriod=current;eventFilterRouteKey='';overlay.remove();renderPersonnel();};
+  overlay.querySelector('#emp-all').onclick=()=>{eventFilterPeriodType='year';eventFilterPeriod=current;eventFilterRouteKey='';eventFilterLine='';eventFilterStation='';overlay.remove();renderPersonnel();};
   overlay.querySelector('#emp-year-switch').onclick=()=>{overlay.querySelector('.modal-body').innerHTML=`<div class="event-year-choice">${years.map(y=>`<button data-emp-year="${y}" class="${y===current?'selected':''}">${y}年</button>`).join('')}</div>`;overlay.querySelectorAll('[data-emp-year]').forEach(b=>b.onclick=()=>{const y=b.dataset.empYear;overlay.remove();openEventMonthPicker(events,y);});};
 }
 function renderPersonnel(){
@@ -4064,7 +4146,7 @@ function renderPersonnel(){
   let html=`<div class="event-toolbar-head"><div class="event-tabs"><button class="event-tab ${personnelView==='events'?'active':''}" data-personnel-view="events">事件紀錄</button><button class="event-tab ${personnelView==='people'?'active':''}" data-personnel-view="people">人員紀錄</button></div>${personnelView==='events'?'<div class="row"><button class="secondary event-add-btn" id="event-batch-open">批次 Word</button><button class="primary event-add-btn" id="event-paste-open">＋ 新增</button></div>':''}</div>`;
   if(personnelView==='people'){html+=`<div class="card"><b>人員紀錄</b><p class="muted">正式人員名冊匯入與事件關聯將在後續版本啟用。</p></div>`;}else{html+=`<div class="event-search-row"><input type="text" id="p-search" placeholder="搜尋事件主旨、內容或參與人員" value="${escapeHtml(personnelKeyword)}"><button class="event-filter-trigger" id="event-advanced-filter" aria-label="進階篩選">☷</button></div><div class="event-quick-types"><button data-quick-type="" class="${!eventFilterTypeId?'active':''}">全部</button>${getEventTypes().map(t=>`<button data-quick-type="${escapeHtml(t.id)}" class="${eventFilterTypeId===t.id?'active':''}">${eventTypeIcon(t.id)}<span>${escapeHtml(t.name)}</span></button>`).join('')}</div><div class="event-list-heading"><button id="event-month-picker">${eventFilterPeriodType==='month'?escapeHtml(eventFilterPeriod.replace('-',' 年 '))+' 月':eventFilterPeriodType==='year'?escapeHtml(eventFilterPeriod)+' 年':'全部年度'}⌄</button><span>共 ${filtered.length} 件</span></div>`;
     const groups=new Map();for(const e of filtered){const ym=String(e.date||'未指定').slice(0,7),arr=groups.get(ym)||[];arr.push(e);groups.set(ym,arr);}if(filtered.length){for(const [ym,items] of groups){const [y,m]=ym.split('-');html+=`<section class="event-month-group"><div class="event-month-header"><b>${/^\d{4}$/.test(y)?`${Number(m)}月`:'未指定月份'}</b><span>${items.length}件</span></div><div class="event-month-items">`;for(const e of items){const line=String(e.lineCode||'').toUpperCase(),status=e.routeConfirmationRequired?'路線待確認':e.reviewStatus==='pending'?'待確認':(e.category&&e.category!=='一般事件'?e.category:'');const d=String(e.date||''),dt=d?new Date(`${d}T00:00:00`):null,week=dt&&!Number.isNaN(dt.getTime())?['日','一','二','三','四','五','六'][dt.getDay()]:'',eventTime=(e.timeline||[])[0]?.time||'';html+=`<article class="event-record-row" data-event-detail="${e.id}"><div class="event-record-date"><b>${escapeHtml(d.slice(5).replace('-','/'))}</b><small>${week?`（${week}）`:''}</small><time>${escapeHtml(eventTime)}</time></div><div class="event-record-main"><div class="event-record-meta"><span class="event-record-type"><span class="event-record-icon">${eventTypeIcon(e.eventTypeId)}</span><span>${escapeHtml(eventTypeName(e.eventTypeId))}</span></span>${line?`<span class="event-line-badge ${line==='O'?'orange':'blue'}">${line}</span>`:'<span></span>'}<span class="event-record-station">${escapeHtml(e.station||'未指定')}</span><span class="event-record-status">${escapeHtml(status||'')}</span></div><div class="event-record-subject">${escapeHtml(e.subject||e.title||'事件紀錄')}</div></div><span class="event-record-chevron">›</span></article>`;}html+='</div></section>';}}else html+='<div class="empty">沒有符合條件的事件</div>';}
-  contentEl.innerHTML=html;contentEl.querySelectorAll('[data-personnel-view]').forEach(btn=>btn.onclick=()=>{personnelView=btn.dataset.personnelView;renderPersonnel();});if(personnelView==='events'){document.getElementById('event-paste-open').onclick=()=>openEventEditor();document.getElementById('event-batch-open').onclick=openBatchEventImportV2;bindImeSafeSearch(document.getElementById('p-search'),value=>{personnelKeyword=value;},renderPersonnel);document.getElementById('event-advanced-filter').onclick=()=>openEventAdvancedFilter(events);document.getElementById('event-month-picker').onclick=()=>openEventMonthPicker(events);contentEl.querySelectorAll('[data-quick-type]').forEach(b=>b.onclick=()=>{eventFilterTypeId=b.dataset.quickType;renderPersonnel();});contentEl.querySelectorAll('[data-event-detail]').forEach(card=>card.onclick=()=>openEventDetail(card.dataset.eventDetail));}
+  contentEl.innerHTML=html;contentEl.querySelectorAll('[data-personnel-view]').forEach(btn=>btn.onclick=()=>{personnelView=btn.dataset.personnelView;renderPersonnel();});if(personnelView==='events'){document.getElementById('event-paste-open').onclick=()=>openEventEditor();document.getElementById('event-batch-open').onclick=openBatchEventImportV2;bindImeSafeSearch(document.getElementById('p-search'),value=>{personnelKeyword=value;},renderPersonnel);document.getElementById('event-advanced-filter').onclick=()=>openEventAdvancedFilter(events);document.getElementById('event-month-picker').onclick=()=>openEventMonthPicker(events);contentEl.querySelectorAll('[data-quick-type]').forEach(b=>b.onclick=()=>{eventFilterTypeId=b.dataset.quickType;if(!eventFilterTypeId){eventFilterRouteKey='';eventFilterLine='';eventFilterStation='';}renderPersonnel();});contentEl.querySelectorAll('[data-event-detail]').forEach(card=>card.onclick=()=>openEventDetail(card.dataset.eventDetail));}
 }function parseRidershipStation(raw){
   const source = String(raw||'').replace(/\s+/g,' ').trim();
   const match = source.match(/^(.*?)\s*[（(]\s*((?:BR|BL|B|R|G|O|Y)\s*\d+[A-Z]?)\s*[)）]\s*$/i);
